@@ -1,0 +1,3 @@
+onlyBuiltDependencies:
+  - cloudflared
+  - esbuild

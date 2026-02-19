@@ -1,6 +1,6 @@
 import { basename } from "node:path";
-import { t } from "../i18n/index.js";
 import { GitChangeStatus } from "../utils/constants.js";
+import { t } from "../i18n/index.js";
 
 export interface GitChange {
   file: string;
@@ -12,42 +12,37 @@ export interface NotificationData {
   responseSummary: string;
   durationMs: number;
   gitChanges: GitChange[];
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
 }
 
 export function formatNotification(data: NotificationData): string {
   const parts: string[] = [];
 
-  parts.push(t("notification.title"));
-
-  let projectLine = `📂 \`${escapeMarkdownV2(data.projectName)}\``;
+  let header = `<b>${escapeHtml(data.projectName)}</b>`;
   if (data.durationMs > 0) {
-    projectLine += ` \\| ⏱ ${escapeMarkdownV2(formatDuration(data.durationMs))}`;
+    header += ` — ${escapeHtml(formatDuration(data.durationMs))}`;
   }
-  parts.push(projectLine);
-  parts.push("");
+  parts.push(header);
 
-  if (data.responseSummary) {
-    let summary = data.responseSummary;
-    if (summary.length > 2000) {
-      summary = summary.slice(0, 2000) + "...";
-    }
-    parts.push(escapeMarkdownV2(summary));
+  if (data.inputTokens > 0 || data.outputTokens > 0) {
+    parts.push(`${t("notification.tokens")}: ${formatTokenCount(data.inputTokens)} → ${formatTokenCount(data.outputTokens)}`);
   }
 
-  if (data.gitChanges.length > 0) {
-    parts.push("");
-    parts.push(t("notification.changes"));
-    for (const change of data.gitChanges) {
-      const emoji = gitChangeEmoji(change.status);
-      parts.push(`${emoji} \`${escapeMarkdownV2(change.file)}\``);
-    }
+  if (data.cacheReadTokens > 0 || data.cacheCreationTokens > 0) {
+    const cacheParts: string[] = [];
+    if (data.cacheReadTokens > 0) cacheParts.push(`${formatTokenCount(data.cacheReadTokens)} ${t("notification.cacheRead")}`);
+    if (data.cacheCreationTokens > 0) cacheParts.push(`${formatTokenCount(data.cacheCreationTokens)} ${t("notification.cacheWrite")}`);
+    parts.push(`${t("notification.cache")}: ${cacheParts.join(", ")}`);
   }
 
   return parts.join("\n");
 }
 
-export function escapeMarkdownV2(text: string): string {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, "\\$&");
+export function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function formatDuration(ms: number): string {
@@ -56,6 +51,12 @@ function formatDuration(ms: number): string {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
   return `${minutes}m${seconds}s`;
+}
+
+function formatTokenCount(tokens: number): string {
+  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`;
+  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}k`;
+  return `${tokens}`;
 }
 
 function gitChangeEmoji(status: GitChangeStatus): string {

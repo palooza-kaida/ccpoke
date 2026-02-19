@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="icon" type="image/svg+xml" sizes="any" href="logo.svg?v=3">
   <link rel="apple-touch-icon" href="logo.svg?v=3">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <style type="text/tailwindcss">
     @theme {
@@ -122,7 +123,8 @@
       nav > div { padding-left: 1rem; padding-right: 1rem; }
 
       .flow-grid { grid-template-columns: 1fr }
-      .flow-center-wrap { flex-direction: row; justify-content: center; align-items: center; padding: 0.75rem 0; gap: 0.25rem; }
+      .flow-center-wrap { flex-direction: row; justify-content: center; align-items: center; padding: 0.5rem 0; gap: 0.5rem; }
+      .flow-center-wrap span { margin: 0; }
       .flow-line { width: 2px; height: 2rem; }
       .flow-line::after {
         right: auto;
@@ -153,22 +155,26 @@
         display: none;
       }
       .nav-hide-mobile { display: none }
-      .hero-section { padding: 3rem 0 2rem }
+      .mob-menu-btn { display: flex !important; }
+      .hero-section { padding: 2.5rem 0 1.5rem }
       .hero-section p { font-size: 0.92rem; }
-      .sect-section { padding: 3.5rem 0 }
+      .sect-section { padding: 2.5rem 0 }
       .sect-section > div:first-child h2 { font-size: 1.35rem; }
       .sect-section > div:first-child p { font-size: 0.85rem; }
       .t-right-wrap .pm-tab { padding: 4px 6px; font-size: 0.65rem; }
       #cplbl { display: none }
       #cpbtn { padding: 4px 8px; }
-      .step-term { white-space: pre-wrap; word-break: break-all; font-size: 0.7rem; line-height: 1.7; padding: 0.875rem 1rem; }
+      .step-term { white-space: pre-wrap; word-break: break-all; font-size: 0.75rem; line-height: 1.7; padding: 0.875rem 1rem; }
       .flow-grid > div { padding: 1.25rem; }
       .flow-grid > div h3 { font-size: 0.88rem; }
       .flow-grid > div p { font-size: 0.82rem; }
-      .timeline { padding-left: 2rem; }
+      .timeline { padding-left: 2.5rem !important; }
+      .timeline::before { left: 1.125rem !important; }
+      .tl-dot { left: -1.875rem !important; width: 1rem !important; height: 1rem !important; }
       .timeline h3 { font-size: 1rem; }
       .timeline p { font-size: 0.78rem; }
       .tl-item { padding-bottom: 2rem; }
+      .tl-item .flex.flex-wrap span { padding: 7px 14px !important; font-size: 0.8rem !important; }
 
       #features .grid { grid-template-columns: 40px 1fr; gap: 0.875rem; padding-top: 1.25rem; padding-bottom: 1.25rem; }
       #features .grid h3 { font-size: 0.9rem; }
@@ -178,9 +184,12 @@
       #setup .grid { gap: 0.75rem; }
       #setup .grid h3 { font-size: 0.9rem; }
       #setup .grid p { font-size: 0.82rem; }
+      #setup .flex.flex-col { gap: 1.75rem; }
 
       .hero-section img { width: 56px; height: 56px; }
-      .sect-section > div:first-child { margin-bottom: 2rem; }
+      .sect-section > div:first-child { margin-bottom: 1.5rem; }
+      .cta-bottom { padding: 2rem 1.25rem; }
+      .cta-bottom p { font-size: 0.82rem; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -199,6 +208,26 @@
     .lang-option:hover { background: var(--color-bg-warm); color: var(--color-txt) }
     .lang-option.active { color: var(--color-accent); font-weight: 600 }
     .lang-option.active::after { content: '✓'; margin-left: auto; font-size: 0.7rem }
+
+
+    .mob-menu-btn { display: none; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; border-radius: 8px; transition: background 0.15s; color: var(--color-txt-2) }
+    .mob-menu-btn:hover { background: #ECECEE; color: var(--color-txt) }
+    .mob-menu-btn svg { width: 20px; height: 20px }
+    .mob-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 150; opacity: 0; transition: opacity 0.2s }
+    .mob-nav-overlay.open { display: block; opacity: 1 }
+    .mob-nav-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 260px; background: white; z-index: 200; transform: translateX(100%); transition: transform 0.25s ease; box-shadow: -4px 0 24px rgba(0,0,0,0.08); padding: 1.25rem }
+    .mob-nav-panel.open { transform: translateX(0) }
+    .mob-nav-panel a { display: block; padding: 12px 16px; font-size: 0.95rem; font-weight: 600; color: var(--color-txt-2); border-radius: 10px; transition: all 0.12s; text-decoration: none }
+    .mob-nav-panel a:hover { background: var(--color-bg-warm); color: var(--color-txt) }
+    .mob-nav-close { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border: none; background: transparent; cursor: pointer; border-radius: 8px; transition: background 0.15s; color: var(--color-txt-2); margin-left: auto; margin-bottom: 0.75rem }
+    .mob-nav-close:hover { background: #ECECEE }
+
+
+    .cta-bottom { text-align: center; padding: 3rem 2rem; background: var(--color-bg-warm); border-radius: 1.5rem; margin-bottom: 1rem }
+    .cta-bottom p { font-size: 0.92rem; color: var(--color-txt-2); margin-bottom: 1.25rem; line-height: 1.65 }
+    .cta-gh { display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px; background: var(--color-txt); color: white; font-family: var(--font-sans); font-size: 0.88rem; font-weight: 700; border: none; border-radius: 10px; cursor: pointer; text-decoration: none; transition: all 0.2s }
+    .cta-gh:hover { background: #333; color: white; transform: translateY(-1px) }
+    .cta-gh svg { width: 16px; height: 16px }
   </style>
 </head>
 <body>
@@ -233,9 +262,32 @@
             <svg class="w-[18px] h-[18px]" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           </a>
         </li>
+        <li>
+          <button class="mob-menu-btn" id="mobMenuBtn" onclick="openMobMenu()" aria-label="Menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+        </li>
       </ul>
     </div>
   </nav>
+
+
+  <div class="mob-nav-overlay" id="mobOverlay" onclick="closeMobMenu()"></div>
+  <div class="mob-nav-panel" id="mobPanel">
+    <button class="mob-nav-close" onclick="closeMobMenu()" aria-label="Close menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <nav>
+      <a href="#how-it-works" onclick="closeMobMenu()" data-i18n="navHow">How it works</a>
+      <a href="#features" onclick="closeMobMenu()" data-i18n="navFeat">Features</a>
+      <a href="#setup" onclick="closeMobMenu()" data-i18n="navSetup">Setup</a>
+      <a href="#roadmap" onclick="closeMobMenu()" data-i18n="navRoad">Roadmap</a>
+      <a href="https://github.com/palooza-kaida/ccbot" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
 
   <main class="max-w-content mx-auto px-6">
 
@@ -246,7 +298,7 @@
       <h1 class="text-[clamp(2.2rem,5.5vw,3.4rem)] font-extrabold tracking-tighter leading-[1.12] mb-3">
         <span data-i18n="heroTitle">Code anywhere, </span><span class="text-accent" data-i18n="heroAccent">anytime</span>
       </h1>
-      <p class="text-[1.05rem] text-txt-2 max-w-[540px] mx-auto mb-8 leading-[1.7]" data-i18n="heroSub">
+      <p class="text-[1.05rem] text-txt-2 max-w-[540px] mx-auto mb-6 leading-[1.7]" data-i18n="heroSub">
         Two-way interaction with Claude Code via Telegram, Discord, Zalo. Code on the go with your phone.
       </p>
 
@@ -275,9 +327,10 @@
           </button>
         </div>
       </div>
+
     </section>
 
-    <!-- HOW IT WORKS -->
+
     <section class="sect-section py-20" id="how-it-works">
       <div class="mb-12">
         <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2" data-i18n="howLabel">How it works</p>
@@ -298,7 +351,7 @@
           <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mb-1.5">ccbot</span>
           <div class="flow-line"></div>
           <div class="flow-line reverse"></div>
-          <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mt-1.5">real-time</span>
+          <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mt-1.5" data-i18n="flowRealtime">real-time</span>
         </div>
 
         <div class="p-8 bg-bg-warm rounded-2xl h-full">
@@ -311,13 +364,13 @@
             <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E3F2FD] text-[#1976D2]">Telegram</span>
             <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#EDE7F6] text-[#5E35B1]">Discord</span>
             <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E8F5E9] text-[#2E7D32]">Zalo</span>
-            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-plat-more text-txt-3">+ more</span>
+            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-plat-more text-txt-3" data-i18n="plusMore">+ more</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FEATURES -->
+
     <section class="sect-section py-20" id="features">
       <div class="mb-12">
         <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2" data-i18n="featLabel">Features</p>
@@ -332,7 +385,7 @@
           <div>
             <h3 class="text-base font-bold mb-1 flex items-center gap-2">
               <span data-i18n="featPushT">Push notification</span>
-              <span class="text-[0.6rem] font-bold px-[7px] py-0.5 rounded uppercase tracking-wider bg-accent-light text-accent">Hook-based</span>
+              <span class="text-[0.6rem] font-bold px-[7px] py-0.5 rounded uppercase tracking-wider bg-accent-light text-accent" data-i18n="badgeHook">Hook-based</span>
             </h3>
             <p class="text-[0.88rem] text-txt-2 leading-relaxed" data-i18n="featPushD">Claude Code done → notification pushed instantly. No polling, no delay.</p>
           </div>
@@ -345,7 +398,7 @@
           <div>
             <h3 class="text-base font-bold mb-1 flex items-center gap-2">
               <span data-i18n="feat2wayT">Two-way interaction</span>
-              <span class="text-[0.6rem] font-bold px-[7px] py-0.5 rounded uppercase tracking-wider bg-plum-light text-plum">Tier 2</span>
+              <span class="text-[0.6rem] font-bold px-[7px] py-0.5 rounded uppercase tracking-wider bg-plum-light text-plum" data-i18n="badgeTier2">Tier 2</span>
             </h3>
             <p class="text-[0.88rem] text-txt-2 leading-relaxed" data-i18n="feat2wayD">Send prompts from your phone, Claude Code receives and processes, response sent back. Approve/deny permissions right in chat.</p>
           </div>
@@ -383,7 +436,7 @@
       </div>
     </section>
 
-    <!-- SETUP -->
+
     <section class="sect-section py-20" id="setup">
       <div class="mb-12">
         <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2" data-i18n="setupLabel">Setup</p>
@@ -396,7 +449,7 @@
           <div class="w-8 h-8 rounded-full bg-txt text-white flex items-center justify-center text-[0.8rem] font-bold shrink-0">1</div>
           <div class="min-w-0">
             <h3 class="text-base font-bold mb-1.5" data-i18n="s1T">Create Bot Token</h3>
-            <p class="text-[0.88rem] text-txt-2 leading-relaxed">
+            <p class="text-[0.88rem] text-txt-2 leading-relaxed" data-i18n="s1D">
               Mở <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a> trên Telegram &rarr;
               <code class="font-mono text-[0.78rem] bg-bg-warm px-[7px] py-0.5 rounded text-accent">/newbot</code> &rarr; lưu token.<br>
               Lấy User ID từ <a href="https://t.me/userinfobot" target="_blank" rel="noopener">@userinfobot</a>.
@@ -445,7 +498,7 @@
       </div>
     </section>
 
-    <!-- ROADMAP -->
+
     <section class="sect-section py-20" id="roadmap">
       <div class="mb-12">
         <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2" data-i18n="roadLabel">Roadmap</p>
@@ -537,15 +590,29 @@
       </div>
     </section>
 
+
+    <section class="cta-bottom mt-8">
+      <p data-i18n="ctaSub">MIT licensed, open-source. Contributions welcome.</p>
+      <a href="https://github.com/palooza-kaida/ccbot" target="_blank" rel="noopener" class="cta-gh">
+        <svg viewBox="0 0 16 16" fill="currentColor" style="width:16px;height:16px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        <span data-i18n="ctaGh">Star on GitHub</span>
+      </a>
+    </section>
+
   </main>
 
-  <footer class="py-12 text-center border-t border-border mt-5">
+  <footer class="py-8 text-center border-t border-border mt-5">
     <div class="max-w-content mx-auto px-6">
       <p class="text-[0.82rem] text-txt-3">MIT &middot; TypeScript &middot; <a href="https://github.com/palooza-kaida/ccbot" class="text-txt-3 hover:text-txt-2">github.com/palooza-kaida/ccbot</a></p>
     </div>
   </footer>
 
   <script>
+    if (window.Telegram && Telegram.WebApp) {
+      Telegram.WebApp.ready();
+      Telegram.WebApp.expand();
+    }
+
     const cmds = {
       npm:  'npm i -g ccbot',
       yarn: 'yarn global add ccbot',
@@ -585,6 +652,17 @@
       const dd = document.getElementById('langDropdown');
       if (dd && !dd.contains(e.target)) dd.classList.remove('open');
     });
+
+    function openMobMenu() {
+      document.getElementById('mobOverlay').classList.add('open');
+      document.getElementById('mobPanel').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMobMenu() {
+      document.getElementById('mobOverlay').classList.remove('open');
+      document.getElementById('mobPanel').classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
     cb.addEventListener('click', () => {
       navigator.clipboard.writeText(cmds[pm]);

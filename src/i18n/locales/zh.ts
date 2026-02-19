@@ -2,24 +2,26 @@ import type { TranslationKeys } from "../types.js";
 
 export const zh: TranslationKeys = {
   bot: {
-    started: "ccbot: 已启动 (hook端口: {port})",
-    shuttingDown: "ccbot: 正在关闭...",
-    telegramStarted: "ccbot: telegram bot 已启动",
-    commandsRegistered: "ccbot: 命令已注册",
-    commandsRegisterFailed: "ccbot: 注册命令失败: {error}",
-    menuButtonRegistered: "ccbot: 小程序菜单按钮已注册",
-    menuButtonFailed: "ccbot: 注册菜单按钮失败: {error}",
-    noChatId: "ccbot: 尚无聊天ID — 运行 'ccbot setup' 或向机器人发送 /start",
-    notificationFailed: "ccbot: 发送通知失败: {error}",
-    registeredChatId: "ccbot: 已注册聊天ID {chatId}",
-    unauthorizedUser: "ccbot: 未授权用户 {userId} ({username})",
+    started: "已启动 (hook端口: {port})",
+    shuttingDown: "正在关闭...",
+    telegramStarted: "telegram bot 已启动",
+    commandsRegistered: "命令已注册",
+    commandsRegisterFailed: "注册命令失败: {error}",
+    menuButtonRegistered: "小程序菜单按钮已注册",
+    menuButtonFailed: "注册菜单按钮失败: {error}",
+    noChatId: "尚无聊天ID — 运行 'ccbot setup' 或向机器人发送 /start",
+    notificationFailed: "发送通知失败: {error}",
+    registeredChatId: "已注册聊天ID {chatId}",
+    unauthorizedUser: "未授权用户 {userId} ({username})",
     ready: "✅ *ccbot* 已就绪\\.\n\n当Claude Code完成响应时，您将收到通知\\.",
-    running: "🟢 ccbot 正在运行",
+    alreadyConnected: "✅ ccbot 已连接 — 机器人运行正常。",
+    connectionLost: "⚠️ 与 Telegram 连接中断 — 正在重试...",
+    connectionRestored: "✅ 已重新连接 Telegram",
     commands: {
       start: "将机器人连接到此聊天",
-      ping: "检查机器人是否在线",
-      status: "Claude Code 会话状态",
     },
+    viewDetails: "📱 查看详情",
+    dashboard: "📱 控制台",
   },
 
   setup: {
@@ -85,11 +87,20 @@ export const zh: TranslationKeys = {
   },
 
   hook: {
-    serverListening: "ccbot: hook 服务器正在监听 localhost:{port}",
-    invalidPayload: "ccbot: 无效的 stop event 负载 — 缺少必要字段",
-    stopEventReceived: "ccbot: 收到 session {sessionId} 的 stop event，位于 {cwd}",
-    transcriptFailed: "ccbot: 解析 transcript 失败: {error}",
-    notificationFailed: "ccbot: 发送通知失败: {error}",
+    serverListening: "hook 服务器正在监听 localhost:{port}",
+    invalidPayload: "无效的 stop event 负载 — 缺少必要字段",
+    stopEventReceived: "收到 session {sessionId} 的 stop event，位于 {cwd}",
+    transcriptFailed: "解析 transcript 失败: {error}",
+    notificationFailed: "发送通知失败: {error}",
+  },
+
+  tunnel: {
+    installing: "正在安装 cloudflared 二进制文件...",
+    installed: "cloudflared 二进制文件已安装",
+    started: "🌐 公共 URL: {url}",
+    failed: "⚠️ 隧道失败，仅使用 localhost。{error}",
+    disconnected: "⚠️ 隧道断开连接，正在重新连接...",
+    exited: "隧道进程已退出 (代码 {code})",
   },
 
   config: {
@@ -108,10 +119,14 @@ export const zh: TranslationKeys = {
   notification: {
     title: "🤖 *Claude Code 响应*",
     changes: "📂 *变更:*",
+    tokens: "tokens",
+    cache: "cache",
+    cacheRead: "读取",
+    cacheWrite: "写入",
   },
 
   common: {
     unknownCommand: "未知命令: {command}",
-    setupFailed: "ccbot: 设置失败: {error}",
+    setupFailed: "setup 失败: {error}",
   },
 };

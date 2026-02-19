@@ -4,10 +4,14 @@ import {
   formatNotification,
   extractProjectName,
   type GitChange,
+  type NotificationData,
 } from "../telegram/message-formatter.js";
 import { formatError } from "../utils/error-utils.js";
-import { GitChangeStatus } from "../utils/constants.js";
+import { GitChangeStatus, MINI_APP_BASE_URL } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
+import { responseStore } from "../utils/response-store.js";
+import type { TunnelManager } from "../utils/tunnel.js";
+import { log } from "../utils/log.js";
 
 const GIT_TIMEOUT_MS = 10_000;
 
@@ -20,7 +24,7 @@ interface StopEvent {
   stop_hook_active: boolean;
 }
 
-export type NotifyFunc = (text: string) => Promise<void>;
+type NotifyFunc = (text: string, responseUrl?: string) => Promise<void>;
 
 function isValidStopEvent(data: unknown): data is StopEvent {
   if (typeof data !== "object" || data === null) return false;
@@ -32,24 +36,30 @@ function isValidStopEvent(data: unknown): data is StopEvent {
 
 export class HookHandler {
   private notify: NotifyFunc;
+  private hookPort: number;
+  private tunnelManager: TunnelManager;
 
-  constructor(notify: NotifyFunc) {
+  constructor(notify: NotifyFunc, hookPort: number, tunnelManager: TunnelManager) {
     this.notify = notify;
+    this.hookPort = hookPort;
+    this.tunnelManager = tunnelManager;
   }
 
-  handleStopEvent(event: unknown): void {
+  async handleStopEvent(event: unknown): Promise<void> {
     if (!isValidStopEvent(event)) {
-      console.log(t("hook.invalidPayload"));
+      log(t("hook.invalidPayload"));
       return;
     }
 
-    console.log(t("hook.stopEventReceived", { sessionId: event.session_id, cwd: event.cwd }));
+    log(t("hook.stopEventReceived", { sessionId: event.session_id, cwd: event.cwd }));
 
-    let summary = { lastAssistantMessage: "", durationMs: 0, totalCostUSD: 0 };
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    let summary = { lastAssistantMessage: "", durationMs: 0, totalCostUSD: 0, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
     try {
       summary = parseTranscript(event.transcript_path);
     } catch (err: unknown) {
-      console.log(t("hook.transcriptFailed", { error: formatError(err) }));
+      log(t("hook.transcriptFailed", { error: formatError(err) }));
     }
 
     const gitChanges = this.collectGitChanges(event.cwd);
@@ -59,16 +69,46 @@ export class HookHandler {
       durationMs = 1000;
     }
 
-    const notification = formatNotification({
+    const data: NotificationData = {
       projectName: extractProjectName(event.cwd),
       responseSummary: summary.lastAssistantMessage,
       durationMs,
       gitChanges,
+      inputTokens: summary.inputTokens,
+      outputTokens: summary.outputTokens,
+      cacheCreationTokens: summary.cacheCreationTokens,
+      cacheReadTokens: summary.cacheReadTokens,
+    };
+
+    const notification = formatNotification(data);
+    const responseUrl = this.buildResponseUrl(data);
+
+
+    this.notify(notification, responseUrl).catch((err: unknown) => {
+      log(t("hook.notificationFailed", { error: formatError(err) }));
+    });
+  }
+
+  private buildResponseUrl(data: NotificationData): string {
+    const id = responseStore.save({
+      projectName: data.projectName,
+      responseSummary: data.responseSummary,
+      durationMs: data.durationMs,
+      gitChanges: data.gitChanges,
+      inputTokens: data.inputTokens,
+      outputTokens: data.outputTokens,
+      cacheCreationTokens: data.cacheCreationTokens,
+      cacheReadTokens: data.cacheReadTokens,
     });
 
-    this.notify(notification).catch((err: unknown) => {
-      console.log(t("hook.notificationFailed", { error: formatError(err) }));
+    const apiBase = this.tunnelManager.getPublicUrl() || `http://localhost:${this.hookPort}`;
+    const params = new URLSearchParams({
+      id,
+      api: apiBase,
+      p: data.projectName,
+      d: String(data.durationMs),
     });
+    return `${MINI_APP_BASE_URL}/response.html?${params.toString()}`;
   }
 
   private collectGitChanges(cwd: string): GitChange[] {
@@ -155,3 +195,4 @@ export class HookHandler {
     return changes;
   }
 }
+

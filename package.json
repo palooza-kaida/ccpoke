@@ -1,6 +1,6 @@
 {
   "name": "ccbot",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Claude Code Telegram Notification Bot — get notified when Claude Code completes a response",
   "type": "module",
   "license": "MIT",
@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.0.1",
+    "cloudflared": "^0.7.1",
     "express": "^5.0.1",
     "node-telegram-bot-api": "^0.66.0"
   },

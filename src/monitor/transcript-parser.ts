@@ -10,11 +10,13 @@ interface TranscriptEntry {
   sessionId?: string;
   parentUuid?: string;
   uuid?: string;
+  summary?: string;
 }
 
 interface MessageContent {
   role: string;
   content?: ContentPart[];
+  usage?: TokenUsage;
 }
 
 interface ContentPart {
@@ -22,10 +24,21 @@ interface ContentPart {
   text?: string;
 }
 
+interface TokenUsage {
+  input_tokens?: number;
+  output_tokens?: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+}
+
 export interface TranscriptSummary {
   lastAssistantMessage: string;
   durationMs: number;
   totalCostUSD: number;
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationTokens: number;
+  cacheReadTokens: number;
 }
 
 export function parseTranscript(transcriptPath: string): TranscriptSummary {
@@ -34,9 +47,14 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
   const lines = raw.split("\n");
 
   let lastAssistantText = "";
+  let summaryText = "";
   let totalCost = 0;
   let firstTimestamp: Date | null = null;
   let lastTimestamp: Date | null = null;
+  let inputTokens = 0;
+  let outputTokens = 0;
+  let cacheCreationTokens = 0;
+  let cacheReadTokens = 0;
 
   for (const line of lines) {
     if (!line.trim()) continue;
@@ -58,11 +76,26 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
 
     totalCost += entry.costUSD ?? 0;
 
+    if (entry.type === "summary" && entry.summary) {
+      summaryText = entry.summary;
+    }
+
     if (entry.type === "assistant" || entry.message) {
       const msg = entry.message;
       if (msg?.role === "assistant") {
-        const text = extractTextFromContent(msg.content ?? []);
-        if (text) lastAssistantText = text;
+        const rawContent = msg.content ?? [];
+        const contentArray = Array.isArray(rawContent) ? rawContent : [];
+        const text = extractTextFromContent(contentArray);
+        if (text) {
+          lastAssistantText = text;
+        }
+
+        if (msg.usage) {
+          inputTokens += msg.usage.input_tokens ?? 0;
+          outputTokens += msg.usage.output_tokens ?? 0;
+          cacheCreationTokens += msg.usage.cache_creation_input_tokens ?? 0;
+          cacheReadTokens += msg.usage.cache_read_input_tokens ?? 0;
+        }
       }
     }
   }
@@ -72,7 +105,17 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
     durationMs = lastTimestamp.getTime() - firstTimestamp.getTime();
   }
 
-  return { lastAssistantMessage: lastAssistantText, durationMs, totalCostUSD: totalCost };
+  const finalMessage = lastAssistantText || summaryText;
+
+  return {
+    lastAssistantMessage: finalMessage,
+    durationMs,
+    totalCostUSD: totalCost,
+    inputTokens,
+    outputTokens,
+    cacheCreationTokens,
+    cacheReadTokens,
+  };
 }
 
 function extractTextFromContent(parts: ContentPart[]): string {

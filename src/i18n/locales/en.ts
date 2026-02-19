@@ -2,24 +2,26 @@ import type { TranslationKeys } from "../types.js";
 
 export const en: TranslationKeys = {
   bot: {
-    started: "ccbot: started (hook port: {port})",
-    shuttingDown: "ccbot: shutting down...",
-    telegramStarted: "ccbot: telegram bot started",
-    commandsRegistered: "ccbot: commands registered",
-    commandsRegisterFailed: "ccbot: failed to register commands: {error}",
-    menuButtonRegistered: "ccbot: mini app menu button registered",
-    menuButtonFailed: "ccbot: failed to register menu button: {error}",
-    noChatId: "ccbot: no chat ID yet — run 'ccbot setup' or send /start to the bot",
-    notificationFailed: "ccbot: failed to send notification: {error}",
-    registeredChatId: "ccbot: registered chat ID {chatId}",
-    unauthorizedUser: "ccbot: unauthorized user {userId} ({username})",
+    started: "started (hook port: {port})",
+    shuttingDown: "shutting down...",
+    telegramStarted: "telegram bot started",
+    commandsRegistered: "commands registered",
+    commandsRegisterFailed: "failed to register commands: {error}",
+    menuButtonRegistered: "mini app menu button registered",
+    menuButtonFailed: "failed to register menu button: {error}",
+    noChatId: "no chat ID yet — run 'ccbot setup' or send /start to the bot",
+    notificationFailed: "failed to send notification: {error}",
+    registeredChatId: "registered chat ID {chatId}",
+    unauthorizedUser: "unauthorized user {userId} ({username})",
     ready: "✅ *ccbot* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
-    running: "🟢 ccbot is running",
+    alreadyConnected: "✅ ccbot is already connected — bot is running normally.",
+    connectionLost: "⚠️ lost connection to Telegram — retrying...",
+    connectionRestored: "✅ reconnected to Telegram",
     commands: {
       start: "Connect bot to this chat",
-      ping: "Check if bot is alive",
-      status: "Claude Code session status",
     },
+    viewDetails: "📱 View details",
+    dashboard: "📱 Dashboard",
   },
 
   setup: {
@@ -85,11 +87,20 @@ export const en: TranslationKeys = {
   },
 
   hook: {
-    serverListening: "ccbot: hook server listening on localhost:{port}",
-    invalidPayload: "ccbot: invalid stop event payload — missing required fields",
-    stopEventReceived: "ccbot: stop event received for session {sessionId} at {cwd}",
-    transcriptFailed: "ccbot: failed to parse transcript: {error}",
-    notificationFailed: "ccbot: failed to send notification: {error}",
+    serverListening: "hook server listening on localhost:{port}",
+    invalidPayload: "invalid stop event payload — missing required fields",
+    stopEventReceived: "stop event received for session {sessionId} at {cwd}",
+    transcriptFailed: "failed to parse transcript: {error}",
+    notificationFailed: "failed to send notification: {error}",
+  },
+
+  tunnel: {
+    installing: "installing cloudflared binary...",
+    installed: "cloudflared binary installed",
+    started: "🌐 public URL: {url}",
+    failed: "⚠️ tunnel failed, using localhost only. {error}",
+    disconnected: "⚠️ tunnel disconnected, reconnecting...",
+    exited: "tunnel process exited (code {code})",
   },
 
   config: {
@@ -108,10 +119,14 @@ export const en: TranslationKeys = {
   notification: {
     title: "🤖 *Claude Code Response*",
     changes: "📂 *Changes:*",
+    tokens: "tokens",
+    cache: "cache",
+    cacheRead: "read",
+    cacheWrite: "write",
   },
 
   common: {
     unknownCommand: "unknown command: {command}",
-    setupFailed: "ccbot: setup failed: {error}",
+    setupFailed: "setup failed: {error}",
   },
 };

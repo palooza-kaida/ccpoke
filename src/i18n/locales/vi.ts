@@ -2,24 +2,26 @@ import type { TranslationKeys } from "../types.js";
 
 export const vi: TranslationKeys = {
   bot: {
-    started: "ccbot: đã khởi động (hook port: {port})",
-    shuttingDown: "ccbot: đang tắt...",
-    telegramStarted: "ccbot: telegram bot đã khởi động",
-    commandsRegistered: "ccbot: đã đăng ký commands",
-    commandsRegisterFailed: "ccbot: đăng ký commands thất bại: {error}",
-    menuButtonRegistered: "ccbot: đã đăng ký mini app menu button",
-    menuButtonFailed: "ccbot: đăng ký menu button thất bại: {error}",
-    noChatId: "ccbot: chưa có chat ID — chạy 'ccbot setup' hoặc gửi /start cho bot",
-    notificationFailed: "ccbot: gửi notification thất bại: {error}",
-    registeredChatId: "ccbot: đã đăng ký chat ID {chatId}",
-    unauthorizedUser: "ccbot: user không có quyền {userId} ({username})",
+    started: "đã khởi động (hook port: {port})",
+    shuttingDown: "đang tắt...",
+    telegramStarted: "telegram bot đã khởi động",
+    commandsRegistered: "đã đăng ký commands",
+    commandsRegisterFailed: "đăng ký commands thất bại: {error}",
+    menuButtonRegistered: "đã đăng ký mini app menu button",
+    menuButtonFailed: "đăng ký menu button thất bại: {error}",
+    noChatId: "chưa có chat ID — chạy 'ccbot setup' hoặc gửi /start cho bot",
+    notificationFailed: "gửi notification thất bại: {error}",
+    registeredChatId: "đã đăng ký chat ID {chatId}",
+    unauthorizedUser: "user không có quyền {userId} ({username})",
     ready: "✅ *ccbot* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
-    running: "🟢 ccbot đang chạy",
+    alreadyConnected: "✅ ccbot đã kết nối rồi — bot đang hoạt động bình thường.",
+    connectionLost: "⚠️ mất kết nối tới Telegram — đang thử kết nối lại...",
+    connectionRestored: "✅ đã kết nối lại Telegram",
     commands: {
       start: "Kết nối bot với chat này",
-      ping: "Kiểm tra bot còn sống không",
-      status: "Trạng thái Claude Code session",
     },
+    viewDetails: "📱 Xem chi tiết",
+    dashboard: "📱 Bảng điều khiển",
   },
 
   setup: {
@@ -85,11 +87,20 @@ export const vi: TranslationKeys = {
   },
 
   hook: {
-    serverListening: "ccbot: hook server đang lắng nghe tại localhost:{port}",
-    invalidPayload: "ccbot: payload stop event không hợp lệ — thiếu trường bắt buộc",
-    stopEventReceived: "ccbot: nhận stop event cho session {sessionId} tại {cwd}",
-    transcriptFailed: "ccbot: parse transcript thất bại: {error}",
-    notificationFailed: "ccbot: gửi notification thất bại: {error}",
+    serverListening: "hook server đang lắng nghe tại localhost:{port}",
+    invalidPayload: "payload stop event không hợp lệ — thiếu trường bắt buộc",
+    stopEventReceived: "nhận stop event cho session {sessionId} tại {cwd}",
+    transcriptFailed: "parse transcript thất bại: {error}",
+    notificationFailed: "gửi notification thất bại: {error}",
+  },
+
+  tunnel: {
+    installing: "đang cài đặt cloudflared binary...",
+    installed: "đã cài đặt cloudflared binary",
+    started: "🌐 URL công khai: {url}",
+    failed: "⚠️ tunnel thất bại, chỉ dùng localhost. {error}",
+    disconnected: "⚠️ tunnel bị ngắt, đang kết nối lại...",
+    exited: "tunnel process đã thoát (code {code})",
   },
 
   config: {
@@ -108,10 +119,14 @@ export const vi: TranslationKeys = {
   notification: {
     title: "🤖 *Claude Code Response*",
     changes: "📂 *Thay đổi:*",
+    tokens: "token",
+    cache: "cache",
+    cacheRead: "đọc",
+    cacheWrite: "ghi",
   },
 
   common: {
     unknownCommand: "lệnh không xác định: {command}",
-    setupFailed: "ccbot: setup thất bại: {error}",
+    setupFailed: "setup thất bại: {error}",
   },
 };

@@ -12,12 +12,14 @@ export interface TranslationKeys {
     registeredChatId: string;
     unauthorizedUser: string;
     ready: string;
-    running: string;
+    alreadyConnected: string;
+    connectionLost: string;
+    connectionRestored: string;
     commands: {
       start: string;
-      ping: string;
-      status: string;
     };
+    viewDetails: string;
+    dashboard: string;
   };
   setup: {
     intro: string;
@@ -84,6 +86,14 @@ export interface TranslationKeys {
     transcriptFailed: string;
     notificationFailed: string;
   };
+  tunnel: {
+    installing: string;
+    installed: string;
+    started: string;
+    failed: string;
+    disconnected: string;
+    exited: string;
+  };
   config: {
     notFound: string;
     readError: string;
@@ -99,6 +109,10 @@ export interface TranslationKeys {
   notification: {
     title: string;
     changes: string;
+    tokens: string;
+    cache: string;
+    cacheRead: string;
+    cacheWrite: string;
   };
   common: {
     unknownCommand: string;

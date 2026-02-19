@@ -11,6 +11,8 @@ import { runHelp } from "./commands/help.js";
 import { formatError } from "./utils/error-utils.js";
 import { CliCommand } from "./utils/constants.js";
 import { t } from "./i18n/index.js";
+import { TunnelManager } from "./utils/tunnel.js";
+import { log, logError } from "./utils/log.js";
 
 const args = process.argv.slice(2);
 
@@ -22,16 +24,32 @@ if (args.length > 0) {
 
 async function startBot(): Promise<void> {
   const cfg = ConfigManager.load();
-  const bot = new Bot(cfg);
-  const handler = new HookHandler((text) => bot.sendNotification(text));
-  const hookServer = new HookServer(cfg.hook_port, cfg.hook_secret, handler);
-
+  const hookServer = new HookServer(cfg.hook_port, cfg.hook_secret);
   hookServer.start();
-  console.log(t("bot.started", { port: cfg.hook_port }));
+  log(`ccbot: ${t("bot.started", { port: cfg.hook_port })}`);
+
+  const tunnelManager = new TunnelManager();
+  let tunnelUrl: string | null = null;
+  try {
+    tunnelUrl = await tunnelManager.start(cfg.hook_port);
+    log(t("tunnel.started", { url: tunnelUrl }));
+  } catch (err: unknown) {
+    log(t("tunnel.failed", { error: formatError(err) }));
+  }
+
+  const bot = new Bot(cfg, tunnelUrl);
+  const handler = new HookHandler(
+    (text, responseUrl) => bot.sendNotification(text, responseUrl),
+    cfg.hook_port,
+    tunnelManager,
+  );
+  hookServer.setHandler(handler);
+
   await bot.start();
 
   const shutdown = async () => {
-    console.log(`\n${t("bot.shuttingDown")}`);
+    log(t("bot.shuttingDown"));
+    tunnelManager.stop();
     await bot.stop();
     await hookServer.stop();
     process.exit(0);
@@ -47,7 +65,7 @@ function handleSubcommand(args: string[]): void {
   switch (args[0]) {
     case CliCommand.Setup:
       runSetup().catch((err: unknown) => {
-        console.error(t("common.setupFailed", { error: formatError(err) }));
+        logError(t("common.setupFailed", { error: formatError(err) }));
         process.exit(1);
       });
       break;
@@ -67,7 +85,7 @@ function handleSubcommand(args: string[]): void {
       break;
 
     default:
-      console.error(t("common.unknownCommand", { command: args[0] }));
+      logError(t("common.unknownCommand", { command: args[0] }));
       runHelp();
       process.exit(1);
   }

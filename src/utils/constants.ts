@@ -25,3 +25,5 @@ export const CliCommand = {
 } as const;
 
 export type CliCommand = (typeof CliCommand)[keyof typeof CliCommand];
+
+export const MINI_APP_BASE_URL = "https://palooza-kaida.github.io/ccbot";
