@@ -1,12 +1,9 @@
 import * as p from "@clack/prompts";
-import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { homedir } from "node:os";
 import { ConfigManager, type Config } from "../config-manager.js";
 import { HookInstaller } from "../hook/hook-installer.js";
 import { detectCliPrefix } from "../utils/install-detection.js";
-import { formatError } from "../utils/error-utils.js";
 import { t, setLocale, type Locale, SUPPORTED_LOCALES, LOCALE_LABELS } from "../i18n/index.js";
+import { DEFAULT_HOOK_PORT } from "../utils/constants.js";
 
 export async function runSetup(): Promise<void> {
   p.intro(t("setup.intro"));
@@ -14,7 +11,9 @@ export async function runSetup(): Promise<void> {
   let existing: Config | null = null;
   try {
     existing = ConfigManager.load();
-  } catch {}
+  } catch {
+    // first-time setup, no existing config
+  }
 
   const locale = await promptLanguage(existing);
   setLocale(locale);
@@ -83,7 +82,7 @@ async function promptCredentials(existing: Config | null): Promise<Credentials> 
         p.cancel(t("setup.cancelled"));
         process.exit(0);
       },
-    },
+    }
   );
 
   return {
@@ -96,7 +95,7 @@ function buildConfig(credentials: Credentials, existing: Config | null, locale: 
   return {
     telegram_bot_token: credentials.token,
     user_id: credentials.userId,
-    hook_port: existing?.hook_port || 9377,
+    hook_port: existing?.hook_port || DEFAULT_HOOK_PORT,
     hook_secret: existing?.hook_secret || ConfigManager.generateSecret(),
     locale,
   };
@@ -117,32 +116,19 @@ function installHook(config: Config): void {
     HookInstaller.install(config.hook_port, config.hook_secret);
     p.log.success(t("setup.hookInstalled"));
   } catch (err: unknown) {
-    const msg = formatError(err);
-    p.log.error(t("setup.hookFailed", { error: msg }));
-    throw new Error(`install hook: ${msg}`);
+    p.log.error(t("setup.hookFailed", { error: err instanceof Error ? err.message : String(err) }));
+    throw err;
   }
 }
 
 function registerChatId(userId: number): void {
-  const stateDir = join(homedir(), ".ccbot");
-  const stateFile = join(stateDir, "state.json");
-
-  interface BotState {
-    chat_id: number | null;
-  }
-
-  let state: BotState = { chat_id: null };
-  try {
-    const data = readFileSync(stateFile, "utf-8");
-    state = JSON.parse(data);
-  } catch {}
+  const state = ConfigManager.loadChatState();
 
   if (state.chat_id === userId) {
     return;
   }
 
   state.chat_id = userId;
-  mkdirSync(stateDir, { recursive: true });
-  writeFileSync(stateFile, JSON.stringify(state, null, 2), { mode: 0o600 });
+  ConfigManager.saveChatState(state);
   p.log.success(t("setup.chatIdRegistered"));
 }

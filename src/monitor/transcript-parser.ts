@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
+import { expandHome } from "../utils/paths.js";
 
 interface TranscriptEntry {
   type?: string;
@@ -67,10 +67,10 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
     }
 
     if (entry.timestamp) {
-      const t = new Date(entry.timestamp);
-      if (!isNaN(t.getTime())) {
-        if (!firstTimestamp) firstTimestamp = t;
-        lastTimestamp = t;
+      const entryDate = new Date(entry.timestamp);
+      if (!isNaN(entryDate.getTime())) {
+        if (!firstTimestamp) firstTimestamp = entryDate;
+        lastTimestamp = entryDate;
       }
     }
 
@@ -123,11 +123,4 @@ function extractTextFromContent(parts: ContentPart[]): string {
     .filter((p) => p.type === "text" && p.text)
     .map((p) => p.text!)
     .join("\n");
-}
-
-function expandHome(path: string): string {
-  if (path.startsWith("~/")) {
-    return homedir() + path.slice(1);
-  }
-  return path;
 }

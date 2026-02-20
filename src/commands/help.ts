@@ -17,7 +17,7 @@ export function runHelp(): void {
       t("help.cmdUpdate"),
       t("help.cmdUninstall"),
       t("help.cmdHelp"),
-    ].join("\n"),
+    ].join("\n")
   );
 
   p.outro(t("help.docs"));

@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 import { t } from "../i18n/index.js";
-import { log } from "../utils/log.js";
+import { log } from "./log.js";
+import { TUNNEL_TIMEOUT_MS } from "./constants.js";
 
 export class TunnelManager {
   private tunnel: { stop: () => boolean } | null = null;
@@ -20,8 +21,8 @@ export class TunnelManager {
     const url = await new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
         tunnel.stop();
-        reject(new Error("Tunnel connection timeout (30s)"));
-      }, 30_000);
+        reject(new Error(t("tunnel.timeout", { seconds: TUNNEL_TIMEOUT_MS / 1000 })));
+      }, TUNNEL_TIMEOUT_MS);
 
       tunnel.once("url", (url: string) => {
         clearTimeout(timeout);

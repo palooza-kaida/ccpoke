@@ -1,11 +1,10 @@
 import * as p from "@clack/prompts";
 import { rmSync } from "node:fs";
-import { join } from "node:path";
-import { homedir } from "node:os";
 import { HookInstaller } from "../hook/hook-installer.js";
 import { detectInstallMethod } from "../utils/install-detection.js";
 import { InstallMethod } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
+import { paths } from "../utils/paths.js";
 
 export function runUninstall(): void {
   p.intro(t("uninstall.intro"));
@@ -28,7 +27,7 @@ function removeHook(): void {
 }
 
 function removeConfigDirectory(): void {
-  const ccbotDir = join(homedir(), ".ccbot");
+  const ccbotDir = paths.ccbotDir;
   try {
     rmSync(ccbotDir, { recursive: true, force: true });
     p.log.success(t("uninstall.configRemoved"));

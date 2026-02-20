@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
-import { homedir } from "node:os";
 import { randomBytes } from "node:crypto";
 import { type Locale, isValidLocale, setLocale } from "./i18n/index.js";
 import { t } from "./i18n/index.js";
+import { paths } from "./utils/paths.js";
+import { DEFAULT_HOOK_PORT } from "./utils/constants.js";
 
 export interface Config {
   telegram_bot_token: string;
@@ -13,30 +13,38 @@ export interface Config {
   locale: Locale;
 }
 
-export class ConfigManager {
-  private static readonly CONFIG_DIR = join(homedir(), ".ccbot");
-  private static readonly CONFIG_FILE = join(ConfigManager.CONFIG_DIR, "config.json");
+export interface ChatState {
+  chat_id: number | null;
+}
 
+export class ConfigManager {
   static load(): Config {
     let data: string;
     try {
-      data = readFileSync(ConfigManager.CONFIG_FILE, "utf-8");
+      data = readFileSync(paths.configFile, "utf-8");
     } catch (err: unknown) {
-      if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
-        throw new Error(t("config.notFound"));
+      if (
+        err instanceof Error &&
+        "code" in err &&
+        (err as NodeJS.ErrnoException).code === "ENOENT"
+      ) {
+        throw new Error(t("config.notFound"), { cause: err });
       }
-      throw new Error(t("config.readError", { error: err instanceof Error ? err.message : String(err) }));
+      throw err;
     }
 
-    const raw: unknown = JSON.parse(data);
+    const raw: Record<string, unknown> = JSON.parse(data);
     const cfg = ConfigManager.validate(raw);
+    if (cfg.hook_secret !== raw.hook_secret) {
+      ConfigManager.save(cfg);
+    }
     setLocale(cfg.locale);
     return cfg;
   }
 
   static save(cfg: Config): void {
-    mkdirSync(ConfigManager.CONFIG_DIR, { recursive: true });
-    writeFileSync(ConfigManager.CONFIG_FILE, JSON.stringify(cfg, null, 2), { mode: 0o600 });
+    mkdirSync(paths.ccbotDir, { recursive: true });
+    writeFileSync(paths.configFile, JSON.stringify(cfg, null, 2), { mode: 0o600 });
   }
 
   static isOwner(cfg: Config, userId: number): boolean {
@@ -45,6 +53,20 @@ export class ConfigManager {
 
   static generateSecret(): string {
     return randomBytes(32).toString("hex");
+  }
+
+  static loadChatState(): ChatState {
+    try {
+      const data = readFileSync(paths.stateFile, "utf-8");
+      return JSON.parse(data);
+    } catch {
+      return { chat_id: null };
+    }
+  }
+
+  static saveChatState(state: ChatState): void {
+    mkdirSync(paths.ccbotDir, { recursive: true });
+    writeFileSync(paths.stateFile, JSON.stringify(state, null, 2), { mode: 0o600 });
   }
 
   private static validate(data: unknown): Config {
@@ -62,9 +84,14 @@ export class ConfigManager {
       throw new Error(t("config.invalidUserId"));
     }
 
-    let hookPort = 9377;
+    let hookPort = DEFAULT_HOOK_PORT;
     if (obj.hook_port !== undefined) {
-      if (typeof obj.hook_port !== "number" || !Number.isInteger(obj.hook_port) || obj.hook_port < 1 || obj.hook_port > 65535) {
+      if (
+        typeof obj.hook_port !== "number" ||
+        !Number.isInteger(obj.hook_port) ||
+        obj.hook_port < 1 ||
+        obj.hook_port > 65535
+      ) {
         throw new Error(t("config.invalidPort"));
       }
       hookPort = obj.hook_port;
@@ -89,10 +116,6 @@ export class ConfigManager {
       hook_secret: hookSecret,
       locale,
     };
-
-    if (typeof obj.hook_secret !== "string" || obj.hook_secret.length === 0) {
-      ConfigManager.save(cfg);
-    }
 
     return cfg;
   }

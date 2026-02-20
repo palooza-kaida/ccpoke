@@ -1,16 +1,16 @@
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { InstallMethod } from "./constants.js";
+import { InstallMethod, MAX_GIT_SEARCH_DEPTH } from "./constants.js";
 export type { InstallMethod } from "./constants.js";
 
 export function detectInstallMethod(): InstallMethod {
-  const execPath = process.argv[1] ?? "";
+  const scriptPath = process.argv[1] ?? "";
 
-  if (execPath.includes("npx") || execPath.includes(".npm/_npx")) {
+  if (scriptPath.includes("npx") || scriptPath.includes(".npm/_npx")) {
     return InstallMethod.Npx;
   }
 
-  const scriptDir = dirname(execPath);
+  const scriptDir = dirname(scriptPath);
   if (isGitRepo(scriptDir)) {
     return InstallMethod.GitClone;
   }
@@ -32,7 +32,7 @@ export function detectCliPrefix(): string {
 
 export function getGitRepoRoot(dir: string): string | null {
   let current = dir;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < MAX_GIT_SEARCH_DEPTH; i++) {
     if (existsSync(join(current, ".git"))) {
       return current;
     }

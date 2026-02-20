@@ -3,8 +3,9 @@ import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { detectInstallMethod, getGitRepoRoot } from "../utils/install-detection.js";
-import { InstallMethod } from "../utils/constants.js";
+import { InstallMethod, PackageManager } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
+import { getPackageVersion } from "../utils/paths.js";
 
 export function runUpdate(): void {
   const method = detectInstallMethod();
@@ -26,13 +27,13 @@ export function runUpdate(): void {
   }
 }
 
-function detectGlobalPackageManager(): string {
-  const execPath = process.argv[1] ?? "";
+function detectGlobalPackageManager(): PackageManager {
+  const scriptPath = process.argv[1] ?? "";
 
-  if (execPath.includes("pnpm")) return "pnpm";
-  if (execPath.includes("yarn")) return "yarn";
-  if (execPath.includes("bun")) return "bun";
-  return "npm";
+  if (scriptPath.includes(PackageManager.Pnpm)) return PackageManager.Pnpm;
+  if (scriptPath.includes(PackageManager.Yarn)) return PackageManager.Yarn;
+  if (scriptPath.includes(PackageManager.Bun)) return PackageManager.Bun;
+  return PackageManager.Npm;
 }
 
 function updateGlobal(): void {
@@ -42,16 +43,41 @@ function updateGlobal(): void {
   p.intro(t("update.intro"));
 
   const s = p.spinner();
-  s.start(t("update.updating", { pm }));
+  s.start(t("update.checking"));
+
+  const currentVersion = getPackageVersion();
+  let latestVersion = "unknown";
+  try {
+    const cmd =
+      pm === PackageManager.Yarn ? `yarn info ${pkg} version --silent` : `npm view ${pkg} version`;
+    latestVersion = execSync(cmd, { stdio: "pipe" }).toString().trim();
+  } catch {
+    // ignore
+  }
+
+  if (
+    currentVersion !== "unknown" &&
+    latestVersion !== "unknown" &&
+    currentVersion === latestVersion
+  ) {
+    s.stop(t("update.alreadyLatestNpm", { version: currentVersion }));
+    p.outro(t("update.noUpdateNeeded"));
+    return;
+  }
+
+  const updateMsg =
+    currentVersion !== "unknown" && latestVersion !== "unknown"
+      ? t("update.updatingNpm", { pm, from: currentVersion, to: latestVersion })
+      : t("update.updating", { pm });
+
+  s.message(updateMsg);
 
   const cmd =
-    pm === "yarn"
-      ? `yarn global add ${pkg}`
-      : `${pm} install -g ${pkg}@latest`;
+    pm === PackageManager.Yarn ? `yarn global add ${pkg}` : `${pm} install -g ${pkg}@latest`;
 
   try {
     execSync(cmd, { stdio: "pipe" });
-    s.stop(t("update.updateSuccess"));
+    s.stop(t("update.updateSuccess", { from: currentVersion, to: latestVersion }));
     p.outro(t("update.updateComplete"));
   } catch {
     s.stop(t("update.updateFailed"));
@@ -61,7 +87,8 @@ function updateGlobal(): void {
 }
 
 function updateGitClone(): void {
-  const scriptDir = dirname(process.argv[1] ?? "");
+  const scriptPath = process.argv[1] ?? "";
+  const scriptDir = dirname(scriptPath);
   const repoRoot = getGitRepoRoot(scriptDir);
 
   if (!repoRoot) {
@@ -74,17 +101,46 @@ function updateGitClone(): void {
   const s = p.spinner();
 
   try {
+    let currentHash = "unknown";
+    try {
+      currentHash = execSync("git rev-parse --short HEAD", { cwd: repoRoot, stdio: "pipe" })
+        .toString()
+        .trim();
+    } catch {
+      // git command may fail if not a clean repo
+    }
+
     s.start(t("update.pulling"));
     execSync("git pull", { cwd: repoRoot, stdio: "pipe" });
-    s.stop(t("update.pulled"));
 
-    const pm = existsSync(join(repoRoot, "pnpm-lock.yaml"))
-      ? "pnpm"
+    let latestHash = "unknown";
+    try {
+      latestHash = execSync("git rev-parse --short HEAD", { cwd: repoRoot, stdio: "pipe" })
+        .toString()
+        .trim();
+    } catch {
+      // git command may fail
+    }
+
+    if (currentHash !== "unknown" && currentHash === latestHash) {
+      s.stop(t("update.alreadyLatestGit", { hash: currentHash }));
+      p.outro(t("update.noUpdateNeeded"));
+      return;
+    }
+
+    if (currentHash !== "unknown" && latestHash !== "unknown" && currentHash !== latestHash) {
+      s.stop(t("update.pulledGit", { from: currentHash, to: latestHash }));
+    } else {
+      s.stop(t("update.pulled"));
+    }
+
+    const pm: PackageManager = existsSync(join(repoRoot, "pnpm-lock.yaml"))
+      ? PackageManager.Pnpm
       : existsSync(join(repoRoot, "yarn.lock"))
-        ? "yarn"
+        ? PackageManager.Yarn
         : existsSync(join(repoRoot, "bun.lockb"))
-          ? "bun"
-          : "npm";
+          ? PackageManager.Bun
+          : PackageManager.Npm;
 
     s.start(t("update.installingDeps"));
     execSync(`${pm} install`, { cwd: repoRoot, stdio: "pipe" });

@@ -1,13 +1,9 @@
-import { readFileSync, writeFileSync, mkdirSync, unlinkSync, rmdirSync } from "node:fs";
-import { join } from "node:path";
-import { homedir } from "node:os";
+import { readFileSync, writeFileSync, mkdirSync, unlinkSync, rmSync } from "node:fs";
 import { t } from "../i18n/index.js";
+import { paths } from "../utils/paths.js";
+import { ApiRoute } from "../utils/constants.js";
 
 export class HookInstaller {
-  private static readonly HOOKS_DIR = join(homedir(), ".ccbot", "hooks");
-  private static readonly SCRIPT_PATH = join(HookInstaller.HOOKS_DIR, "stop-notify.sh");
-  private static readonly SETTINGS_PATH = join(homedir(), ".claude", "settings.json");
-
   static isInstalled(): boolean {
     try {
       const settings = HookInstaller.readSettings();
@@ -16,7 +12,9 @@ export class HookInstaller {
 
       return existingStop.some((entry) => {
         const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
-        return entryHooks?.some((h) => typeof h.command === "string" && (h.command as string).includes("ccbot"));
+        return entryHooks?.some(
+          (h) => typeof h.command === "string" && h.command.includes("ccbot")
+        );
       });
     } catch {
       return false;
@@ -38,14 +36,14 @@ export class HookInstaller {
     }
 
     existingStop.push({
-      hooks: [{ type: "command", command: HookInstaller.SCRIPT_PATH, timeout: 10 }],
+      hooks: [{ type: "command", command: paths.hookScript, timeout: 10 }],
     });
 
     hooks.Stop = existingStop;
     settings.hooks = hooks;
 
-    mkdirSync(join(homedir(), ".claude"), { recursive: true });
-    writeFileSync(HookInstaller.SETTINGS_PATH, JSON.stringify(settings, null, 2));
+    mkdirSync(paths.claudeDir, { recursive: true });
+    writeFileSync(paths.claudeSettings, JSON.stringify(settings, null, 2));
 
     HookInstaller.installScript(hookPort, hookSecret);
   }
@@ -56,32 +54,34 @@ export class HookInstaller {
   }
 
   private static installScript(hookPort: number, hookSecret: string): void {
-    mkdirSync(HookInstaller.HOOKS_DIR, { recursive: true });
+    mkdirSync(paths.hooksDir, { recursive: true });
 
-    const script = `#!/bin/bash
-curl -s -X POST http://localhost:${hookPort}/hook/stop \\
-  -H "Content-Type: application/json" \\
-  -H "X-CCBot-Secret: ${hookSecret}" \\
-  --data-binary @- > /dev/null 2>&1 || true
-`;
+    const isWindows = process.platform === "win32";
+    const script = isWindows
+      ? `@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop} -H "Content-Type: application/json" -H "X-CCBot-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`
+      : `#!/bin/bash\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop} \\\n  -H "Content-Type: application/json" \\\n  -H "X-CCBot-Secret: ${hookSecret}" \\\n  --data-binary @- > /dev/null 2>&1 || true\n`;
 
-    writeFileSync(HookInstaller.SCRIPT_PATH, script, { mode: 0o755 });
+    writeFileSync(paths.hookScript, script, { mode: isWindows ? 0o644 : 0o755 });
   }
 
   private static removeScript(): void {
     try {
-      unlinkSync(HookInstaller.SCRIPT_PATH);
-    } catch {}
+      unlinkSync(paths.hookScript);
+    } catch {
+      // script file may not exist
+    }
 
     try {
-      rmdirSync(HookInstaller.HOOKS_DIR);
-    } catch {}
+      rmSync(paths.hooksDir, { recursive: true, force: true });
+    } catch {
+      // hooks directory may not exist
+    }
   }
 
   private static removeFromSettings(): void {
     let data: string;
     try {
-      data = readFileSync(HookInstaller.SETTINGS_PATH, "utf-8");
+      data = readFileSync(paths.claudeSettings, "utf-8");
     } catch {
       return;
     }
@@ -95,7 +95,7 @@ curl -s -X POST http://localhost:${hookPort}/hook/stop \\
 
     const filtered = existingStop.filter((entry) => {
       const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
-      return !entryHooks?.some((h) => typeof h.command === "string" && (h.command as string).includes("ccbot"));
+      return !entryHooks?.some((h) => typeof h.command === "string" && h.command.includes("ccbot"));
     });
 
     if (filtered.length === 0) {
@@ -108,18 +108,22 @@ curl -s -X POST http://localhost:${hookPort}/hook/stop \\
       delete settings.hooks;
     }
 
-    writeFileSync(HookInstaller.SETTINGS_PATH, JSON.stringify(settings, null, 2));
+    writeFileSync(paths.claudeSettings, JSON.stringify(settings, null, 2));
   }
 
   private static readSettings(): Record<string, unknown> {
     try {
-      const data = readFileSync(HookInstaller.SETTINGS_PATH, "utf-8");
+      const data = readFileSync(paths.claudeSettings, "utf-8");
       return JSON.parse(data);
     } catch (err: unknown) {
-      if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
+      if (
+        err instanceof Error &&
+        "code" in err &&
+        (err as NodeJS.ErrnoException).code === "ENOENT"
+      ) {
         return {};
       }
-      throw new Error(t("config.readSettingsError", { error: err instanceof Error ? err.message : String(err) }));
+      throw err;
     }
   }
 }

@@ -1,15 +1,13 @@
 import express, { type Express } from "express";
 import type { Server } from "node:http";
-import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
 import { HookHandler } from "./hook-handler.js";
 import { responseStore } from "../utils/response-store.js";
-import { MINI_APP_BASE_URL } from "../utils/constants.js";
+import { MINI_APP_BASE_URL, ApiRoute } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
 import { log } from "../utils/log.js";
+import { paths } from "../utils/paths.js";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const PUBLIC_DIR = join(__dirname, "../../public");
+const ALLOWED_CORS_ORIGIN = new URL(MINI_APP_BASE_URL).origin;
 
 export class HookServer {
   private app: Express;
@@ -48,10 +46,12 @@ export class HookServer {
     const app = express();
     app.use(express.json({ limit: "10mb" }));
 
-    app.use(express.static(PUBLIC_DIR));
+    app.use(express.static(paths.publicDir));
 
-    app.get("/api/responses/:id", (req, res) => {
-      res.header("Access-Control-Allow-Origin", new URL(MINI_APP_BASE_URL).origin);
+    app.get(ApiRoute.ResponseData, (req, res) => {
+      const requestOrigin = req.headers.origin ?? "";
+      const isTunnel = requestOrigin.endsWith(".trycloudflare.com");
+      res.header("Access-Control-Allow-Origin", isTunnel ? requestOrigin : ALLOWED_CORS_ORIGIN);
       const data = responseStore.get(req.params.id);
       if (!data) {
         res.status(404).json({ error: "not_found" });
@@ -60,11 +60,7 @@ export class HookServer {
       res.json(data);
     });
 
-    app.get("/response/:id", (_req, res) => {
-      res.sendFile(join(PUBLIC_DIR, "response.html"));
-    });
-
-    app.post("/hook/stop", (req, res) => {
+    app.post(ApiRoute.HookStop, (req, res) => {
       const receivedSecret = req.headers["x-ccbot-secret"];
       if (receivedSecret !== this.secret) {
         res.status(403).send("forbidden");
@@ -75,7 +71,7 @@ export class HookServer {
       res.status(200).send("ok");
     });
 
-    app.get("/health", (_req, res) => {
+    app.get(ApiRoute.Health, (_req, res) => {
       res.status(200).send("healthy");
     });
 
