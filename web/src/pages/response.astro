@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ResponseViewer from "../components/response/ResponseViewer";
+
+const locale = "en";
+---
+
+<BaseLayout locale={locale} title="ccbot — Response" description="Claude Code response viewer — ccbot" currentPath="/response">
+  <script is:inline src="https://telegram.org/js/telegram-web-app.js"></script>
+  <ResponseViewer client:load />
+</BaseLayout>

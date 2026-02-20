@@ -1,0 +1,64 @@
+---
+import { ts, type Locale } from "../../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<section class="sect-section py-20" id="setup">
+  <div class="mb-12">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2">{ts(locale, "setupLabel")}</p>
+    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-tight mb-2">{ts(locale, "setupTitle")}</h2>
+    <p class="text-[0.95rem] text-txt-2 max-w-[460px]">{ts(locale, "setupSub")}</p>
+  </div>
+
+  <div class="flex flex-col gap-8">
+    <div class="grid grid-cols-[32px_1fr] gap-4">
+      <div class="w-8 h-8 rounded-full bg-txt text-white flex items-center justify-center text-[0.8rem] font-bold shrink-0">1</div>
+      <div class="min-w-0">
+        <h3 class="text-base font-bold mb-1.5">{ts(locale, "setupStep1Title")}</h3>
+        <p class="text-[0.88rem] text-txt-2 leading-relaxed" set:html={ts(locale, "setupStep1Desc")} />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-[32px_1fr] gap-4">
+      <div class="w-8 h-8 rounded-full bg-txt text-white flex items-center justify-center text-[0.8rem] font-bold shrink-0">2</div>
+      <div class="min-w-0">
+        <h3 class="text-base font-bold mb-1.5">{ts(locale, "setupStep2Title")}</h3>
+        <div class="step-term mt-3 bg-bg-code rounded-[10px] px-5 py-4 font-mono text-[0.78rem] text-term-sub leading-[1.9] overflow-x-auto max-w-full"><span class="d">$ </span>pnpm add -g ccbot
+<span class="d">$ </span>ccbot setup
+
+<span class="c">┌  🤖 ccbot setup</span>
+<span class="c">│</span>
+<span class="c">◇  Telegram Bot Token</span>
+<span class="c">│  ****:ABC-xxx</span>
+<span class="c">│</span>
+<span class="c">◇  Your Telegram User ID</span>
+<span class="c">│  123456789</span>
+<span class="c">│</span>
+<span class="c">◆  Config saved</span>
+<span class="c">◆  Hook installed →</span>
+<span class="c">   ~/.claude/settings.json</span>
+<span class="c">◆  Chat ID registered</span>
+<span class="c">│</span>
+<span class="c">└  🎉 Setup complete!</span></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-[32px_1fr] gap-4">
+      <div class="w-8 h-8 rounded-full bg-txt text-white flex items-center justify-center text-[0.8rem] font-bold shrink-0">3</div>
+      <div class="min-w-0">
+        <h3 class="text-base font-bold mb-1.5">{ts(locale, "setupStep3Title")}</h3>
+        <div class="step-term mt-3 bg-bg-code rounded-[10px] px-5 py-4 font-mono text-[0.78rem] text-term-sub leading-[1.9] overflow-x-auto max-w-full"><span class="d">$ </span>ccbot
+
+<span class="c">ccbot: hook server listening on localhost:9377</span>
+<span class="c">ccbot: telegram bot started</span>
+<span class="c">ccbot: registered chat ID 123456789</span></div>
+        <p class="mt-2.5 text-[0.88rem] text-txt-2 leading-relaxed" set:html={ts(locale, "setupStep3Desc")} />
+      </div>
+    </div>
+  </div>
+</section>

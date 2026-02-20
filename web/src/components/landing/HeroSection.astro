@@ -1,0 +1,29 @@
+---
+import { ts, type Locale } from "../../i18n";
+import TerminalWidget from "./TerminalWidget";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="hero-section pt-14 pb-10 text-center">
+  <div class="mb-5">
+    <img src={`${base}logo.svg`} alt="ccbot hero logo" class="mx-auto w-[72px] h-[72px]">
+  </div>
+  <h1 class="text-[clamp(2.2rem,5.5vw,3.4rem)] font-extrabold tracking-tighter leading-[1.12] mb-3">
+    <span>{ts(locale, "heroTitle")}</span><span class="text-accent">{ts(locale, "heroAccent")}</span>
+  </h1>
+  <p class="text-[1.05rem] text-txt-2 max-w-[540px] mx-auto mb-6 leading-[1.7]">
+    {ts(locale, "heroSub")}
+  </p>
+
+  <TerminalWidget
+    client:load
+    copyLabel={ts(locale, "copyBtn")}
+    copiedLabel={ts(locale, "copiedBtn")}
+  />
+</section>

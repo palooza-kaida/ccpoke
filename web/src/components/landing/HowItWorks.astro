@@ -1,0 +1,48 @@
+---
+import { ts, type Locale } from "../../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<section class="sect-section py-20" id="how">
+  <div class="mb-12">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2">{ts(locale, "howLabel")}</p>
+    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-tight mb-2">{ts(locale, "howTitle")}</h2>
+    <p class="text-[0.95rem] text-txt-2 max-w-[460px]">{ts(locale, "howSub")}</p>
+  </div>
+
+  <div class="flow-grid grid grid-cols-[1fr_80px_1fr]">
+    <div class="p-8 bg-bg-warm rounded-2xl h-full">
+      <h3 class="text-[0.95rem] font-bold mb-2 flex items-center gap-2.5 text-txt">
+        <svg class="text-accent shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>{ts(locale, "howTerminalTitle")}</span>
+      </h3>
+      <p class="text-sm text-txt-2 leading-relaxed">{ts(locale, "howTerminalDesc")}</p>
+    </div>
+
+    <div class="flow-center-wrap flex flex-col items-center gap-1 relative self-center">
+      <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mb-1.5">ccbot</span>
+      <div class="flow-line"></div>
+      <div class="flow-line reverse"></div>
+      <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mt-1.5">{ts(locale, "howFlowRealtime")}</span>
+    </div>
+
+    <div class="p-8 bg-bg-warm rounded-2xl h-full">
+      <h3 class="text-[0.95rem] font-bold mb-2 flex items-center gap-2.5 text-txt">
+        <svg class="text-accent shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        <span>{ts(locale, "howYouTitle")}</span>
+      </h3>
+      <p class="text-sm text-txt-2 leading-relaxed">{ts(locale, "howYouDesc")}</p>
+      <div class="flex flex-wrap gap-1.5 mt-3.5">
+        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E3F2FD] text-[#1976D2]">Telegram</span>
+        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#EDE7F6] text-[#5E35B1]">Discord</span>
+        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E8F5E9] text-[#2E7D32]">Zalo</span>
+        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-plat-more text-txt-3">{ts(locale, "howPlusMore")}</span>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,46 @@
+---
+import { ts, ta, type Locale } from "../../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const phases = [
+  { labelKey: "phase1Label", titleKey: "phase1Title", descKey: "phase1Desc", tagsKey: "phase1Tags", status: "done", dotClass: "done", labelColor: "text-emerald", tagBg: "bg-emerald-light", tagText: "text-emerald" },
+  { labelKey: "phase2Label", titleKey: "phase2Title", descKey: "phase2Desc", tagsKey: "phase2Tags", status: "wip", dotClass: "wip", labelColor: "text-accent", tagBg: "bg-accent-light", tagText: "text-accent" },
+  { labelKey: "phase3Label", titleKey: "phase3Title", descKey: "phase3Desc", tagsKey: "phase3Tags", status: "soon", dotClass: "soon", labelColor: "text-txt-3", tagBg: "bg-bg-warm", tagText: "text-txt-2" },
+  { labelKey: "phase4Label", titleKey: "phase4Title", descKey: "phase4Desc", tagsKey: "phase4Tags", status: "soon", dotClass: "soon", labelColor: "text-txt-3", tagBg: "bg-bg-warm", tagText: "text-txt-2" },
+  { labelKey: "phase5Label", titleKey: "phase5Title", descKey: "phase5Desc", tagsKey: "phase5Tags", status: "soon", dotClass: "soon", labelColor: "text-txt-3", tagBg: "bg-bg-warm", tagText: "text-txt-2" },
+  { labelKey: "phase6Label", titleKey: "phase6Title", descKey: "phase6Desc", tagsKey: "phase6Tags", status: "soon", dotClass: "soon", labelColor: "text-txt-3", tagBg: "bg-bg-warm", tagText: "text-txt-2" },
+];
+---
+
+<section class="sect-section py-20" id="roadmap">
+  <div class="mb-12">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2">{ts(locale, "roadmapLabel")}</p>
+    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-tight mb-2">{ts(locale, "roadmapTitle")}</h2>
+    <p class="text-[0.95rem] text-txt-2 max-w-[520px]">{ts(locale, "roadmapSub")}</p>
+  </div>
+
+  <div class="timeline relative pl-10 max-w-[680px]">
+    {phases.map((phase, idx) => (
+      <div class:list={["tl-item relative", phase.status === "done" ? "done" : phase.status === "wip" ? "wip" : "", idx < phases.length - 1 ? "pb-11" : "pb-0"]}>
+        <div class:list={["tl-dot", phase.dotClass]}></div>
+        <p class:list={["text-[0.68rem] font-bold uppercase tracking-[0.08em] mb-1.5", phase.labelColor]}>
+          {ts(locale, phase.labelKey)}
+        </p>
+        <h3 class="text-lg font-bold mb-1.5">{ts(locale, phase.titleKey)}</h3>
+        <p class="text-[0.82rem] text-txt-3 mb-3">{ts(locale, phase.descKey)}</p>
+        <div class="flex flex-wrap gap-2">
+          {ta(locale, phase.tagsKey).map((tag) => (
+            <span class:list={["px-3.5 py-[5px] rounded-full text-[0.78rem] font-medium transition-transform duration-150 hover:-translate-y-px hover:shadow-md", phase.tagBg, phase.tagText]}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

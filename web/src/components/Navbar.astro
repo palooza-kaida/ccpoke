@@ -1,0 +1,134 @@
+---
+import { ts, SUPPORTED_LOCALES, LOCALE_LABELS, DEFAULT_LOCALE, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  currentPath?: string;
+  showSectionNav?: boolean;
+}
+
+const { locale, currentPath = "/", showSectionNav = false } = Astro.props;
+const base = import.meta.env.BASE_URL;
+
+function localePageHref(loc: Locale, path: string): string {
+  const cleanPath = path === "/" ? "" : path;
+  if (loc === DEFAULT_LOCALE) return `${base}${cleanPath ? cleanPath.slice(1) + "/" : ""}`;
+  return `${base}${loc}${cleanPath}/`;
+}
+
+const navLinks = [
+  { key: "navHow", hash: "#how" },
+  { key: "navFeatures", hash: "#features" },
+  { key: "navSetup", hash: "#setup" },
+  { key: "navRoadmap", hash: "#roadmap" },
+];
+---
+
+<nav class="sticky top-0 z-[100] bg-white/85 backdrop-blur-[12px] border-b border-border">
+  <div class="max-w-content mx-auto px-6 h-14 flex items-center gap-6">
+    <a href={localePageHref(locale, "/")} class="flex items-center gap-1.5 no-underline text-txt shrink-0">
+      <img src={`${base}logo.svg`} alt="ccbot logo" class="w-8 h-8">
+      <span class="font-bold text-base tracking-tight">ccbot</span>
+    </a>
+
+    {showSectionNav && (
+      <div class="flex items-center gap-5 ml-auto nav-hide-mobile">
+        {navLinks.map(({ key, hash }) => (
+          <a href={hash} class="text-[0.78rem] font-semibold text-txt-2 no-underline hover:text-txt transition-colors duration-150">
+            {ts(locale, key)}
+          </a>
+        ))}
+      </div>
+    )}
+
+    <div class="flex items-center gap-2 ml-auto">
+      <div class="lang-dropdown" id="langDropdown">
+        <button class="lang-trigger" id="langTrigger" type="button" aria-label="Language">
+          <span id="langCurrent">{LOCALE_LABELS[locale]}</span>
+          <svg viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="lang-menu">
+          {SUPPORTED_LOCALES.map((loc) => (
+            <a
+              href={localePageHref(loc, currentPath)}
+              class:list={["lang-option", { active: loc === locale }]}
+              data-locale={loc}
+            >
+              {LOCALE_LABELS[loc]}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <a href="https://github.com/palooza-kaida/ccbot" target="_blank" rel="noopener"
+        class="text-txt-3 hover:text-txt transition-colors duration-150 nav-hide-mobile" aria-label="GitHub">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57L9 21.07c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.8 1.3 3.49 1 .1-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6.02 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22l-.01 3.29c0 .31.2.69.82.57A12 12 0 0 0 12 .3"/>
+        </svg>
+      </a>
+
+      {showSectionNav && (
+        <button class="mob-menu-btn" id="mobMenuBtn" type="button" aria-label="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      )}
+    </div>
+  </div>
+</nav>
+
+{showSectionNav && (
+  <div class="mob-nav-overlay" id="mobOverlay"></div>
+  <div class="mob-nav-panel" id="mobPanel">
+    <button class="mob-nav-close" id="mobClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+    {navLinks.map(({ key, hash }) => (
+      <a href={hash} class="mob-nav-link">{ts(locale, key)}</a>
+    ))}
+  </div>
+)}
+
+<script>
+  const langDropdown = document.getElementById("langDropdown");
+  const langTrigger = document.getElementById("langTrigger");
+  langTrigger?.addEventListener("click", () => langDropdown?.classList.toggle("open"));
+  document.addEventListener("click", (e) => {
+    if (!langDropdown?.contains(e.target as Node)) langDropdown?.classList.remove("open");
+  });
+
+  document.querySelectorAll(".lang-option").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      const locale = (el as HTMLElement).dataset.locale;
+      if (locale) localStorage.setItem("ccbot-locale", locale);
+
+      const query = window.location.search;
+      if (query) {
+        e.preventDefault();
+        window.location.href = (el as HTMLAnchorElement).href + query;
+      }
+    });
+  });
+
+  const mobMenuBtn = document.getElementById("mobMenuBtn");
+  const mobOverlay = document.getElementById("mobOverlay");
+  const mobClose = document.getElementById("mobClose");
+  const mobPanel = document.getElementById("mobPanel");
+
+  function openMobMenu() {
+    mobOverlay?.classList.add("open");
+    mobPanel?.classList.add("open");
+  }
+  function closeMobMenu() {
+    mobOverlay?.classList.remove("open");
+    mobPanel?.classList.remove("open");
+  }
+
+  mobMenuBtn?.addEventListener("click", openMobMenu);
+  mobOverlay?.addEventListener("click", closeMobMenu);
+  mobClose?.addEventListener("click", closeMobMenu);
+  mobPanel?.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeMobMenu));
+</script>

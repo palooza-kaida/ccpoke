@@ -1,0 +1,81 @@
+---
+import { ts, type Locale } from "../../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const features = [
+  {
+    titleKey: "featurePushTitle",
+    descKey: "featurePushDesc",
+    badgeKey: "featurePushBadge",
+    bg: "bg-accent-light",
+    text: "text-accent",
+    badgeBg: "bg-accent-light",
+    badgeText: "text-accent",
+    icon: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  },
+  {
+    titleKey: "feature2wayTitle",
+    descKey: "feature2wayDesc",
+    badgeKey: "feature2wayBadge",
+    bg: "bg-plum-light",
+    text: "text-plum",
+    badgeBg: "bg-plum-light",
+    badgeText: "text-plum",
+    icon: '<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>',
+  },
+  {
+    titleKey: "featureGitTitle",
+    descKey: "featureGitDesc",
+    bg: "bg-emerald-light",
+    text: "text-emerald",
+    icon: '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  },
+  {
+    titleKey: "featureSummaryTitle",
+    descKey: "featureSummaryDesc",
+    bg: "bg-sky-light",
+    text: "text-sky",
+    icon: '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>',
+  },
+  {
+    titleKey: "featureSecurityTitle",
+    descKey: "featureSecurityDesc",
+    bg: "bg-feat-icon",
+    text: "text-txt",
+    icon: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+  },
+];
+---
+
+<section class="sect-section py-20" id="features">
+  <div class="mb-12">
+    <p class="text-[0.72rem] font-bold uppercase tracking-[0.14em] text-accent mb-2">{ts(locale, "featuresLabel")}</p>
+    <h2 class="text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-tight mb-2">{ts(locale, "featuresTitle")}</h2>
+  </div>
+
+  <div class="flex flex-col">
+    {features.map((feat, idx) => (
+      <div class:list={["grid grid-cols-[48px_1fr] gap-5 items-start py-7", idx < features.length - 1 ? "border-b border-border" : ""]}>
+        <div class:list={["w-12 h-12 rounded-xl flex items-center justify-center", feat.bg, feat.text]}>
+          <svg class="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><Fragment set:html={feat.icon} /></svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold mb-1 flex items-center gap-2">
+            <span>{ts(locale, feat.titleKey)}</span>
+            {feat.badgeKey && (
+              <span class:list={["text-[0.6rem] font-bold px-[7px] py-0.5 rounded uppercase tracking-wider", feat.badgeBg, feat.badgeText]}>
+                {ts(locale, feat.badgeKey)}
+              </span>
+            )}
+          </h3>
+          <p class="text-[0.88rem] text-txt-2 leading-relaxed">{ts(locale, feat.descKey)}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</section>

@@ -1,0 +1,18 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ResponseViewer from "../../components/response/ResponseViewer";
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE, type Locale } from "../../i18n";
+
+export function getStaticPaths() {
+  return SUPPORTED_LOCALES
+    .filter((l) => l !== DEFAULT_LOCALE)
+    .map((locale) => ({ params: { locale }, props: { locale } }));
+}
+
+const locale = (Astro.props.locale ?? DEFAULT_LOCALE) as Locale;
+---
+
+<BaseLayout locale={locale} title="ccbot — Response" description="Claude Code response viewer — ccbot" currentPath="/response">
+  <script is:inline src="https://telegram.org/js/telegram-web-app.js"></script>
+  <ResponseViewer client:load />
+</BaseLayout>

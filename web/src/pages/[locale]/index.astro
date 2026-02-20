@@ -1,0 +1,29 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import HeroSection from "../../components/landing/HeroSection.astro";
+import HowItWorks from "../../components/landing/HowItWorks.astro";
+import FeatureList from "../../components/landing/FeatureList.astro";
+import SetupGuide from "../../components/landing/SetupGuide.astro";
+import Roadmap from "../../components/landing/Roadmap.astro";
+import CtaBottom from "../../components/landing/CtaBottom.astro";
+import { SUPPORTED_LOCALES, DEFAULT_LOCALE, type Locale } from "../../i18n";
+
+export function getStaticPaths() {
+  return SUPPORTED_LOCALES
+    .filter((l) => l !== DEFAULT_LOCALE)
+    .map((locale) => ({ params: { locale }, props: { locale } }));
+}
+
+const locale = (Astro.props.locale ?? DEFAULT_LOCALE) as Locale;
+---
+
+<BaseLayout locale={locale} currentPath="/" showSectionNav>
+  <main class="max-w-content mx-auto px-6">
+    <HeroSection locale={locale} />
+    <HowItWorks locale={locale} />
+    <FeatureList locale={locale} />
+    <SetupGuide locale={locale} />
+    <Roadmap locale={locale} />
+    <CtaBottom locale={locale} />
+  </main>
+</BaseLayout>
