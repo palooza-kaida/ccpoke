@@ -1,6 +1,6 @@
 {
   "name": "ccbot",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Claude Code Telegram Notification Bot — get notified when Claude Code completes a response",
   "type": "module",
   "license": "MIT",
