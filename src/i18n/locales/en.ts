@@ -22,7 +22,7 @@ export const en: TranslationKeys = {
       start: "Connect bot to this chat",
     },
     viewDetails: "📱 View details",
-    dashboard: "📱 Dashboard",
+    open: "Open",
     sendFailed: "send failed, falling back",
     sendFallbackFailed: "fallback also failed",
   },

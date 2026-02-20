@@ -11,7 +11,7 @@ const CLAUDE_HOME = join(homedir(), ".claude");
 
 export const paths = {
   projectRoot: PROJECT_ROOT,
-  publicDir: join(PROJECT_ROOT, "public"),
+
   packageJson: join(PROJECT_ROOT, "package.json"),
 
   ccbotDir: CCBOT_HOME,

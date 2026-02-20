@@ -5,7 +5,6 @@ import { responseStore } from "../utils/response-store.js";
 import { MINI_APP_BASE_URL, ApiRoute } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
 import { log } from "../utils/log.js";
-import { paths } from "../utils/paths.js";
 
 const ALLOWED_CORS_ORIGIN = new URL(MINI_APP_BASE_URL).origin;
 
@@ -45,9 +44,6 @@ export class HookServer {
   private createApp(): Express {
     const app = express();
     app.use(express.json({ limit: "10mb" }));
-
-    app.use(express.static(paths.publicDir));
-
     app.get(ApiRoute.ResponseData, (req, res) => {
       const requestOrigin = req.headers.origin ?? "";
       const isTunnel = requestOrigin.endsWith(".trycloudflare.com");

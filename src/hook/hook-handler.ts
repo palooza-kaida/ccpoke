@@ -99,6 +99,6 @@ export class HookHandler {
       p: data.projectName,
       d: String(data.durationMs),
     });
-    return `${MINI_APP_BASE_URL}/response.html?${params.toString()}`;
+    return `${MINI_APP_BASE_URL}/response/?${params.toString()}`;
   }
 }

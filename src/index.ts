@@ -22,7 +22,14 @@ if (args.length > 0) {
 }
 
 async function startBot(): Promise<void> {
-  const cfg = ConfigManager.load();
+  let cfg;
+  try {
+    cfg = ConfigManager.load();
+  } catch {
+    logError(t("config.notFound"));
+    process.exit(1);
+  }
+
   const hookServer = new HookServer(cfg.hook_port, cfg.hook_secret);
   hookServer.start();
   log(`ccbot: ${t("bot.started", { port: cfg.hook_port })}`);

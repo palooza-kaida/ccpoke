@@ -22,7 +22,7 @@ export const vi: TranslationKeys = {
       start: "Kết nối bot với chat này",
     },
     viewDetails: "📱 Xem chi tiết",
-    dashboard: "📱 Bảng điều khiển",
+    open: "Mở",
     sendFailed: "gửi thất bại, dùng fallback",
     sendFallbackFailed: "fallback cũng thất bại",
   },

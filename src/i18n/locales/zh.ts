@@ -21,7 +21,7 @@ export const zh: TranslationKeys = {
       start: "将机器人连接到此聊天",
     },
     viewDetails: "📱 查看详情",
-    dashboard: "📱 控制台",
+    open: "打开",
     sendFailed: "发送失败，使用备用方式",
     sendFallbackFailed: "备用方式也失败",
   },

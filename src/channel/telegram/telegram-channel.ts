@@ -98,7 +98,7 @@ export class TelegramChannel implements NotificationChannel {
       await this.bot.setChatMenuButton({
         menu_button: JSON.stringify({
           type: "web_app",
-          text: t("bot.dashboard"),
+          text: t("bot.open"),
           web_app: { url },
         }),
       } as Record<string, unknown>);

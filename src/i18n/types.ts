@@ -19,7 +19,7 @@ export interface TranslationKeys {
       start: string;
     };
     viewDetails: string;
-    dashboard: string;
+    open: string;
     sendFailed: string;
     sendFallbackFailed: string;
   };
