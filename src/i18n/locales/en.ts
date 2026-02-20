@@ -6,14 +6,15 @@ export const en: TranslationKeys = {
     shuttingDown: "shutting down...",
     telegramStarted: "telegram bot started",
     commandsRegistered: "commands registered",
-    commandsRegisterFailed: "failed to register commands: {error}",
+    commandsRegisterFailed: "failed to register commands",
     menuButtonRegistered: "mini app menu button registered",
-    menuButtonFailed: "failed to register menu button: {error}",
+    menuButtonFailed: "failed to register menu button",
     noChatId: "no chat ID yet — run 'ccbot setup' or send /start to the bot",
-    notificationFailed: "failed to send notification: {error}",
+    notificationFailed: "failed to send notification",
     registeredChatId: "registered chat ID {chatId}",
     unauthorizedUser: "unauthorized user {userId} ({username})",
-    ready: "✅ *ccbot* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
+    ready:
+      "✅ *ccbot* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
     alreadyConnected: "✅ ccbot is already connected — bot is running normally.",
     connectionLost: "⚠️ lost connection to Telegram — retrying...",
     connectionRestored: "✅ reconnected to Telegram",
@@ -22,6 +23,8 @@ export const en: TranslationKeys = {
     },
     viewDetails: "📱 View details",
     dashboard: "📱 Dashboard",
+    sendFailed: "send failed, falling back",
+    sendFallbackFailed: "fallback also failed",
   },
 
   setup: {
@@ -40,7 +43,8 @@ export const en: TranslationKeys = {
     hookAlreadyInstalled: "Hook already installed",
     hookFailed: "Hook installation failed: {error}",
     chatIdRegistered: "Chat ID registered",
-    complete: "🎉 Setup complete!\n\n  Next steps:\n  1. Start bot:  {command}\n  2. Use Claude Code normally → notifications will arrive",
+    complete:
+      "🎉 Setup complete!\n\n  Next steps:\n  1. Start bot:  {command}\n  2. Use Claude Code normally → notifications will arrive",
     languageMessage: "Language",
   },
 
@@ -59,13 +63,19 @@ export const en: TranslationKeys = {
     intro: "📦 ccbot update",
     npxAlreadyLatest: "Installed via npx — always uses latest version, no update needed.",
     npxDone: "Already up to date",
+    checking: "Checking version...",
+    alreadyLatestNpm: "Already up to date (v{version})",
+    alreadyLatestGit: "Already up to date (commit {hash})",
+    updatingNpm: "Updating via {pm} (v{from} → v{to})...",
     updating: "Updating via {pm}...",
-    updateSuccess: "Updated successfully",
+    updateSuccess: "Updated successfully (v{from} → v{to})",
     updateComplete: "Update complete",
     updateFailed: "Update failed",
+    noUpdateNeeded: "✨ No update needed",
     updateManualGlobal: "Try manually: {cmd}",
     pulling: "Pulling latest changes...",
     pulled: "Pulled latest changes",
+    pulledGit: "Pulled latest changes ({from} → {to})",
     installingDeps: "Installing dependencies...",
     depsInstalled: "Dependencies installed",
     building: "Building...",
@@ -90,22 +100,22 @@ export const en: TranslationKeys = {
     serverListening: "hook server listening on localhost:{port}",
     invalidPayload: "invalid stop event payload — missing required fields",
     stopEventReceived: "stop event received for session {sessionId} at {cwd}",
-    transcriptFailed: "failed to parse transcript: {error}",
-    notificationFailed: "failed to send notification: {error}",
+    transcriptFailed: "failed to parse transcript",
+    notificationFailed: "failed to send notification",
   },
 
   tunnel: {
     installing: "installing cloudflared binary...",
     installed: "cloudflared binary installed",
     started: "🌐 public URL: {url}",
-    failed: "⚠️ tunnel failed, using localhost only. {error}",
+    failed: "⚠️ tunnel failed, using localhost only",
     disconnected: "⚠️ tunnel disconnected, reconnecting...",
     exited: "tunnel process exited (code {code})",
+    timeout: "tunnel connection timeout ({seconds}s)",
   },
 
   config: {
     notFound: "config not found — run 'ccbot setup' first",
-    readError: "read config: {error}",
     mustBeObject: "config must be a JSON object",
     invalidToken: "telegram_bot_token must be a string containing ':' — run 'ccbot setup'",
     invalidUserId: "user_id must be an integer — run 'ccbot setup'",
@@ -113,12 +123,9 @@ export const en: TranslationKeys = {
     invalidSecret: "hook_secret must contain only hex characters (a-f, 0-9)",
     invalidHookPort: "invalid hook port: {port} (must be 1-65535)",
     hookAlreadyInstalled: "ccbot hook already installed",
-    readSettingsError: "read settings: {error}",
   },
 
   notification: {
-    title: "🤖 *Claude Code Response*",
-    changes: "📂 *Changes:*",
     tokens: "tokens",
     cache: "cache",
     cacheRead: "read",
@@ -127,6 +134,6 @@ export const en: TranslationKeys = {
 
   common: {
     unknownCommand: "unknown command: {command}",
-    setupFailed: "setup failed: {error}",
+    setupFailed: "setup failed",
   },
 };

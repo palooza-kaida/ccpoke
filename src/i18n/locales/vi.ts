@@ -6,14 +6,15 @@ export const vi: TranslationKeys = {
     shuttingDown: "đang tắt...",
     telegramStarted: "telegram bot đã khởi động",
     commandsRegistered: "đã đăng ký commands",
-    commandsRegisterFailed: "đăng ký commands thất bại: {error}",
+    commandsRegisterFailed: "đăng ký commands thất bại",
     menuButtonRegistered: "đã đăng ký mini app menu button",
-    menuButtonFailed: "đăng ký menu button thất bại: {error}",
+    menuButtonFailed: "đăng ký menu button thất bại",
     noChatId: "chưa có chat ID — chạy 'ccbot setup' hoặc gửi /start cho bot",
-    notificationFailed: "gửi notification thất bại: {error}",
+    notificationFailed: "gửi notification thất bại",
     registeredChatId: "đã đăng ký chat ID {chatId}",
     unauthorizedUser: "user không có quyền {userId} ({username})",
-    ready: "✅ *ccbot* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
+    ready:
+      "✅ *ccbot* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
     alreadyConnected: "✅ ccbot đã kết nối rồi — bot đang hoạt động bình thường.",
     connectionLost: "⚠️ mất kết nối tới Telegram — đang thử kết nối lại...",
     connectionRestored: "✅ đã kết nối lại Telegram",
@@ -22,6 +23,8 @@ export const vi: TranslationKeys = {
     },
     viewDetails: "📱 Xem chi tiết",
     dashboard: "📱 Bảng điều khiển",
+    sendFailed: "gửi thất bại, dùng fallback",
+    sendFallbackFailed: "fallback cũng thất bại",
   },
 
   setup: {
@@ -40,7 +43,8 @@ export const vi: TranslationKeys = {
     hookAlreadyInstalled: "Hook đã được cài rồi",
     hookFailed: "Cài hook thất bại: {error}",
     chatIdRegistered: "Đã đăng ký Chat ID",
-    complete: "🎉 Setup hoàn tất!\n\n  Bước tiếp:\n  1. Chạy bot:  {command}\n  2. Dùng Claude Code bình thường → notification sẽ đến",
+    complete:
+      "🎉 Setup hoàn tất!\n\n  Bước tiếp:\n  1. Chạy bot:  {command}\n  2. Dùng Claude Code bình thường → notification sẽ đến",
     languageMessage: "Ngôn ngữ",
   },
 
@@ -59,13 +63,19 @@ export const vi: TranslationKeys = {
     intro: "📦 ccbot cập nhật",
     npxAlreadyLatest: "Cài qua npx — luôn dùng bản mới nhất, không cần cập nhật.",
     npxDone: "Đã là phiên bản mới nhất",
+    checking: "Đang kiểm tra phiên bản...",
+    alreadyLatestNpm: "Đã là phiên bản mới nhất (v{version})",
+    alreadyLatestGit: "Đã là phiên bản mới nhất (commit {hash})",
+    updatingNpm: "Đang cập nhật qua {pm} (v{from} → v{to})...",
     updating: "Đang cập nhật qua {pm}...",
-    updateSuccess: "Cập nhật thành công",
+    updateSuccess: "Cập nhật thành công (v{from} → v{to})",
     updateComplete: "Hoàn tất cập nhật",
     updateFailed: "Cập nhật thất bại",
+    noUpdateNeeded: "✨ Không cần cập nhật",
     updateManualGlobal: "Thử thủ công: {cmd}",
     pulling: "Đang pull code mới nhất...",
     pulled: "Đã pull code mới nhất",
+    pulledGit: "Đã pull code mới nhất ({from} → {to})",
     installingDeps: "Đang cài dependencies...",
     depsInstalled: "Đã cài dependencies",
     building: "Đang build...",
@@ -90,22 +100,22 @@ export const vi: TranslationKeys = {
     serverListening: "hook server đang lắng nghe tại localhost:{port}",
     invalidPayload: "payload stop event không hợp lệ — thiếu trường bắt buộc",
     stopEventReceived: "nhận stop event cho session {sessionId} tại {cwd}",
-    transcriptFailed: "parse transcript thất bại: {error}",
-    notificationFailed: "gửi notification thất bại: {error}",
+    transcriptFailed: "parse transcript thất bại",
+    notificationFailed: "gửi notification thất bại",
   },
 
   tunnel: {
     installing: "đang cài đặt cloudflared binary...",
     installed: "đã cài đặt cloudflared binary",
     started: "🌐 URL công khai: {url}",
-    failed: "⚠️ tunnel thất bại, chỉ dùng localhost. {error}",
+    failed: "⚠️ tunnel thất bại, chỉ dùng localhost",
     disconnected: "⚠️ tunnel bị ngắt, đang kết nối lại...",
     exited: "tunnel process đã thoát (code {code})",
+    timeout: "tunnel connection timeout ({seconds}s)",
   },
 
   config: {
     notFound: "không tìm thấy config — chạy 'ccbot setup' trước",
-    readError: "đọc config: {error}",
     mustBeObject: "config phải là một JSON object",
     invalidToken: "telegram_bot_token phải là string chứa ':' — chạy 'ccbot setup'",
     invalidUserId: "user_id phải là số nguyên — chạy 'ccbot setup'",
@@ -113,12 +123,9 @@ export const vi: TranslationKeys = {
     invalidSecret: "hook_secret chỉ được chứa ký tự hex (a-f, 0-9)",
     invalidHookPort: "hook port không hợp lệ: {port} (phải từ 1-65535)",
     hookAlreadyInstalled: "ccbot hook đã được cài rồi",
-    readSettingsError: "đọc settings: {error}",
   },
 
   notification: {
-    title: "🤖 *Claude Code Response*",
-    changes: "📂 *Thay đổi:*",
     tokens: "token",
     cache: "cache",
     cacheRead: "đọc",
@@ -127,6 +134,6 @@ export const vi: TranslationKeys = {
 
   common: {
     unknownCommand: "lệnh không xác định: {command}",
-    setupFailed: "setup thất bại: {error}",
+    setupFailed: "setup thất bại",
   },
 };

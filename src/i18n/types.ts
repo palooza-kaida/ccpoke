@@ -20,6 +20,8 @@ export interface TranslationKeys {
     };
     viewDetails: string;
     dashboard: string;
+    sendFailed: string;
+    sendFallbackFailed: string;
   };
   setup: {
     intro: string;
@@ -54,13 +56,19 @@ export interface TranslationKeys {
     intro: string;
     npxAlreadyLatest: string;
     npxDone: string;
+    checking: string;
+    alreadyLatestNpm: string;
+    alreadyLatestGit: string;
+    updatingNpm: string;
     updating: string;
     updateSuccess: string;
     updateComplete: string;
     updateFailed: string;
+    noUpdateNeeded: string;
     updateManualGlobal: string;
     pulling: string;
     pulled: string;
+    pulledGit: string;
     installingDeps: string;
     depsInstalled: string;
     building: string;
@@ -93,10 +101,10 @@ export interface TranslationKeys {
     failed: string;
     disconnected: string;
     exited: string;
+    timeout: string;
   };
   config: {
     notFound: string;
-    readError: string;
     mustBeObject: string;
     invalidToken: string;
     invalidUserId: string;
@@ -104,11 +112,8 @@ export interface TranslationKeys {
     invalidSecret: string;
     invalidHookPort: string;
     hookAlreadyInstalled: string;
-    readSettingsError: string;
   };
   notification: {
-    title: string;
-    changes: string;
     tokens: string;
     cache: string;
     cacheRead: string;

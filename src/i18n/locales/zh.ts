@@ -6,11 +6,11 @@ export const zh: TranslationKeys = {
     shuttingDown: "正在关闭...",
     telegramStarted: "telegram bot 已启动",
     commandsRegistered: "命令已注册",
-    commandsRegisterFailed: "注册命令失败: {error}",
+    commandsRegisterFailed: "注册命令失败",
     menuButtonRegistered: "小程序菜单按钮已注册",
-    menuButtonFailed: "注册菜单按钮失败: {error}",
+    menuButtonFailed: "注册菜单按钮失败",
     noChatId: "尚无聊天ID — 运行 'ccbot setup' 或向机器人发送 /start",
-    notificationFailed: "发送通知失败: {error}",
+    notificationFailed: "发送通知失败",
     registeredChatId: "已注册聊天ID {chatId}",
     unauthorizedUser: "未授权用户 {userId} ({username})",
     ready: "✅ *ccbot* 已就绪\\.\n\n当Claude Code完成响应时，您将收到通知\\.",
@@ -22,6 +22,8 @@ export const zh: TranslationKeys = {
     },
     viewDetails: "📱 查看详情",
     dashboard: "📱 控制台",
+    sendFailed: "发送失败，使用备用方式",
+    sendFallbackFailed: "备用方式也失败",
   },
 
   setup: {
@@ -40,7 +42,8 @@ export const zh: TranslationKeys = {
     hookAlreadyInstalled: "Hook 已安装",
     hookFailed: "Hook 安装失败: {error}",
     chatIdRegistered: "聊天 ID 已注册",
-    complete: "🎉 设置完成！\n\n  下一步:\n  1. 启动机器人:  {command}\n  2. 正常使用 Claude Code → 通知将自动发送",
+    complete:
+      "🎉 设置完成！\n\n  下一步:\n  1. 启动机器人:  {command}\n  2. 正常使用 Claude Code → 通知将自动发送",
     languageMessage: "语言",
   },
 
@@ -59,13 +62,19 @@ export const zh: TranslationKeys = {
     intro: "📦 ccbot 更新",
     npxAlreadyLatest: "通过 npx 安装 — 始终使用最新版本，无需更新。",
     npxDone: "已是最新版本",
+    checking: "正在检查版本...",
+    alreadyLatestNpm: "已是最新版本 (v{version})",
+    alreadyLatestGit: "已是最新版本 (commit {hash})",
+    updatingNpm: "正在通过 {pm} 更新 (v{from} → v{to})...",
     updating: "正在通过 {pm} 更新...",
-    updateSuccess: "更新成功",
+    updateSuccess: "更新成功 (v{from} → v{to})",
     updateComplete: "更新完成",
     updateFailed: "更新失败",
+    noUpdateNeeded: "✨ 无需更新",
     updateManualGlobal: "请手动尝试: {cmd}",
     pulling: "正在拉取最新代码...",
     pulled: "已拉取最新代码",
+    pulledGit: "已拉取最新代码 ({from} → {to})",
     installingDeps: "正在安装依赖...",
     depsInstalled: "依赖已安装",
     building: "正在构建...",
@@ -90,22 +99,22 @@ export const zh: TranslationKeys = {
     serverListening: "hook 服务器正在监听 localhost:{port}",
     invalidPayload: "无效的 stop event 负载 — 缺少必要字段",
     stopEventReceived: "收到 session {sessionId} 的 stop event，位于 {cwd}",
-    transcriptFailed: "解析 transcript 失败: {error}",
-    notificationFailed: "发送通知失败: {error}",
+    transcriptFailed: "解析 transcript 失败",
+    notificationFailed: "发送通知失败",
   },
 
   tunnel: {
     installing: "正在安装 cloudflared 二进制文件...",
     installed: "cloudflared 二进制文件已安装",
     started: "🌐 公共 URL: {url}",
-    failed: "⚠️ 隧道失败，仅使用 localhost。{error}",
+    failed: "⚠️ 隧道失败，仅使用 localhost",
     disconnected: "⚠️ 隧道断开连接，正在重新连接...",
     exited: "隧道进程已退出 (代码 {code})",
+    timeout: "隧道连接超时 ({seconds}秒)",
   },
 
   config: {
     notFound: "未找到配置 — 请先运行 'ccbot setup'",
-    readError: "读取配置: {error}",
     mustBeObject: "配置必须是 JSON 对象",
     invalidToken: "telegram_bot_token 必须是包含 ':' 的字符串 — 运行 'ccbot setup'",
     invalidUserId: "user_id 必须是整数 — 运行 'ccbot setup'",
@@ -113,12 +122,9 @@ export const zh: TranslationKeys = {
     invalidSecret: "hook_secret 只能包含十六进制字符 (a-f, 0-9)",
     invalidHookPort: "无效的 hook 端口: {port}（必须为 1-65535）",
     hookAlreadyInstalled: "ccbot hook 已安装",
-    readSettingsError: "读取设置: {error}",
   },
 
   notification: {
-    title: "🤖 *Claude Code 响应*",
-    changes: "📂 *变更:*",
     tokens: "tokens",
     cache: "cache",
     cacheRead: "读取",
@@ -127,6 +133,6 @@ export const zh: TranslationKeys = {
 
   common: {
     unknownCommand: "未知命令: {command}",
-    setupFailed: "setup 失败: {error}",
+    setupFailed: "setup 失败",
   },
 };
