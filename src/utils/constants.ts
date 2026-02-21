@@ -53,3 +53,5 @@ export const MAX_GIT_SEARCH_DEPTH = 5;
 export const GIT_TIMEOUT_MS = 10_000;
 
 export const MINI_APP_BASE_URL = "https://palooza-kaida.github.io/ccpoke";
+export const NPM_REGISTRY_URL = "https://registry.npmjs.org/ccpoke/latest";
+export const VERSION_CHECK_TIMEOUT_MS = 5_000;

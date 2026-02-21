@@ -13,6 +13,7 @@ import { t } from "./i18n/index.js";
 import { TunnelManager } from "./utils/tunnel.js";
 import { log, logError } from "./utils/log.js";
 import { detectInstallMethod } from "./utils/install-detection.js";
+import { checkForUpdates } from "./utils/version-check.js";
 
 const args = process.argv.slice(2);
 
@@ -44,15 +45,14 @@ async function startBot(): Promise<void> {
   log(`ccpoke: ${t("bot.started", { port: cfg.hook_port })}`);
 
   const tunnelManager = new TunnelManager();
-  let tunnelUrl: string | null = null;
   try {
-    tunnelUrl = await tunnelManager.start(cfg.hook_port);
+    const tunnelUrl = await tunnelManager.start(cfg.hook_port);
     log(t("tunnel.started", { url: tunnelUrl }));
   } catch (err: unknown) {
     logError(t("tunnel.failed"), err);
   }
 
-  const channel = new TelegramChannel(cfg, tunnelUrl);
+  const channel = new TelegramChannel(cfg);
   const handler = new HookHandler(channel, cfg.hook_port, tunnelManager);
   hookServer.setHandler(handler);
 
@@ -61,6 +61,8 @@ async function startBot(): Promise<void> {
   if (detectInstallMethod() === InstallMethod.Npx) {
     log(t("bot.globalInstallTip"));
   }
+
+  checkForUpdates().catch(() => {});
 
   const shutdown = async () => {
     log(t("bot.shuttingDown"));
