@@ -1,5 +1,5 @@
 export const en: Record<string, string | string[]> = {
-  title: "ccbot — Code anywhere with AI Agents",
+  title: "ccpoke — Code anywhere with AI Agents",
   metaDesc: "Two-way interaction with Claude Code from Telegram, Discord, Zalo. Code anytime, anywhere.",
 
   heroTitle: "Code anywhere, ",
@@ -16,7 +16,7 @@ export const en: Record<string, string | string[]> = {
   howTitle: "Two-way bridge between terminal and phone",
   howSub: "Send prompts, receive results, approve permissions — all from your favorite chat platform.",
   howTerminalTitle: "Terminal",
-  howTerminalDesc: "Claude Code runs on your machine. ccbot listens to hook events and JSONL transcripts.",
+  howTerminalDesc: "Claude Code runs on your machine. ccpoke listens to hook events and JSONL transcripts.",
   howYouTitle: "You",
   howYouDesc: "Chat, review, approve from anywhere.",
   howFlowRealtime: "real-time",

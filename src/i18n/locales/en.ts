@@ -9,13 +9,13 @@ export const en: TranslationKeys = {
     commandsRegisterFailed: "failed to register commands",
     menuButtonRegistered: "mini app menu button registered",
     menuButtonFailed: "failed to register menu button",
-    noChatId: "no chat ID yet — run 'ccbot setup' or send /start to the bot",
+    noChatId: "no chat ID yet — run 'ccpoke setup' or send /start to the bot",
     notificationFailed: "failed to send notification",
     registeredChatId: "registered chat ID {chatId}",
     unauthorizedUser: "unauthorized user {userId} ({username})",
     ready:
-      "✅ *ccbot* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
-    alreadyConnected: "✅ ccbot is already connected — bot is running normally.",
+      "✅ *ccpoke* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
+    alreadyConnected: "✅ ccpoke is already connected — bot is running normally.",
     connectionLost: "⚠️ lost connection to Telegram — retrying...",
     connectionRestored: "✅ reconnected to Telegram",
     commands: {
@@ -28,7 +28,7 @@ export const en: TranslationKeys = {
   },
 
   setup: {
-    intro: "🤖 ccbot setup",
+    intro: "🤖 ccpoke setup",
     tokenMessage: "Telegram Bot Token",
     tokenPlaceholder: "Get from @BotFather → /newbot",
     tokenRequired: "Bot token is required",
@@ -49,18 +49,18 @@ export const en: TranslationKeys = {
   },
 
   uninstall: {
-    intro: "🗑️  Uninstalling ccbot",
+    intro: "🗑️  Uninstalling ccpoke",
     hookRemoved: "Hook removed from ~/.claude/settings.json",
     hookNotFound: "No hook found (already removed)",
-    configRemoved: "Removed ~/.ccbot/ (config, state, hooks)",
-    configNotFound: "~/.ccbot/ not found (already removed)",
-    removeGlobal: "To also remove the package:\n  pnpm remove -g ccbot",
-    removeGitClone: "To also remove the source:\n  rm -rf <ccbot-directory>",
-    done: "ccbot uninstalled",
+    configRemoved: "Removed ~/.ccpoke/ (config, state, hooks)",
+    configNotFound: "~/.ccpoke/ not found (already removed)",
+    removeGlobal: "To also remove the package:\n  pnpm remove -g ccpoke",
+    removeGitClone: "To also remove the source:\n  rm -rf <ccpoke-directory>",
+    done: "ccpoke uninstalled",
   },
 
   update: {
-    intro: "📦 ccbot update",
+    intro: "📦 ccpoke update",
     npxAlreadyLatest: "Installed via npx — always uses latest version, no update needed.",
     npxDone: "Already up to date",
     checking: "Checking version...",
@@ -85,15 +85,15 @@ export const en: TranslationKeys = {
   },
 
   help: {
-    intro: "🤖 ccbot — Claude Code ↔ Telegram Notification Bot",
+    intro: "🤖 ccpoke — Claude Code ↔ Telegram Notification Bot",
     usage: "Usage: {prefix} [command]",
     commands: "Commands:",
     cmdNone: "  (none)      Start the bot",
     cmdSetup: "  setup       Interactive setup (config + hooks)",
-    cmdUpdate: "  update      Update ccbot to latest version",
-    cmdUninstall: "  uninstall   Remove all ccbot data and hooks",
+    cmdUpdate: "  update      Update ccpoke to latest version",
+    cmdUninstall: "  uninstall   Remove all ccpoke data and hooks",
     cmdHelp: "  help        Show this help message",
-    docs: "docs → https://github.com/palooza-kaida/ccbot",
+    docs: "docs → https://github.com/palooza-kaida/ccpoke",
   },
 
   hook: {
@@ -115,14 +115,14 @@ export const en: TranslationKeys = {
   },
 
   config: {
-    notFound: "config not found — run 'ccbot setup' first",
+    notFound: "config not found — run 'ccpoke setup' first",
     mustBeObject: "config must be a JSON object",
-    invalidToken: "telegram_bot_token must be a string containing ':' — run 'ccbot setup'",
-    invalidUserId: "user_id must be an integer — run 'ccbot setup'",
+    invalidToken: "telegram_bot_token must be a string containing ':' — run 'ccpoke setup'",
+    invalidUserId: "user_id must be an integer — run 'ccpoke setup'",
     invalidPort: "hook_port must be an integer between 1 and 65535",
     invalidSecret: "hook_secret must contain only hex characters (a-f, 0-9)",
     invalidHookPort: "invalid hook port: {port} (must be 1-65535)",
-    hookAlreadyInstalled: "ccbot hook already installed",
+    hookAlreadyInstalled: "ccpoke hook already installed",
   },
 
   notification: {

@@ -1,4 +1,4 @@
-# 🤖 ccbot — Claude Code ↔ Telegram Notification Bot
+# 🤖 ccpoke — Claude Code ↔ Telegram Notification Bot
 
 [Tiếng Việt](./README.md)
 
@@ -10,14 +10,14 @@
 
 You're using Claude Code on your computer. You step away with your phone but have no idea if Claude Code is done yet or what files it changed.
 
-**ccbot** is a lightweight bridge between Claude Code and Telegram — when Claude Code finishes, you get a notification right on your phone.
+**ccpoke** is a lightweight bridge between Claude Code and Telegram — when Claude Code finishes, you get a notification right on your phone.
 
 ```
 Claude Code completes response
         ↓
   Stop Hook triggers
         ↓
-  ccbot receives event
+  ccpoke receives event
         ↓
   Telegram notification 📱
 ```
@@ -43,21 +43,21 @@ Claude Code completes response
 ### Option 1: Global install (recommended)
 
 ```bash
-pnpm add -g ccbot
-ccbot setup
+pnpm add -g ccpoke
+ccpoke setup
 ```
 
 ### Option 2: npx (no install needed)
 
 ```bash
-npx ccbot setup
+npx ccpoke setup
 ```
 
 ### Option 3: Clone repo (for development)
 
 ```bash
-git clone https://github.com/palooza-kaida/ccbot.git
-cd ccbot
+git clone https://github.com/palooza-kaida/ccpoke.git
+cd ccpoke
 pnpm install
 pnpm setup
 ```
@@ -65,7 +65,7 @@ pnpm setup
 The setup wizard will guide you step by step:
 
 ```
-┌  🤖 ccbot setup
+┌  🤖 ccpoke setup
 │
 ◇  Telegram Bot Token
 │  your-bot-token
@@ -83,7 +83,7 @@ The setup wizard will guide you step by step:
 <details>
 <summary>Manual setup (without wizard)</summary>
 
-Create `~/.ccbot/config.json`:
+Create `~/.ccpoke/config.json`:
 
 ```json
 {
@@ -93,7 +93,7 @@ Create `~/.ccbot/config.json`:
 }
 ```
 
-Then run `ccbot setup` to install the hook and register your chat ID.
+Then run `ccpoke setup` to install the hook and register your chat ID.
 
 </details>
 
@@ -103,10 +103,10 @@ Then run `ccbot setup` to install the hook and register your chat ID.
 
 ```bash
 # Global install
-ccbot
+ccpoke
 
 # Or npx
-npx ccbot
+npx ccpoke
 
 # Or local dev
 pnpm dev
@@ -141,16 +141,16 @@ Fixed authentication bug in login.go. Main changes:
 ## Uninstall
 
 ```bash
-ccbot uninstall
+ccpoke uninstall
 ```
 
 ```
-┌  🗑️  Uninstalling ccbot
+┌  🗑️  Uninstalling ccpoke
 │
 ◆  Hook removed from ~/.claude/settings.json
-◆  Removed ~/.ccbot/ (config, state, hooks)
+◆  Removed ~/.ccpoke/ (config, state, hooks)
 │
-└  ccbot uninstalled
+└  ccpoke uninstalled
 ```
 
 ## License

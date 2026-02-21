@@ -36,7 +36,7 @@ const alternates = alternateLocales(locale, currentPath, base);
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script is:inline define:vars={{ base, locale }}>
     (function() {
-      var saved = localStorage.getItem("ccbot-locale");
+      var saved = localStorage.getItem("ccpoke-locale");
       if (!saved || saved === locale) return;
       var supported = ["en", "vi", "zh"];
       if (supported.indexOf(saved) === -1) return;

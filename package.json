@@ -1,5 +1,5 @@
 {
-  "name": "ccbot",
+  "name": "ccpoke",
   "version": "1.3.0",
   "description": "Claude Code Telegram Notification Bot — get notified when Claude Code completes a response",
   "type": "module",
@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/palooza-kaida/ccbot.git"
+    "url": "git+https://github.com/palooza-kaida/ccpoke.git"
   },
-  "homepage": "https://github.com/palooza-kaida/ccbot#readme",
+  "homepage": "https://github.com/palooza-kaida/ccpoke#readme",
   "bugs": {
-    "url": "https://github.com/palooza-kaida/ccbot/issues"
+    "url": "https://github.com/palooza-kaida/ccpoke/issues"
   },
   "keywords": [
     "claude",
@@ -39,7 +39,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "ccbot": "dist/index.js"
+    "ccpoke": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

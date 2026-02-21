@@ -11,6 +11,12 @@ import python from "highlight.js/lib/languages/python";
 import yaml from "highlight.js/lib/languages/yaml";
 import diff from "highlight.js/lib/languages/diff";
 import markdown from "highlight.js/lib/languages/markdown";
+import java from "highlight.js/lib/languages/java";
+import go from "highlight.js/lib/languages/go";
+import rust from "highlight.js/lib/languages/rust";
+import c from "highlight.js/lib/languages/c";
+import cpp from "highlight.js/lib/languages/cpp";
+import sql from "highlight.js/lib/languages/sql";
 import "highlight.js/styles/github-dark.min.css";
 
 hljs.registerLanguage("typescript", typescript);
@@ -29,6 +35,15 @@ hljs.registerLanguage("yml", yaml);
 hljs.registerLanguage("diff", diff);
 hljs.registerLanguage("markdown", markdown);
 hljs.registerLanguage("md", markdown);
+hljs.registerLanguage("java", java);
+hljs.registerLanguage("go", go);
+hljs.registerLanguage("golang", go);
+hljs.registerLanguage("rust", rust);
+hljs.registerLanguage("rs", rust);
+hljs.registerLanguage("c", c);
+hljs.registerLanguage("cpp", cpp);
+hljs.registerLanguage("c++", cpp);
+hljs.registerLanguage("sql", sql);
 
 marked.setOptions({ breaks: true, gfm: true });
 

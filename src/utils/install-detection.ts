@@ -22,11 +22,11 @@ export function detectCliPrefix(): string {
   const method = detectInstallMethod();
   switch (method) {
     case InstallMethod.Npx:
-      return "npx ccbot";
+      return "npx ccpoke";
     case InstallMethod.GitClone:
       return "node dist/index.js";
     default:
-      return "ccbot";
+      return "ccpoke";
   }
 }
 

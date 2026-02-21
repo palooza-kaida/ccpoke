@@ -57,7 +57,7 @@ export class HookServer {
     });
 
     app.post(ApiRoute.HookStop, (req, res) => {
-      const receivedSecret = req.headers["x-ccbot-secret"];
+      const receivedSecret = req.headers["x-ccpoke-secret"];
       if (receivedSecret !== this.secret) {
         res.status(403).send("forbidden");
         return;

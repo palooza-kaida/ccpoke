@@ -13,7 +13,7 @@ export class HookInstaller {
       return existingStop.some((entry) => {
         const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
         return entryHooks?.some(
-          (h) => typeof h.command === "string" && h.command.includes("ccbot")
+          (h) => typeof h.command === "string" && h.command.includes("ccpoke")
         );
       });
     } catch {
@@ -58,8 +58,8 @@ export class HookInstaller {
 
     const isWindows = process.platform === "win32";
     const script = isWindows
-      ? `@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop} -H "Content-Type: application/json" -H "X-CCBot-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`
-      : `#!/bin/bash\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop} \\\n  -H "Content-Type: application/json" \\\n  -H "X-CCBot-Secret: ${hookSecret}" \\\n  --data-binary @- > /dev/null 2>&1 || true\n`;
+      ? `@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop} -H "Content-Type: application/json" -H "X-CCPoke-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`
+      : `#!/bin/bash\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop} \\\n  -H "Content-Type: application/json" \\\n  -H "X-CCPoke-Secret: ${hookSecret}" \\\n  --data-binary @- > /dev/null 2>&1 || true\n`;
 
     writeFileSync(paths.hookScript, script, { mode: isWindows ? 0o644 : 0o755 });
   }
@@ -95,7 +95,9 @@ export class HookInstaller {
 
     const filtered = existingStop.filter((entry) => {
       const entryHooks = entry.hooks as Array<Record<string, unknown>> | undefined;
-      return !entryHooks?.some((h) => typeof h.command === "string" && h.command.includes("ccbot"));
+      return !entryHooks?.some(
+        (h) => typeof h.command === "string" && h.command.includes("ccpoke")
+      );
     });
 
     if (filtered.length === 0) {

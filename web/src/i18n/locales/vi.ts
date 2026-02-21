@@ -1,5 +1,5 @@
 export const vi: Record<string, string | string[]> = {
-  title: "ccbot — Code mọi nơi với AI Agents",
+  title: "ccpoke — Code mọi nơi với AI Agents",
   metaDesc: "Tương tác 2 chiều với Claude Code từ Telegram, Discord, Zalo. Code mọi lúc mọi nơi.",
 
   heroTitle: "Code mọi nơi, ",
@@ -16,7 +16,7 @@ export const vi: Record<string, string | string[]> = {
   howTitle: "Bridge 2 chiều giữa terminal và điện thoại",
   howSub: "Gửi prompt, nhận kết quả, approve quyền — tất cả từ nền tảng chat bạn đang dùng.",
   howTerminalTitle: "Terminal",
-  howTerminalDesc: "Claude Code chạy trên máy. ccbot lắng nghe hook event và JSONL transcript.",
+  howTerminalDesc: "Claude Code chạy trên máy. ccpoke lắng nghe hook event và JSONL transcript.",
   howYouTitle: "Bạn",
   howYouDesc: "Chat, review, approve từ bất kỳ đâu.",
   howFlowRealtime: "real-time",

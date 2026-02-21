@@ -9,12 +9,12 @@ export const zh: TranslationKeys = {
     commandsRegisterFailed: "注册命令失败",
     menuButtonRegistered: "小程序菜单按钮已注册",
     menuButtonFailed: "注册菜单按钮失败",
-    noChatId: "尚无聊天ID — 运行 'ccbot setup' 或向机器人发送 /start",
+    noChatId: "尚无聊天ID — 运行 'ccpoke setup' 或向机器人发送 /start",
     notificationFailed: "发送通知失败",
     registeredChatId: "已注册聊天ID {chatId}",
     unauthorizedUser: "未授权用户 {userId} ({username})",
-    ready: "✅ *ccbot* 已就绪\\.\n\n当Claude Code完成响应时，您将收到通知\\.",
-    alreadyConnected: "✅ ccbot 已连接 — 机器人运行正常。",
+    ready: "✅ *ccpoke* 已就绪\\.\n\n当Claude Code完成响应时，您将收到通知\\.",
+    alreadyConnected: "✅ ccpoke 已连接 — 机器人运行正常。",
     connectionLost: "⚠️ 与 Telegram 连接中断 — 正在重试...",
     connectionRestored: "✅ 已重新连接 Telegram",
     commands: {
@@ -27,7 +27,7 @@ export const zh: TranslationKeys = {
   },
 
   setup: {
-    intro: "🤖 ccbot 设置",
+    intro: "🤖 ccpoke 设置",
     tokenMessage: "Telegram Bot Token",
     tokenPlaceholder: "从 @BotFather → /newbot 获取",
     tokenRequired: "Bot token 为必填项",
@@ -48,18 +48,18 @@ export const zh: TranslationKeys = {
   },
 
   uninstall: {
-    intro: "🗑️  卸载 ccbot",
+    intro: "🗑️  卸载 ccpoke",
     hookRemoved: "已从 ~/.claude/settings.json 移除 Hook",
     hookNotFound: "未找到 Hook（已移除）",
-    configRemoved: "已删除 ~/.ccbot/（配置、状态、钩子）",
-    configNotFound: "未找到 ~/.ccbot/（已删除）",
-    removeGlobal: "要同时删除包:\n  pnpm remove -g ccbot",
-    removeGitClone: "要同时删除源代码:\n  rm -rf <ccbot-directory>",
-    done: "ccbot 已卸载",
+    configRemoved: "已删除 ~/.ccpoke/（配置、状态、钩子）",
+    configNotFound: "未找到 ~/.ccpoke/（已删除）",
+    removeGlobal: "要同时删除包:\n  pnpm remove -g ccpoke",
+    removeGitClone: "要同时删除源代码:\n  rm -rf <ccpoke-directory>",
+    done: "ccpoke 已卸载",
   },
 
   update: {
-    intro: "📦 ccbot 更新",
+    intro: "📦 ccpoke 更新",
     npxAlreadyLatest: "通过 npx 安装 — 始终使用最新版本，无需更新。",
     npxDone: "已是最新版本",
     checking: "正在检查版本...",
@@ -84,15 +84,15 @@ export const zh: TranslationKeys = {
   },
 
   help: {
-    intro: "🤖 ccbot — Claude Code ↔ Telegram 通知机器人",
+    intro: "🤖 ccpoke — Claude Code ↔ Telegram 通知机器人",
     usage: "用法: {prefix} [命令]",
     commands: "命令:",
     cmdNone: "  (无)        启动机器人",
     cmdSetup: "  setup       交互式设置（配置 + 钩子）",
-    cmdUpdate: "  update      更新 ccbot 到最新版本",
-    cmdUninstall: "  uninstall   删除所有 ccbot 数据和钩子",
+    cmdUpdate: "  update      更新 ccpoke 到最新版本",
+    cmdUninstall: "  uninstall   删除所有 ccpoke 数据和钩子",
     cmdHelp: "  help        显示此帮助信息",
-    docs: "文档 → https://github.com/palooza-kaida/ccbot",
+    docs: "文档 → https://github.com/palooza-kaida/ccpoke",
   },
 
   hook: {
@@ -114,14 +114,14 @@ export const zh: TranslationKeys = {
   },
 
   config: {
-    notFound: "未找到配置 — 请先运行 'ccbot setup'",
+    notFound: "未找到配置 — 请先运行 'ccpoke setup'",
     mustBeObject: "配置必须是 JSON 对象",
-    invalidToken: "telegram_bot_token 必须是包含 ':' 的字符串 — 运行 'ccbot setup'",
-    invalidUserId: "user_id 必须是整数 — 运行 'ccbot setup'",
+    invalidToken: "telegram_bot_token 必须是包含 ':' 的字符串 — 运行 'ccpoke setup'",
+    invalidUserId: "user_id 必须是整数 — 运行 'ccpoke setup'",
     invalidPort: "hook_port 必须是 1 到 65535 之间的整数",
     invalidSecret: "hook_secret 只能包含十六进制字符 (a-f, 0-9)",
     invalidHookPort: "无效的 hook 端口: {port}（必须为 1-65535）",
-    hookAlreadyInstalled: "ccbot hook 已安装",
+    hookAlreadyInstalled: "ccpoke hook 已安装",
   },
 
   notification: {

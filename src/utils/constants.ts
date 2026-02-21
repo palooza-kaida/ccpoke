@@ -51,4 +51,4 @@ export const SPLIT_LOOKBACK_RANGE = 200;
 export const MAX_GIT_SEARCH_DEPTH = 5;
 export const GIT_TIMEOUT_MS = 10_000;
 
-export const MINI_APP_BASE_URL = "https://palooza-kaida.github.io/ccbot";
+export const MINI_APP_BASE_URL = "https://palooza-kaida.github.io/ccpoke";

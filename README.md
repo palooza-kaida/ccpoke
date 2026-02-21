@@ -1,4 +1,4 @@
-# 🤖 ccbot — Claude Code ↔ Telegram Notification Bot
+# 🤖 ccpoke — Claude Code ↔ Telegram Notification Bot
 
 [English](./README.en.md)
 
@@ -10,14 +10,14 @@
 
 Bạn đang dùng Claude Code trên máy tính. Ra ngoài cầm điện thoại nhưng không biết Claude Code đã xong chưa, thay đổi file nào.
 
-**ccbot** là cầu nối nhẹ giữa Claude Code và Telegram — khi Claude Code xong việc, bạn nhận notification ngay trên điện thoại.
+**ccpoke** là cầu nối nhẹ giữa Claude Code và Telegram — khi Claude Code xong việc, bạn nhận notification ngay trên điện thoại.
 
 ```
 Claude Code xong response
         ↓
   Stop Hook trigger
         ↓
-  ccbot nhận event
+  ccpoke nhận event
         ↓
   Telegram notification 📱
 ```
@@ -43,21 +43,21 @@ Claude Code xong response
 ### Cách 1: Global install (khuyến nghị)
 
 ```bash
-pnpm add -g ccbot
-ccbot setup
+pnpm add -g ccpoke
+ccpoke setup
 ```
 
 ### Cách 2: npx (không cần cài)
 
 ```bash
-npx ccbot setup
+npx ccpoke setup
 ```
 
 ### Cách 3: Clone repo (cho development)
 
 ```bash
-git clone https://github.com/palooza-kaida/ccbot.git
-cd ccbot
+git clone https://github.com/palooza-kaida/ccpoke.git
+cd ccpoke
 pnpm install
 pnpm setup
 ```
@@ -65,7 +65,7 @@ pnpm setup
 Setup wizard sẽ hướng dẫn từng bước:
 
 ```
-┌  🤖 ccbot setup
+┌  🤖 ccpoke setup
 │
 ◇  Telegram Bot Token
 │  your-bot-token
@@ -83,7 +83,7 @@ Setup wizard sẽ hướng dẫn từng bước:
 <details>
 <summary>Thiết lập thủ công (không dùng wizard)</summary>
 
-Tạo file `~/.ccbot/config.json`:
+Tạo file `~/.ccpoke/config.json`:
 
 ```json
 {
@@ -93,7 +93,7 @@ Tạo file `~/.ccbot/config.json`:
 }
 ```
 
-Sau đó chạy `ccbot setup` để cài hook và đăng ký chat ID.
+Sau đó chạy `ccpoke setup` để cài hook và đăng ký chat ID.
 
 </details>
 
@@ -103,10 +103,10 @@ Sau đó chạy `ccbot setup` để cài hook và đăng ký chat ID.
 
 ```bash
 # Global install
-ccbot
+ccpoke
 
 # Hoặc npx
-npx ccbot
+npx ccpoke
 
 # Hoặc local dev
 pnpm dev
@@ -141,16 +141,16 @@ Bot chạy xong → dùng Claude Code bình thường → notification tự đ�
 ## Gỡ cài đặt
 
 ```bash
-ccbot uninstall
+ccpoke uninstall
 ```
 
 ```
-┌  🗑️  Uninstalling ccbot
+┌  🗑️  Uninstalling ccpoke
 │
 ◆  Hook removed from ~/.claude/settings.json
-◆  Removed ~/.ccbot/ (config, state, hooks)
+◆  Removed ~/.ccpoke/ (config, state, hooks)
 │
-└  ccbot uninstalled
+└  ccpoke uninstalled
 ```
 
 ## License

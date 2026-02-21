@@ -28,10 +28,10 @@ const { locale } = Astro.props;
       <div class="w-8 h-8 rounded-full bg-txt text-white flex items-center justify-center text-[0.8rem] font-bold shrink-0">2</div>
       <div class="min-w-0">
         <h3 class="text-base font-bold mb-1.5">{ts(locale, "setupStep2Title")}</h3>
-        <div class="step-term mt-3 bg-bg-code rounded-[10px] px-5 py-4 font-mono text-[0.78rem] text-term-sub leading-[1.9] overflow-x-auto max-w-full"><span class="d">$ </span>pnpm add -g ccbot
-<span class="d">$ </span>ccbot setup
+        <div class="step-term mt-3 bg-bg-code rounded-[10px] px-5 py-4 font-mono text-[0.78rem] text-term-sub leading-[1.9] overflow-x-auto max-w-full"><span class="d">$ </span>pnpm add -g ccpoke
+<span class="d">$ </span>ccpoke setup
 
-<span class="c">┌  🤖 ccbot setup</span>
+<span class="c">┌  🤖 ccpoke setup</span>
 <span class="c">│</span>
 <span class="c">◇  Telegram Bot Token</span>
 <span class="c">│  ****:ABC-xxx</span>
@@ -52,11 +52,11 @@ const { locale } = Astro.props;
       <div class="w-8 h-8 rounded-full bg-txt text-white flex items-center justify-center text-[0.8rem] font-bold shrink-0">3</div>
       <div class="min-w-0">
         <h3 class="text-base font-bold mb-1.5">{ts(locale, "setupStep3Title")}</h3>
-        <div class="step-term mt-3 bg-bg-code rounded-[10px] px-5 py-4 font-mono text-[0.78rem] text-term-sub leading-[1.9] overflow-x-auto max-w-full"><span class="d">$ </span>ccbot
+        <div class="step-term mt-3 bg-bg-code rounded-[10px] px-5 py-4 font-mono text-[0.78rem] text-term-sub leading-[1.9] overflow-x-auto max-w-full"><span class="d">$ </span>ccpoke
 
-<span class="c">ccbot: hook server listening on localhost:9377</span>
-<span class="c">ccbot: telegram bot started</span>
-<span class="c">ccbot: registered chat ID 123456789</span></div>
+<span class="c">ccpoke: hook server listening on localhost:9377</span>
+<span class="c">ccpoke: telegram bot started</span>
+<span class="c">ccpoke: registered chat ID 123456789</span></div>
         <p class="mt-2.5 text-[0.88rem] text-txt-2 leading-relaxed" set:html={ts(locale, "setupStep3Desc")} />
       </div>
     </div>

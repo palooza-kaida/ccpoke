@@ -38,7 +38,7 @@ function detectGlobalPackageManager(): PackageManager {
 
 function updateGlobal(): void {
   const pm = detectGlobalPackageManager();
-  const pkg = "ccbot";
+  const pkg = "ccpoke";
 
   p.intro(t("update.intro"));
 

@@ -1,4 +1,4 @@
-# ccbot Design System
+# ccpoke Design System
 
 ## Philosophy
 - **Minimal & Clean**: White background, generous whitespace, no visual clutter

@@ -27,9 +27,9 @@ function removeHook(): void {
 }
 
 function removeConfigDirectory(): void {
-  const ccbotDir = paths.ccbotDir;
+  const ccpokeDir = paths.ccpokeDir;
   try {
-    rmSync(ccbotDir, { recursive: true, force: true });
+    rmSync(ccpokeDir, { recursive: true, force: true });
     p.log.success(t("uninstall.configRemoved"));
   } catch {
     p.log.warn(t("uninstall.configNotFound"));

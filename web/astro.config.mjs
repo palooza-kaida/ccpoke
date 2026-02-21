@@ -4,7 +4,7 @@ import preact from "@astrojs/preact";
 
 export default defineConfig({
   site: "https://palooza-kaida.github.io",
-  base: "/ccbot/",
+  base: "/ccpoke/",
   integrations: [preact()],
   vite: {
     plugins: [tailwindcss()],

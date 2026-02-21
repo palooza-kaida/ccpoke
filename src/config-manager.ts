@@ -43,7 +43,7 @@ export class ConfigManager {
   }
 
   static save(cfg: Config): void {
-    mkdirSync(paths.ccbotDir, { recursive: true });
+    mkdirSync(paths.ccpokeDir, { recursive: true });
     writeFileSync(paths.configFile, JSON.stringify(cfg, null, 2), { mode: 0o600 });
   }
 
@@ -65,7 +65,7 @@ export class ConfigManager {
   }
 
   static saveChatState(state: ChatState): void {
-    mkdirSync(paths.ccbotDir, { recursive: true });
+    mkdirSync(paths.ccpokeDir, { recursive: true });
     writeFileSync(paths.stateFile, JSON.stringify(state, null, 2), { mode: 0o600 });
   }
 

@@ -32,7 +32,7 @@ async function startBot(): Promise<void> {
 
   const hookServer = new HookServer(cfg.hook_port, cfg.hook_secret);
   hookServer.start();
-  log(`ccbot: ${t("bot.started", { port: cfg.hook_port })}`);
+  log(`ccpoke: ${t("bot.started", { port: cfg.hook_port })}`);
 
   const tunnelManager = new TunnelManager();
   let tunnelUrl: string | null = null;

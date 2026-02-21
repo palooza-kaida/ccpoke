@@ -21,7 +21,7 @@ export function ta(locale: Locale, key: string): string[] {
 export function detectLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
 
-  const saved = localStorage.getItem("ccbot-locale");
+  const saved = localStorage.getItem("ccpoke-locale");
   if (saved && SUPPORTED_LOCALES.includes(saved as Locale)) return saved as Locale;
 
   const navLang = navigator.language?.slice(0, 2);

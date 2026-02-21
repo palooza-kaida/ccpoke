@@ -9,13 +9,13 @@ export const vi: TranslationKeys = {
     commandsRegisterFailed: "đăng ký commands thất bại",
     menuButtonRegistered: "đã đăng ký mini app menu button",
     menuButtonFailed: "đăng ký menu button thất bại",
-    noChatId: "chưa có chat ID — chạy 'ccbot setup' hoặc gửi /start cho bot",
+    noChatId: "chưa có chat ID — chạy 'ccpoke setup' hoặc gửi /start cho bot",
     notificationFailed: "gửi notification thất bại",
     registeredChatId: "đã đăng ký chat ID {chatId}",
     unauthorizedUser: "user không có quyền {userId} ({username})",
     ready:
-      "✅ *ccbot* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
-    alreadyConnected: "✅ ccbot đã kết nối rồi — bot đang hoạt động bình thường.",
+      "✅ *ccpoke* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
+    alreadyConnected: "✅ ccpoke đã kết nối rồi — bot đang hoạt động bình thường.",
     connectionLost: "⚠️ mất kết nối tới Telegram — đang thử kết nối lại...",
     connectionRestored: "✅ đã kết nối lại Telegram",
     commands: {
@@ -28,7 +28,7 @@ export const vi: TranslationKeys = {
   },
 
   setup: {
-    intro: "🤖 ccbot setup",
+    intro: "🤖 ccpoke setup",
     tokenMessage: "Telegram Bot Token",
     tokenPlaceholder: "Lấy từ @BotFather → /newbot",
     tokenRequired: "Bot token là bắt buộc",
@@ -49,18 +49,18 @@ export const vi: TranslationKeys = {
   },
 
   uninstall: {
-    intro: "🗑️  Gỡ cài đặt ccbot",
+    intro: "🗑️  Gỡ cài đặt ccpoke",
     hookRemoved: "Đã xóa hook khỏi ~/.claude/settings.json",
     hookNotFound: "Không tìm thấy hook (đã xóa rồi)",
-    configRemoved: "Đã xóa ~/.ccbot/ (config, state, hooks)",
-    configNotFound: "Không tìm thấy ~/.ccbot/ (đã xóa rồi)",
-    removeGlobal: "Để gỡ package:\n  pnpm remove -g ccbot",
-    removeGitClone: "Để xóa source:\n  rm -rf <ccbot-directory>",
-    done: "Đã gỡ ccbot",
+    configRemoved: "Đã xóa ~/.ccpoke/ (config, state, hooks)",
+    configNotFound: "Không tìm thấy ~/.ccpoke/ (đã xóa rồi)",
+    removeGlobal: "Để gỡ package:\n  pnpm remove -g ccpoke",
+    removeGitClone: "Để xóa source:\n  rm -rf <ccpoke-directory>",
+    done: "Đã gỡ ccpoke",
   },
 
   update: {
-    intro: "📦 ccbot cập nhật",
+    intro: "📦 ccpoke cập nhật",
     npxAlreadyLatest: "Cài qua npx — luôn dùng bản mới nhất, không cần cập nhật.",
     npxDone: "Đã là phiên bản mới nhất",
     checking: "Đang kiểm tra phiên bản...",
@@ -85,15 +85,15 @@ export const vi: TranslationKeys = {
   },
 
   help: {
-    intro: "🤖 ccbot — Claude Code ↔ Telegram Notification Bot",
+    intro: "🤖 ccpoke — Claude Code ↔ Telegram Notification Bot",
     usage: "Usage: {prefix} [command]",
     commands: "Commands:",
     cmdNone: "  (none)      Chạy bot",
     cmdSetup: "  setup       Setup tương tác (config + hooks)",
-    cmdUpdate: "  update      Cập nhật ccbot lên bản mới nhất",
-    cmdUninstall: "  uninstall   Xóa toàn bộ dữ liệu và hooks ccbot",
+    cmdUpdate: "  update      Cập nhật ccpoke lên bản mới nhất",
+    cmdUninstall: "  uninstall   Xóa toàn bộ dữ liệu và hooks ccpoke",
     cmdHelp: "  help        Hiện hướng dẫn này",
-    docs: "docs → https://github.com/palooza-kaida/ccbot",
+    docs: "docs → https://github.com/palooza-kaida/ccpoke",
   },
 
   hook: {
@@ -115,14 +115,14 @@ export const vi: TranslationKeys = {
   },
 
   config: {
-    notFound: "không tìm thấy config — chạy 'ccbot setup' trước",
+    notFound: "không tìm thấy config — chạy 'ccpoke setup' trước",
     mustBeObject: "config phải là một JSON object",
-    invalidToken: "telegram_bot_token phải là string chứa ':' — chạy 'ccbot setup'",
-    invalidUserId: "user_id phải là số nguyên — chạy 'ccbot setup'",
+    invalidToken: "telegram_bot_token phải là string chứa ':' — chạy 'ccpoke setup'",
+    invalidUserId: "user_id phải là số nguyên — chạy 'ccpoke setup'",
     invalidPort: "hook_port phải là số nguyên từ 1 đến 65535",
     invalidSecret: "hook_secret chỉ được chứa ký tự hex (a-f, 0-9)",
     invalidHookPort: "hook port không hợp lệ: {port} (phải từ 1-65535)",
-    hookAlreadyInstalled: "ccbot hook đã được cài rồi",
+    hookAlreadyInstalled: "ccpoke hook đã được cài rồi",
   },
 
   notification: {

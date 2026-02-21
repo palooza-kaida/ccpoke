@@ -1,5 +1,5 @@
 export const zh: Record<string, string | string[]> = {
-  title: "ccbot — 使用 AI Agents 随时随地编程",
+  title: "ccpoke — 使用 AI Agents 随时随地编程",
   metaDesc: "通过 Telegram、Discord、Zalo 与 Claude Code 双向交互。随时随地编程。",
 
   heroTitle: "随时随地，",
@@ -16,7 +16,7 @@ export const zh: Record<string, string | string[]> = {
   howTitle: "终端与手机之间的双向桥梁",
   howSub: "发送提示、接收结果、审批权限 — 全部在您使用的聊天平台上完成。",
   howTerminalTitle: "终端",
-  howTerminalDesc: "Claude Code 在您的机器上运行。ccbot 监听 hook 事件和 JSONL 转录。",
+  howTerminalDesc: "Claude Code 在您的机器上运行。ccpoke 监听 hook 事件和 JSONL 转录。",
   howYouTitle: "您",
   howYouDesc: "随时随地聊天、审查、批准。",
   howFlowRealtime: "实时",
