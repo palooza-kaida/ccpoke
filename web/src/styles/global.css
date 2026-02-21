@@ -358,6 +358,9 @@ a:hover { color: var(--color-accent-hover) }
   color: var(--color-txt-2);
 }
 
+.md-body ul { list-style-type: disc; }
+.md-body ol { list-style-type: decimal; }
+
 .md-body li { margin-bottom: 3px; }
 .md-body li::marker { color: var(--color-accent); }
 
