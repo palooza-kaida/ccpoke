@@ -21,7 +21,7 @@ export const vi: TranslationKeys = {
     commands: {
       start: "Kết nối bot với chat này",
     },
-    viewDetails: "📱 Xem chi tiết",
+    viewDetails: "Xem chi tiết",
     open: "Mở",
     sendFailed: "gửi thất bại, dùng fallback",
     sendFallbackFailed: "fallback cũng thất bại",
@@ -130,15 +130,12 @@ export const vi: TranslationKeys = {
     hookAlreadyInstalled: "ccpoke hook đã được cài rồi",
   },
 
-  notification: {
-    tokens: "token",
-    cache: "cache",
-    cacheRead: "đọc",
-    cacheWrite: "ghi",
-  },
-
   common: {
     unknownCommand: "lệnh không xác định: {command}",
     setupFailed: "setup thất bại",
+  },
+  versionCheck: {
+    updateAvailable: "Có bản cập nhật mới! {current} → {latest}",
+    runToUpdate: "Chạy `{command}` để cập nhật",
   },
 };

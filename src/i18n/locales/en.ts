@@ -21,7 +21,7 @@ export const en: TranslationKeys = {
     commands: {
       start: "Connect bot to this chat",
     },
-    viewDetails: "📱 View details",
+    viewDetails: "View details",
     open: "Open",
     sendFailed: "send failed, falling back",
     sendFallbackFailed: "fallback also failed",
@@ -130,15 +130,12 @@ export const en: TranslationKeys = {
     hookAlreadyInstalled: "ccpoke hook already installed",
   },
 
-  notification: {
-    tokens: "tokens",
-    cache: "cache",
-    cacheRead: "read",
-    cacheWrite: "write",
-  },
-
   common: {
     unknownCommand: "unknown command: {command}",
     setupFailed: "setup failed",
+  },
+  versionCheck: {
+    updateAvailable: "Update available! {current} → {latest}",
+    runToUpdate: "Run `{command}` to update",
   },
 };

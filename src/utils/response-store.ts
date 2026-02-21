@@ -12,8 +12,7 @@ export interface StoredResponse {
   gitChanges: Array<{ file: string; status: GitChangeStatus }>;
   inputTokens: number;
   outputTokens: number;
-  cacheCreationTokens: number;
-  cacheReadTokens: number;
+  model: string;
   timestamp: number;
 }
 

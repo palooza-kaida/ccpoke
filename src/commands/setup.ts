@@ -106,12 +106,7 @@ async function waitForUserStart(token: string, botUsername: string): Promise<num
     .map((line) => `│    ${line}`)
     .join("\n");
 
-  // eslint-disable-next-line no-console
-  console.log(indentedQr);
-  // eslint-disable-next-line no-console
-  console.log(`│`);
-  // eslint-disable-next-line no-console
-  console.log(`│    ${deepLink}`);
+  process.stdout.write(`${indentedQr}\n│\n│    ${deepLink}\n`);
 
   p.log.step(t("setup.waitingForStart"));
 

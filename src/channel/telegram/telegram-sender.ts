@@ -17,11 +17,11 @@ export async function sendTelegramMessage(
   for (let i = 0; i < pages.length; i++) {
     let content = pages[i]!;
     if (pages.length > 1) {
-      content = `${content}\n\n<i>[${i + 1}/${pages.length}]</i>`;
+      content = `${content}\n\n_\\[${i + 1}/${pages.length}\\]_`;
     }
 
     const isLastPage = i === pages.length - 1;
-    const opts: TelegramBot.SendMessageOptions = { parse_mode: "HTML" };
+    const opts: TelegramBot.SendMessageOptions = { parse_mode: "MarkdownV2" };
 
     if (isLastPage && responseUrl) {
       opts.reply_markup = buildResponseReplyMarkup(responseUrl);

@@ -118,14 +118,12 @@ export interface TranslationKeys {
     invalidHookPort: string;
     hookAlreadyInstalled: string;
   };
-  notification: {
-    tokens: string;
-    cache: string;
-    cacheRead: string;
-    cacheWrite: string;
-  };
   common: {
     unknownCommand: string;
     setupFailed: string;
+  };
+  versionCheck: {
+    updateAvailable: string;
+    runToUpdate: string;
   };
 }

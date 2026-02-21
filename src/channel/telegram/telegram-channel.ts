@@ -12,11 +12,9 @@ export class TelegramChannel implements NotificationChannel {
   private cfg: Config;
   private chatId: number | null = null;
   private isDisconnected = false;
-  private tunnelUrl: string | null;
 
-  constructor(cfg: Config, tunnelUrl?: string | null) {
+  constructor(cfg: Config) {
     this.cfg = cfg;
-    this.tunnelUrl = tunnelUrl ?? null;
     this.bot = new TelegramBot(cfg.telegram_bot_token, { polling: false });
     this.chatId = ConfigManager.loadChatState().chat_id;
     this.registerHandlers();
@@ -52,30 +50,28 @@ export class TelegramChannel implements NotificationChannel {
   private formatNotification(data: NotificationData): string {
     const parts: string[] = [];
 
-    let header = `<b>${escapeHtml(data.projectName)}</b>`;
+    let header = `📦 *${escapeMarkdownV2(data.projectName)}*`;
     if (data.durationMs > 0) {
-      header += ` — ${escapeHtml(formatDuration(data.durationMs))}`;
+      header += ` · ${escapeMarkdownV2(formatDuration(data.durationMs))}`;
     }
     parts.push(header);
 
+    if (data.responseSummary) {
+      const snippet = extractProseSnippet(data.responseSummary, 150);
+      parts.push(escapeMarkdownV2(snippet + "..."));
+    }
+
     if (data.inputTokens > 0 || data.outputTokens > 0) {
-      parts.push(
-        `${t("notification.tokens")}: ${formatTokenCount(data.inputTokens)} → ${formatTokenCount(data.outputTokens)}`
-      );
+      let statsLine = `📊 ${escapeMarkdownV2(formatTokenCount(data.inputTokens))} → ${escapeMarkdownV2(formatTokenCount(data.outputTokens))}`;
+      if (data.model) {
+        statsLine += ` · 🤖 ${escapeMarkdownV2(formatModelName(data.model))}`;
+      }
+      parts.push(statsLine);
+    } else if (data.model) {
+      parts.push(`🤖 ${escapeMarkdownV2(formatModelName(data.model))}`);
     }
 
-    if (data.cacheReadTokens > 0 || data.cacheCreationTokens > 0) {
-      const cacheParts: string[] = [];
-      if (data.cacheReadTokens > 0)
-        cacheParts.push(`${formatTokenCount(data.cacheReadTokens)} ${t("notification.cacheRead")}`);
-      if (data.cacheCreationTokens > 0)
-        cacheParts.push(
-          `${formatTokenCount(data.cacheCreationTokens)} ${t("notification.cacheWrite")}`
-        );
-      parts.push(`${t("notification.cache")}: ${cacheParts.join(", ")}`);
-    }
-
-    return parts.join("\n");
+    return parts.join("\n\n");
   }
 
   private async registerCommands(): Promise<void> {
@@ -93,7 +89,7 @@ export class TelegramChannel implements NotificationChannel {
   }
 
   private async registerMenuButton(): Promise<void> {
-    const url = this.tunnelUrl ? `${this.tunnelUrl}/` : `${MINI_APP_BASE_URL}/`;
+    const url = `${MINI_APP_BASE_URL}/`;
     try {
       await this.bot.setChatMenuButton({
         menu_button: JSON.stringify({
@@ -149,8 +145,8 @@ export class TelegramChannel implements NotificationChannel {
   }
 }
 
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+function escapeMarkdownV2(text: string): string {
+  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, (m) => `\\${m}`);
 }
 
 function formatDuration(ms: number): string {
@@ -165,4 +161,85 @@ function formatTokenCount(tokens: number): string {
   if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`;
   if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}k`;
   return `${tokens}`;
+}
+
+const PROVIDERS: Record<string, string> = {
+  "claude-": "",
+  "gpt-": "GPT-",
+  "gemini-": "Gemini ",
+  "deepseek-": "DeepSeek ",
+  "mistral-": "Mistral ",
+  "codestral-": "Codestral ",
+  "grok-": "Grok ",
+  "moonshot-": "Moonshot ",
+  "qwen-": "Qwen ",
+};
+
+function formatModelName(model: string): string {
+  const dashIndex = model.indexOf("-");
+  if (dashIndex === -1) return prettify(model);
+
+  const prefix = model.slice(0, dashIndex + 1);
+  const display = PROVIDERS[prefix];
+  if (display === undefined) return prettify(model);
+
+  const rest = model.slice(dashIndex + 1);
+  return rest ? `${display}${prettify(rest)}` : model;
+}
+
+function prettify(s: string): string {
+  return s
+    .replace(/-/g, " ")
+    .replace(/(\d+)\s(\d+)/g, "$1.$2")
+    .replace(/(^| )[a-z]/g, (c) => c.toUpperCase());
+}
+
+function extractProseSnippet(text: string, maxLength: number): string {
+  const withoutCodeBlocks = text.replace(/```[\s\S]*?```/g, "").replace(/```[\s\S]*/g, "");
+  const paragraphs = withoutCodeBlocks.split(/\n\n+/);
+
+  const candidates = paragraphs
+    .map((p) => ({ raw: p.trim(), cleaned: stripInlineMarkdown(p.trim()) }))
+    .filter((c) => c.cleaned.length >= 20);
+
+  const prose = candidates.find((c) => !isStructuredBlock(c.raw));
+  if (prose) return truncateAtWordBoundary(prose.cleaned, maxLength);
+
+  const fallback = candidates[0];
+  if (fallback) return truncateAtWordBoundary(fallback.cleaned, maxLength);
+
+  return truncateAtWordBoundary(stripInlineMarkdown(text), maxLength);
+}
+
+function stripInlineMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/(?<!\w)\*(.+?)\*(?!\w)/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/(?<!\w)_(.+?)_(?!\w)/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/~~(.+?)~~/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+}
+
+function isStructuredBlock(line: string): boolean {
+  if (/^\|.*\|/.test(line)) return true;
+  if (/^#{1,6}\s/.test(line)) return true;
+  if (/^\*\*[^*]+\*\*:?\s*$/.test(line)) return true;
+
+  const lines = line.split("\n");
+  const listLines = lines.filter((l) => /^\s*[-*•]\s|^\s*\d+[.)]\s/.test(l));
+  if (listLines.length > lines.length * 0.5) return true;
+
+  return false;
+}
+
+function truncateAtWordBoundary(text: string, maxLength: number): string {
+  const normalized = text.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
+  if (normalized.length <= maxLength) return normalized;
+
+  const truncated = normalized.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  const cut = lastSpace > maxLength * 0.6 ? truncated.slice(0, lastSpace) : truncated;
+  return cut;
 }

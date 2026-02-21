@@ -20,7 +20,7 @@ export const zh: TranslationKeys = {
     commands: {
       start: "将机器人连接到此聊天",
     },
-    viewDetails: "📱 查看详情",
+    viewDetails: "查看详情",
     open: "打开",
     sendFailed: "发送失败，使用备用方式",
     sendFallbackFailed: "备用方式也失败",
@@ -129,15 +129,12 @@ export const zh: TranslationKeys = {
     hookAlreadyInstalled: "ccpoke hook 已安装",
   },
 
-  notification: {
-    tokens: "tokens",
-    cache: "cache",
-    cacheRead: "读取",
-    cacheWrite: "写入",
-  },
-
   common: {
     unknownCommand: "未知命令: {command}",
     setupFailed: "setup 失败",
+  },
+  versionCheck: {
+    updateAvailable: "发现新版本！{current} → {latest}",
+    runToUpdate: "运行 `{command}` 进行更新",
   },
 };

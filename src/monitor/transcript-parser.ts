@@ -5,7 +5,6 @@ interface TranscriptEntry {
   type?: string;
   message?: MessageContent;
   timestamp?: string;
-  costUSD?: number;
   durationMs?: number;
   sessionId?: string;
   parentUuid?: string;
@@ -17,6 +16,7 @@ interface MessageContent {
   role: string;
   content?: ContentPart[];
   usage?: TokenUsage;
+  model?: string;
 }
 
 interface ContentPart {
@@ -27,18 +27,14 @@ interface ContentPart {
 interface TokenUsage {
   input_tokens?: number;
   output_tokens?: number;
-  cache_creation_input_tokens?: number;
-  cache_read_input_tokens?: number;
 }
 
 export interface TranscriptSummary {
   lastAssistantMessage: string;
   durationMs: number;
-  totalCostUSD: number;
   inputTokens: number;
   outputTokens: number;
-  cacheCreationTokens: number;
-  cacheReadTokens: number;
+  model: string;
 }
 
 export function parseTranscript(transcriptPath: string): TranscriptSummary {
@@ -48,13 +44,11 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
 
   let lastAssistantText = "";
   let summaryText = "";
-  let totalCost = 0;
   let firstTimestamp: Date | null = null;
   let lastTimestamp: Date | null = null;
   let inputTokens = 0;
   let outputTokens = 0;
-  let cacheCreationTokens = 0;
-  let cacheReadTokens = 0;
+  let model = "";
 
   for (const line of lines) {
     if (!line.trim()) continue;
@@ -74,8 +68,6 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
       }
     }
 
-    totalCost += entry.costUSD ?? 0;
-
     if (entry.type === "summary" && entry.summary) {
       summaryText = entry.summary;
     }
@@ -90,11 +82,13 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
           lastAssistantText = text;
         }
 
+        if (msg.model) {
+          model = msg.model;
+        }
+
         if (msg.usage) {
           inputTokens += msg.usage.input_tokens ?? 0;
           outputTokens += msg.usage.output_tokens ?? 0;
-          cacheCreationTokens += msg.usage.cache_creation_input_tokens ?? 0;
-          cacheReadTokens += msg.usage.cache_read_input_tokens ?? 0;
         }
       }
     }
@@ -110,11 +104,9 @@ export function parseTranscript(transcriptPath: string): TranscriptSummary {
   return {
     lastAssistantMessage: finalMessage,
     durationMs,
-    totalCostUSD: totalCost,
     inputTokens,
     outputTokens,
-    cacheCreationTokens,
-    cacheReadTokens,
+    model,
   };
 }
 

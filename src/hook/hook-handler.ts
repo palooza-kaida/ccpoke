@@ -52,11 +52,9 @@ export class HookHandler {
     let summary = {
       lastAssistantMessage: "",
       durationMs: 0,
-      totalCostUSD: 0,
       inputTokens: 0,
       outputTokens: 0,
-      cacheCreationTokens: 0,
-      cacheReadTokens: 0,
+      model: "",
     };
     try {
       summary = parseTranscript(event.transcript_path);
@@ -78,8 +76,7 @@ export class HookHandler {
       gitChanges,
       inputTokens: summary.inputTokens,
       outputTokens: summary.outputTokens,
-      cacheCreationTokens: summary.cacheCreationTokens,
-      cacheReadTokens: summary.cacheReadTokens,
+      model: summary.model,
     };
 
     const responseUrl = this.buildResponseUrl(data);
