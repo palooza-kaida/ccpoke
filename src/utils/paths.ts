@@ -18,12 +18,13 @@ export const paths = {
   configFile: join(CCPOKE_HOME, "config.json"),
   stateFile: join(CCPOKE_HOME, "state.json"),
   hooksDir: join(CCPOKE_HOME, "hooks"),
-  hookScript: join(
+  responsesDir: join(CCPOKE_HOME, "responses"),
+
+  claudeCodeHookScript: join(
     CCPOKE_HOME,
     "hooks",
-    process.platform === "win32" ? "stop-notify.cmd" : "stop-notify.sh"
+    process.platform === "win32" ? "claude-code-stop.cmd" : "claude-code-stop.sh"
   ),
-  responsesDir: join(CCPOKE_HOME, "responses"),
 
   claudeDir: CLAUDE_HOME,
   claudeSettings: join(CLAUDE_HOME, "settings.json"),

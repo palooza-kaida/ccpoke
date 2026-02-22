@@ -7,6 +7,8 @@ export interface NotificationChannel {
 }
 
 export interface NotificationData {
+  agent: string;
+  agentDisplayName: string;
   projectName: string;
   responseSummary: string;
   durationMs: number;

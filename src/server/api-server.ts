@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import type { Server } from "node:http";
-import { HookHandler } from "./hook-handler.js";
+import { AgentHandler } from "../agent/agent-handler.js";
+import { AgentName } from "../agent/types.js";
 import { responseStore } from "../utils/response-store.js";
 import { MINI_APP_BASE_URL, ApiRoute } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
@@ -8,12 +9,12 @@ import { log } from "../utils/log.js";
 
 const ALLOWED_CORS_ORIGIN = new URL(MINI_APP_BASE_URL).origin;
 
-export class HookServer {
+export class ApiServer {
   private app: Express;
   private server: Server | null = null;
   private port: number;
   private secret: string;
-  private handler: HookHandler | null = null;
+  private handler: AgentHandler | null = null;
 
   constructor(port: number, secret: string) {
     this.port = port;
@@ -21,7 +22,7 @@ export class HookServer {
     this.app = this.createApp();
   }
 
-  setHandler(handler: HookHandler): void {
+  setHandler(handler: AgentHandler): void {
     this.handler = handler;
   }
 
@@ -63,7 +64,9 @@ export class HookServer {
         return;
       }
 
-      setImmediate(() => this.handler?.handleStopEvent(req.body));
+      const agentName = req.query.agent ? `${req.query.agent}` : AgentName.ClaudeCode;
+
+      setImmediate(() => this.handler?.handleStopEvent(agentName, req.body));
       res.status(200).send("ok");
     });
 

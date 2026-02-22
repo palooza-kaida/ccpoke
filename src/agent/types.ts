@@ -1,0 +1,36 @@
+import type { GitChange } from "../channel/types.js";
+
+export const AgentName = {
+  ClaudeCode: "claude-code",
+  Cursor: "cursor",
+  Codex: "codex",
+} as const;
+export type AgentName = (typeof AgentName)[keyof typeof AgentName];
+
+export const AGENT_DISPLAY_NAMES: Record<AgentName, string> = {
+  [AgentName.ClaudeCode]: "Claude Code",
+  [AgentName.Cursor]: "Cursor",
+  [AgentName.Codex]: "Codex CLI",
+};
+
+export interface AgentProvider {
+  readonly name: AgentName;
+  readonly displayName: string;
+  readonly settleDelayMs: number;
+
+  detect(): boolean;
+  isHookInstalled(): boolean;
+  installHook(port: number, secret: string): void;
+  uninstallHook(): void;
+  parseEvent(raw: unknown): AgentEventResult;
+}
+
+export interface AgentEventResult {
+  projectName: string;
+  responseSummary: string;
+  durationMs: number;
+  gitChanges: GitChange[];
+  inputTokens: number;
+  outputTokens: number;
+  model: string;
+}

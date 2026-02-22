@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { expandHome } from "../utils/paths.js";
+import { expandHome } from "../../utils/paths.js";
 
 interface TranscriptEntry {
   type?: string;
@@ -29,12 +29,28 @@ interface TokenUsage {
   output_tokens?: number;
 }
 
+export interface StopEvent {
+  session_id: string;
+  transcript_path: string;
+  cwd: string;
+}
+
 export interface TranscriptSummary {
   lastAssistantMessage: string;
   durationMs: number;
   inputTokens: number;
   outputTokens: number;
   model: string;
+}
+
+export function isValidStopEvent(data: unknown): data is StopEvent {
+  if (typeof data !== "object" || data === null) return false;
+  const obj = data as Record<string, unknown>;
+  return (
+    typeof obj.session_id === "string" &&
+    typeof obj.transcript_path === "string" &&
+    typeof obj.cwd === "string"
+  );
 }
 
 export function parseTranscript(transcriptPath: string): TranscriptSummary {

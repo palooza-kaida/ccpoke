@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { randomBytes } from "node:crypto";
-import { type Locale, isValidLocale, setLocale } from "./i18n/index.js";
+import { Locale, isValidLocale, setLocale } from "./i18n/index.js";
 import { t } from "./i18n/index.js";
 import { paths } from "./utils/paths.js";
 import { DEFAULT_HOOK_PORT } from "./utils/constants.js";
@@ -11,6 +11,7 @@ export interface Config {
   hook_port: number;
   hook_secret: string;
   locale: Locale;
+  agents: string[];
 }
 
 export interface ChatState {
@@ -35,7 +36,7 @@ export class ConfigManager {
 
     const raw: Record<string, unknown> = JSON.parse(data);
     const cfg = ConfigManager.validate(raw);
-    if (cfg.hook_secret !== raw.hook_secret) {
+    if (cfg.hook_secret !== raw.hook_secret || !raw.agents) {
       ConfigManager.save(cfg);
     }
     setLocale(cfg.locale);
@@ -69,52 +70,56 @@ export class ConfigManager {
     writeFileSync(paths.stateFile, JSON.stringify(state, null, 2), { mode: 0o600 });
   }
 
-  private static validate(data: unknown): Config {
+  private static validate(data: Record<string, unknown>): Config {
     if (typeof data !== "object" || data === null) {
       throw new Error(t("config.mustBeObject"));
     }
 
-    const obj = data as Record<string, unknown>;
-
-    if (typeof obj.telegram_bot_token !== "string" || !obj.telegram_bot_token.includes(":")) {
+    if (typeof data.telegram_bot_token !== "string" || !data.telegram_bot_token.includes(":")) {
       throw new Error(t("config.invalidToken"));
     }
 
-    if (typeof obj.user_id !== "number" || !Number.isInteger(obj.user_id)) {
+    if (typeof data.user_id !== "number" || !Number.isInteger(data.user_id)) {
       throw new Error(t("config.invalidUserId"));
     }
 
     let hookPort = DEFAULT_HOOK_PORT;
-    if (obj.hook_port !== undefined) {
+    if (data.hook_port !== undefined) {
       if (
-        typeof obj.hook_port !== "number" ||
-        !Number.isInteger(obj.hook_port) ||
-        obj.hook_port < 1 ||
-        obj.hook_port > 65535
+        typeof data.hook_port !== "number" ||
+        !Number.isInteger(data.hook_port) ||
+        data.hook_port < 1 ||
+        data.hook_port > 65535
       ) {
         throw new Error(t("config.invalidPort"));
       }
-      hookPort = obj.hook_port;
+      hookPort = data.hook_port;
     }
 
     let hookSecret: string;
-    if (typeof obj.hook_secret === "string" && obj.hook_secret.length > 0) {
-      if (!/^[a-f0-9]+$/i.test(obj.hook_secret)) {
+    if (typeof data.hook_secret === "string" && data.hook_secret.length > 0) {
+      if (!/^[a-f0-9]+$/i.test(data.hook_secret)) {
         throw new Error(t("config.invalidSecret"));
       }
-      hookSecret = obj.hook_secret;
+      hookSecret = data.hook_secret;
     } else {
       hookSecret = ConfigManager.generateSecret();
     }
 
-    const locale: Locale = isValidLocale(obj.locale) ? obj.locale : "en";
+    const locale: Locale = isValidLocale(data.locale) ? data.locale : Locale.EN;
+
+    let agents: string[] = ["claude-code"];
+    if (Array.isArray(data.agents) && data.agents.length > 0) {
+      agents = data.agents.filter((a): a is string => typeof a === "string");
+    }
 
     const cfg: Config = {
-      telegram_bot_token: obj.telegram_bot_token,
-      user_id: obj.user_id,
+      telegram_bot_token: data.telegram_bot_token,
+      user_id: data.user_id,
       hook_port: hookPort,
       hook_secret: hookSecret,
       locale,
+      agents,
     };
 
     return cfg;

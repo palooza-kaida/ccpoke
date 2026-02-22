@@ -6,6 +6,8 @@ import { MAX_STORED_RESPONSES, RESPONSE_EXPIRE_MS, type GitChangeStatus } from "
 
 export interface StoredResponse {
   id: string;
+  agent: string;
+  agentDisplayName: string;
   projectName: string;
   responseSummary: string;
   durationMs: number;

@@ -1,6 +1,6 @@
 import * as p from "@clack/prompts";
 import { rmSync } from "node:fs";
-import { HookInstaller } from "../hook/hook-installer.js";
+import { createDefaultRegistry } from "../agent/agent-registry.js";
 import { detectInstallMethod } from "../utils/install-detection.js";
 import { InstallMethod } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
@@ -9,7 +9,7 @@ import { paths } from "../utils/paths.js";
 export function runUninstall(): void {
   p.intro(t("uninstall.intro"));
 
-  removeHook();
+  removeAllAgentHooks();
   removeConfigDirectory();
 
   printPostUninstallHint();
@@ -17,12 +17,16 @@ export function runUninstall(): void {
   p.outro(t("uninstall.done"));
 }
 
-function removeHook(): void {
-  try {
-    HookInstaller.uninstall();
-    p.log.success(t("uninstall.hookRemoved"));
-  } catch {
-    p.log.warn(t("uninstall.hookNotFound"));
+function removeAllAgentHooks(): void {
+  const registry = createDefaultRegistry();
+
+  for (const provider of registry.all()) {
+    try {
+      provider.uninstallHook();
+      p.log.success(t("uninstall.agentHookRemoved", { agent: provider.displayName }));
+    } catch {
+      // hook may not exist for this agent
+    }
   }
 }
 

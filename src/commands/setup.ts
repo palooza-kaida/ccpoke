@@ -2,9 +2,10 @@ import * as p from "@clack/prompts";
 import TelegramBot from "node-telegram-bot-api";
 import qrcode from "qrcode-terminal";
 import { ConfigManager, type Config } from "../config-manager.js";
-import { HookInstaller } from "../hook/hook-installer.js";
+import { createDefaultRegistry } from "../agent/agent-registry.js";
+import { AgentName } from "../agent/types.js";
 import { detectCliPrefix } from "../utils/install-detection.js";
-import { t, setLocale, type Locale, SUPPORTED_LOCALES, LOCALE_LABELS } from "../i18n/index.js";
+import { t, setLocale, Locale, SUPPORTED_LOCALES, LOCALE_LABELS } from "../i18n/index.js";
 import { DEFAULT_HOOK_PORT, SETUP_WAIT_TIMEOUT_MS } from "../utils/constants.js";
 
 export async function runSetup(): Promise<Config> {
@@ -21,13 +22,25 @@ export async function runSetup(): Promise<Config> {
   setLocale(locale);
 
   const token = await promptToken(existing);
-  const botUsername = await verifyToken(token);
-  const userId = await waitForUserStart(token, botUsername);
 
-  const config = buildConfig(token, userId, existing, locale);
+  const tokenUnchanged = existing !== null && token === existing.telegram_bot_token;
+  let userId: number;
+
+  if (tokenUnchanged) {
+    userId = existing!.user_id;
+    p.log.success(t("setup.tokenUnchanged"));
+  } else {
+    const botUsername = await verifyToken(token);
+    userId = await waitForUserStart(token, botUsername);
+  }
+
+  const previousAgents = existing?.agents ?? [];
+  const selectedAgents = await promptAgents(previousAgents);
+
+  const config = buildConfig(token, userId, existing, locale, selectedAgents);
 
   saveConfig(config);
-  installHook(config);
+  syncAgentHooks(config, previousAgents);
   registerChatId(userId);
 
   const startCommand = detectCliPrefix();
@@ -39,7 +52,7 @@ export async function runSetup(): Promise<Config> {
 async function promptLanguage(existing: Config | null): Promise<Locale> {
   const result = await p.select({
     message: t("setup.languageMessage"),
-    initialValue: existing?.locale ?? "en",
+    initialValue: existing?.locale ?? Locale.EN,
     options: SUPPORTED_LOCALES.map((loc) => ({
       value: loc,
       label: LOCALE_LABELS[loc],
@@ -139,11 +152,49 @@ async function waitForUserStart(token: string, botUsername: string): Promise<num
   }
 }
 
+async function promptAgents(previousAgents: string[]): Promise<string[]> {
+  const registry = createDefaultRegistry();
+  const providers = registry.all();
+
+  const initialValues = previousAgents.length > 0 ? previousAgents : [AgentName.ClaudeCode];
+
+  const options = providers.map((provider) => {
+    const installed = provider.detect();
+    const label = installed ? provider.displayName : `${provider.displayName} ⚠️ not installed`;
+
+    return {
+      value: provider.name,
+      label,
+      hint: installed ? "detected" : "not found on this machine",
+    };
+  });
+
+  const result = await p.multiselect({
+    message: t("setup.selectAgents"),
+    options,
+    initialValues,
+    required: true,
+  });
+
+  if (p.isCancel(result)) {
+    p.cancel(t("setup.cancelled"));
+    process.exit(0);
+  }
+
+  const selected = result as string[];
+  if (!selected.includes(AgentName.ClaudeCode)) {
+    selected.unshift(AgentName.ClaudeCode);
+  }
+
+  return selected;
+}
+
 function buildConfig(
   token: string,
   userId: number,
   existing: Config | null,
-  locale: Locale
+  locale: Locale,
+  agents: string[]
 ): Config {
   return {
     telegram_bot_token: token,
@@ -151,6 +202,7 @@ function buildConfig(
     hook_port: existing?.hook_port || DEFAULT_HOOK_PORT,
     hook_secret: existing?.hook_secret || ConfigManager.generateSecret(),
     locale,
+    agents,
   };
 }
 
@@ -159,18 +211,45 @@ function saveConfig(config: Config): void {
   p.log.success(t("setup.configSaved"));
 }
 
-function installHook(config: Config): void {
-  if (HookInstaller.isInstalled()) {
-    p.log.step(t("setup.hookAlreadyInstalled"));
-    return;
+function syncAgentHooks(config: Config, previousAgents: string[]): void {
+  const registry = createDefaultRegistry();
+
+  const removedAgents = previousAgents.filter((a) => !config.agents.includes(a));
+  for (const agentName of removedAgents) {
+    const provider = registry.resolve(agentName);
+    if (!provider) continue;
+
+    try {
+      provider.uninstallHook();
+      p.log.success(t("setup.agentHookUninstalled", { agent: provider.displayName }));
+    } catch {
+      // hook may not exist
+    }
   }
 
-  try {
-    HookInstaller.install(config.hook_port, config.hook_secret);
-    p.log.success(t("setup.hookInstalled"));
-  } catch (err: unknown) {
-    p.log.error(t("setup.hookFailed", { error: err instanceof Error ? err.message : String(err) }));
-    throw err;
+  for (const agentName of config.agents) {
+    const provider = registry.resolve(agentName);
+    if (!provider) continue;
+
+    if (!provider.detect()) {
+      p.log.warn(t("setup.agentNotInstalled", { agent: provider.displayName }));
+      continue;
+    }
+
+    if (provider.isHookInstalled()) {
+      p.log.step(t("setup.agentHookAlreadyInstalled", { agent: provider.displayName }));
+      continue;
+    }
+
+    try {
+      provider.installHook(config.hook_port, config.hook_secret);
+      p.log.success(t("setup.agentHookInstalled", { agent: provider.displayName }));
+    } catch (err: unknown) {
+      p.log.error(
+        t("setup.hookFailed", { error: err instanceof Error ? err.message : String(err) })
+      );
+      throw err;
+    }
   }
 }
 

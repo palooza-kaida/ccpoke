@@ -2,8 +2,9 @@
 
 import { ConfigManager, type Config } from "./config-manager.js";
 import { TelegramChannel } from "./channel/telegram/telegram-channel.js";
-import { HookServer } from "./hook/hook-server.js";
-import { HookHandler } from "./hook/hook-handler.js";
+import { ApiServer } from "./server/api-server.js";
+import { AgentHandler } from "./agent/agent-handler.js";
+import { createDefaultRegistry } from "./agent/agent-registry.js";
 import { runSetup } from "./commands/setup.js";
 import { runUpdate } from "./commands/update.js";
 import { runUninstall } from "./commands/uninstall.js";
@@ -25,7 +26,9 @@ if (args.length > 0) {
 
 async function loadOrSetupConfig(): Promise<Config> {
   try {
-    return ConfigManager.load();
+    const config = ConfigManager.load();
+    ensureAgentHooks(config);
+    return config;
   } catch {
     log(t("bot.firstTimeSetup"));
     try {
@@ -37,11 +40,29 @@ async function loadOrSetupConfig(): Promise<Config> {
   }
 }
 
+function ensureAgentHooks(config: Config): void {
+  const registry = createDefaultRegistry();
+
+  for (const agentName of config.agents) {
+    const provider = registry.resolve(agentName);
+    if (!provider) continue;
+    if (provider.isHookInstalled()) continue;
+
+    if (!provider.detect()) {
+      logError(t("setup.agentNotInstalled", { agent: provider.displayName }));
+      continue;
+    }
+
+    provider.installHook(config.hook_port, config.hook_secret);
+    log(t("setup.agentHookInstalled", { agent: provider.displayName }));
+  }
+}
+
 async function startBot(): Promise<void> {
   const cfg = await loadOrSetupConfig();
 
-  const hookServer = new HookServer(cfg.hook_port, cfg.hook_secret);
-  hookServer.start();
+  const apiServer = new ApiServer(cfg.hook_port, cfg.hook_secret);
+  apiServer.start();
   log(`ccpoke: ${t("bot.started", { port: cfg.hook_port })}`);
 
   const tunnelManager = new TunnelManager();
@@ -52,9 +73,10 @@ async function startBot(): Promise<void> {
     logError(t("tunnel.failed"), err);
   }
 
+  const registry = createDefaultRegistry();
   const channel = new TelegramChannel(cfg);
-  const handler = new HookHandler(channel, cfg.hook_port, tunnelManager);
-  hookServer.setHandler(handler);
+  const handler = new AgentHandler(registry, channel, cfg.hook_port, tunnelManager);
+  apiServer.setHandler(handler);
 
   await channel.initialize();
 
@@ -68,7 +90,7 @@ async function startBot(): Promise<void> {
     log(t("bot.shuttingDown"));
     tunnelManager.stop();
     await channel.shutdown();
-    await hookServer.stop();
+    await apiServer.stop();
     process.exit(0);
   };
 

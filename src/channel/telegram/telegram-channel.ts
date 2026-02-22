@@ -52,7 +52,8 @@ export class TelegramChannel implements NotificationChannel {
   private formatNotification(data: NotificationData): string {
     const parts: string[] = [];
 
-    let header = `📦 *${escapeMarkdownV2(data.projectName)}*`;
+    let header = `🐾 *${escapeMarkdownV2(data.agentDisplayName)}*`;
+    header += ` · 📦 *${escapeMarkdownV2(data.projectName)}*`;
     if (data.durationMs > 0) {
       header += ` · ${escapeMarkdownV2(formatDuration(data.durationMs))}`;
     }
@@ -61,6 +62,8 @@ export class TelegramChannel implements NotificationChannel {
     if (data.responseSummary) {
       const snippet = extractProseSnippet(data.responseSummary, 150);
       parts.push(escapeMarkdownV2(snippet + "..."));
+    } else {
+      parts.push(escapeMarkdownV2("✅ Task done"));
     }
 
     if (data.inputTokens > 0 || data.outputTokens > 0) {
