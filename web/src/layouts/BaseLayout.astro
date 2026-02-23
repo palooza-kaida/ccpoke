@@ -29,8 +29,8 @@ const alternates = alternateLocales(locale, currentPath, base);
   {alternates.map(({ locale: loc, href }) => (
     <link rel="alternate" hreflang={loc === "zh" ? "zh-CN" : loc} href={href} />
   ))}
-  <link rel="icon" type="image/svg+xml" sizes="any" href={`${base}logo.svg?v=3`}>
-  <link rel="apple-touch-icon" href={`${base}logo.svg?v=3`}>
+  <link rel="icon" type="image/svg+xml" sizes="any" href={`${base}favicon.svg`}>
+  <link rel="apple-touch-icon" href={`${base}favicon.svg`}>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

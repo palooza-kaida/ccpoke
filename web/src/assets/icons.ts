@@ -13,7 +13,18 @@ import filePlus from "./icons/file-plus.svg?raw";
 import lock from "./icons/lock.svg?raw";
 import chevronDown16 from "./icons/chevron-down-16.svg?raw";
 import alertCircle from "./icons/alert-circle.svg?raw";
+import logoFilled from "./icons/logo-filled.svg?raw";
+import logoFilledRocket from "./icons/logo-filled-rocket.svg?raw";
 import logoOutline from "./icons/logo-outline.svg?raw";
+import logoOutlineRocket from "./icons/logo-outline-rocket.svg?raw";
+import brandAnthropic from "./icons/brands/anthropic.svg?raw";
+import brandCopilot from "./icons/brands/copilot.svg?raw";
+import brandCursor from "./icons/brands/cursor.svg?raw";
+import brandDiscord from "./icons/brands/discord.svg?raw";
+import brandGoogle from "./icons/brands/google.svg?raw";
+import brandOpenai from "./icons/brands/openai.svg?raw";
+import brandTelegram from "./icons/brands/telegram.svg?raw";
+import brandZalo from "./icons/brands/zalo.svg?raw";
 
 export const icons = {
   chevronDown,
@@ -31,7 +42,19 @@ export const icons = {
   lock,
   chevronDown16,
   alertCircle,
+  logoFilled,
+  logoFilledRocket,
   logoOutline,
+  logoOutlineRocket,
+  brandAnthropic,
+  brandCopilot,
+  brandCursor,
+  brandDiscord,
+  brandGoogle,
+  brandOpenai,
+  brandTelegram,
+  brandZalo,
 } as const;
 
 export type IconName = keyof typeof icons;
+

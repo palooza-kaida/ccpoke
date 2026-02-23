@@ -1,14 +1,6 @@
 ---
 import { ts, type Locale } from "../../i18n";
 import { icons } from "../../assets/icons";
-import anthropic from "../../assets/icons/brands/anthropic.svg?raw";
-import cursor from "../../assets/icons/brands/cursor.svg?raw";
-import google from "../../assets/icons/brands/google.svg?raw";
-import openai from "../../assets/icons/brands/openai.svg?raw";
-import copilot from "../../assets/icons/brands/copilot.svg?raw";
-import telegram from "../../assets/icons/brands/telegram.svg?raw";
-import discord from "../../assets/icons/brands/discord.svg?raw";
-import zalo from "../../assets/icons/brands/zalo.svg?raw";
 
 interface Props {
   locale: Locale;
@@ -17,17 +9,17 @@ interface Props {
 const { locale } = Astro.props;
 
 const leftNodes = [
-  { name: "Claude Code", icon: anthropic, active: true },
-  { name: "Cursor", icon: cursor, active: true },
-  { name: "Antigravity", icon: google, active: false },
-  { name: "Codex", icon: openai, active: false },
-  { name: "Copilot", icon: copilot, active: false },
+  { name: "Claude Code", icon: icons.brandAnthropic, active: true },
+  { name: "Cursor", icon: icons.brandCursor, active: true },
+  { name: "Antigravity", icon: icons.brandGoogle, active: false },
+  { name: "Codex", icon: icons.brandOpenai, active: false },
+  { name: "Copilot", icon: icons.brandCopilot, active: false },
 ];
 
 const rightNodes = [
-  { name: "Telegram", icon: telegram, active: true },
-  { name: "Discord", icon: discord, active: false },
-  { name: "Zalo", icon: zalo, active: false },
+  { name: "Telegram", icon: icons.brandTelegram, active: true },
+  { name: "Discord", icon: icons.brandDiscord, active: false },
+  { name: "Zalo", icon: icons.brandZalo, active: false },
 ];
 ---
 

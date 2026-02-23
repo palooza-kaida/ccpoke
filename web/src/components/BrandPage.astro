@@ -1,14 +1,19 @@
 ---
 import { ts, ta, type Locale } from "../i18n";
-import logoFilled from "../assets/icons/logo-filled.svg?raw";
-import logoOutline from "../assets/icons/logo-outline.svg?raw";
-import logoOutlineRocket from "../assets/icons/logo-outline-rocket.svg?raw";
+import { icons } from "../assets/icons";
 
 interface Props {
   locale: Locale;
 }
 
 const { locale } = Astro.props;
+
+const logoVariants = [
+  { svg: icons.logoFilledRocket, nameKey: "brandLogoFilledRocket", tagKey: "brandLogoFilledRocketTag", descKey: "brandLogoFilledRocketDesc", tagClass: "", accent: false },
+  { svg: icons.logoFilled, nameKey: "brandLogoFilled", tagKey: "brandLogoFilledTag", descKey: "brandLogoFilledDesc", tagClass: "logo-card__tag--alt", accent: false },
+  { svg: icons.logoOutline, nameKey: "brandLogoOutline", tagKey: "brandLogoOutlineTag", descKey: "brandLogoOutlineDesc", tagClass: "logo-card__tag--alt", accent: true },
+  { svg: icons.logoOutlineRocket, nameKey: "brandLogoOutlineRocket", tagKey: "brandLogoOutlineRocketTag", descKey: "brandLogoOutlineRocketDesc", tagClass: "logo-card__tag--rocket", accent: true },
+];
 
 const primaryColors = [
   { name: "Accent", hex: "#D97757", desc: "Primary brand color" },
@@ -39,7 +44,7 @@ const dontItems = ta(locale, "brandDontItems");
 
 <section class="brand-hero">
   <div class="brand-hero__inner">
-    <div class="brand-hero__logo" set:html={logoFilled} />
+    <div class="brand-hero__logo" set:html={icons.logoFilledRocket} />
     <h1>{ts(locale, "brandHeroTitle")}</h1>
     <p>{ts(locale, "brandHeroSub")}</p>
   </div>
@@ -55,38 +60,20 @@ const dontItems = ta(locale, "brandDontItems");
     </div>
 
     <div class="logo-grid">
-      <div class="logo-card">
-        <div class="logo-card__preview logo-card__preview--light">
-          <div class="logo-card__svg" set:html={logoFilled} />
+      {logoVariants.map(v => (
+        <div class="logo-card">
+          <div class="logo-card__preview">
+            <div class:list={["logo-card__svg", { "logo-card__svg--accent": v.accent }]} set:html={v.svg} />
+          </div>
+          <div class="logo-card__meta">
+            <div class="logo-card__head">
+              <h3>{ts(locale, v.nameKey)}</h3>
+              <span class:list={["logo-card__tag", v.tagClass]}>{ts(locale, v.tagKey)}</span>
+            </div>
+            <p>{ts(locale, v.descKey)}</p>
+          </div>
         </div>
-        <div class="logo-card__info">
-          <h3>{ts(locale, "brandLogoFilled")}</h3>
-          <span class="logo-card__tag">{ts(locale, "brandLogoFilledTag")}</span>
-          <p>{ts(locale, "brandLogoFilledDesc")}</p>
-        </div>
-      </div>
-
-      <div class="logo-card">
-        <div class="logo-card__preview logo-card__preview--light">
-          <div class="logo-card__svg logo-card__svg--accent" set:html={logoOutline} />
-        </div>
-        <div class="logo-card__info">
-          <h3>{ts(locale, "brandLogoOutline")}</h3>
-          <span class="logo-card__tag logo-card__tag--outline">{ts(locale, "brandLogoOutlineTag")}</span>
-          <p>{ts(locale, "brandLogoOutlineDesc")}</p>
-        </div>
-      </div>
-
-      <div class="logo-card">
-        <div class="logo-card__preview logo-card__preview--light">
-          <div class="logo-card__svg logo-card__svg--accent" set:html={logoOutlineRocket} />
-        </div>
-        <div class="logo-card__info">
-          <h3>{ts(locale, "brandLogoOutlineRocket")}</h3>
-          <span class="logo-card__tag logo-card__tag--rocket">{ts(locale, "brandLogoOutlineRocketTag")}</span>
-          <p>{ts(locale, "brandLogoOutlineRocketDesc")}</p>
-        </div>
-      </div>
+      ))}
     </div>
 
     <div class="brand-subsection">
@@ -94,7 +81,7 @@ const dontItems = ta(locale, "brandDontItems");
       <p>{ts(locale, "brandClearSpaceDesc")}</p>
       <div class="clearspace-demo">
         <div class="clearspace-box">
-          <div class="clearspace-logo" set:html={logoFilled} />
+          <div class="clearspace-logo" set:html={icons.logoFilledRocket} />
           <span class="clearspace-label">x</span>
         </div>
       </div>
@@ -242,7 +229,7 @@ const dontItems = ta(locale, "brandDontItems");
     </div>
 
     <div class="anatomy-demo">
-      <div class="anatomy-logo" set:html={logoFilled} />
+      <div class="anatomy-logo" set:html={icons.logoFilledRocket} />
       <div class="anatomy-labels">
         <div class="anatomy-item">
           <span class="anatomy-dot" style="background: var(--color-accent)"></span>
@@ -266,7 +253,7 @@ const dontItems = ta(locale, "brandDontItems");
           </div>
         </div>
         <div class="anatomy-item">
-          <span class="anatomy-dot" style="background: #EDAA85"></span>
+          <span class="anatomy-dot" style="background: var(--color-flame-top, #EDAA85)"></span>
           <div>
             <strong>{ts(locale, "brandMascotRocket")}</strong>
             <span>{ts(locale, "brandMascotRocketDesc")}</span>
@@ -324,28 +311,72 @@ const dontItems = ta(locale, "brandDontItems");
   .brand-section__header h2 { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 0.5rem; }
   .brand-section__header p { color: var(--color-txt-2); font-size: 0.92rem; line-height: 1.7; max-width: 600px; margin: 0; }
 
-  .logo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-  .logo-card { border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; transition: box-shadow 0.2s; }
-  .logo-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-  .logo-card__preview {
-    display: flex; align-items: center; justify-content: center;
-    padding: 2.5rem 2rem; min-height: 160px;
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
   }
-  .logo-card__preview--light { background: var(--color-bg-warm); }
-  .logo-card__svg { width: 72px; height: 72px; }
+  .logo-card {
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
+  }
+  .logo-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+  .logo-card__preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    min-height: 140px;
+    background: var(--color-bg-warm);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .logo-card__svg {
+    width: 64px;
+    height: 64px;
+  }
   .logo-card__svg :global(svg) { width: 100%; height: 100%; }
   .logo-card__svg--accent :global(svg) { color: var(--color-accent); }
-  .logo-card__info { padding: 1rem 1.25rem; }
-  .logo-card__info h3 { font-size: 0.92rem; font-weight: 700; margin: 0 0 0.375rem; }
-  .logo-card__tag {
-    display: inline-block; font-size: 0.65rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.05em;
-    padding: 2px 8px; border-radius: 4px;
-    background: var(--color-accent-light); color: var(--color-accent); margin-bottom: 0.5rem;
+  .logo-card__meta {
+    padding: 0.75rem 1rem;
   }
-  .logo-card__tag--outline { background: var(--color-plum-light); color: var(--color-plum); }
+  .logo-card__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .logo-card__head h3 {
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+  }
+  .logo-card__tag {
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: var(--color-accent-light);
+    color: var(--color-accent);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .logo-card__tag--alt { background: var(--color-plum-light); color: var(--color-plum); }
   .logo-card__tag--rocket { background: var(--color-sky-light); color: var(--color-sky); }
-  .logo-card__info p { font-size: 0.78rem; color: var(--color-txt-2); margin: 0; line-height: 1.6; }
+  .logo-card__meta p {
+    font-size: 0.72rem;
+    color: var(--color-txt-3);
+    margin: 0;
+    line-height: 1.5;
+  }
 
   .brand-subsection { margin-top: 2.5rem; }
   .brand-subsection h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 0.5rem; }
@@ -416,10 +447,14 @@ const dontItems = ta(locale, "brandDontItems");
   .anatomy-item strong { display: block; font-size: 0.85rem; }
   .anatomy-item span { font-size: 0.78rem; color: var(--color-txt-2); }
 
+  @media (max-width: 900px) {
+    .logo-grid { grid-template-columns: repeat(2, 1fr); }
+    .logo-card__head { flex-wrap: wrap; }
+  }
+
   @media (max-width: 700px) {
     .brand-hero { padding: 3.5rem 1.5rem 3rem; }
     .brand-content { padding: 0 1rem 3rem; }
-    .logo-grid { grid-template-columns: 1fr; }
     .usage-grid { grid-template-columns: 1fr; }
     .type-grid { grid-template-columns: 1fr; }
     .anatomy-demo { grid-template-columns: 1fr; justify-items: center; }
