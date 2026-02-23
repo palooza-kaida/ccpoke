@@ -15,12 +15,6 @@ export const zh: Record<string, string | string[]> = {
   howLabel: "工作原理",
   howTitle: "终端与手机之间的双向桥梁",
   howSub: "发送提示、接收结果、审批权限 — 全部在您使用的聊天平台上完成。",
-  howTerminalTitle: "AI 代理",
-  howTerminalDesc: "Claude Code、Cursor 等 AI 代理在您的机器上运行。ccpoke 监听 hook 事件和转录。",
-  howYouTitle: "您",
-  howYouDesc: "随时随地聊天、审查、批准。",
-  howFlowRealtime: "实时",
-  howPlusMore: "+ 更多",
 
   featuresLabel: "功能",
   featuresTitle: "不仅仅是通知",

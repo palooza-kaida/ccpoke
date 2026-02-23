@@ -1,12 +1,34 @@
 ---
 import { ts, type Locale } from "../../i18n";
 import { icons } from "../../assets/icons";
+import anthropic from "../../assets/icons/brands/anthropic.svg?raw";
+import cursor from "../../assets/icons/brands/cursor.svg?raw";
+import google from "../../assets/icons/brands/google.svg?raw";
+import openai from "../../assets/icons/brands/openai.svg?raw";
+import copilot from "../../assets/icons/brands/copilot.svg?raw";
+import telegram from "../../assets/icons/brands/telegram.svg?raw";
+import discord from "../../assets/icons/brands/discord.svg?raw";
+import zalo from "../../assets/icons/brands/zalo.svg?raw";
 
 interface Props {
   locale: Locale;
 }
 
 const { locale } = Astro.props;
+
+const leftNodes = [
+  { name: "Claude Code", icon: anthropic, active: true },
+  { name: "Cursor", icon: cursor, active: true },
+  { name: "Antigravity", icon: google, active: false },
+  { name: "Codex", icon: openai, active: false },
+  { name: "Copilot", icon: copilot, active: false },
+];
+
+const rightNodes = [
+  { name: "Telegram", icon: telegram, active: true },
+  { name: "Discord", icon: discord, active: false },
+  { name: "Zalo", icon: zalo, active: false },
+];
 ---
 
 <section class="sect-section py-20" id="how">
@@ -16,39 +38,143 @@ const { locale } = Astro.props;
     <p class="text-[0.95rem] text-txt-2 max-w-[460px]">{ts(locale, "howSub")}</p>
   </div>
 
-  <div class="flow-grid grid grid-cols-[1fr_80px_1fr]">
-    <div class="p-8 bg-bg-warm rounded-2xl h-full">
-      <h3 class="text-[0.95rem] font-bold mb-2 flex items-center gap-2.5 text-txt">
-        <span class="text-accent shrink-0 w-[18px] h-[18px]" set:html={icons.bot} />
-        <span>{ts(locale, "howTerminalTitle")}</span>
-      </h3>
-      <p class="text-sm text-txt-2 leading-relaxed">{ts(locale, "howTerminalDesc")}</p>
-      <div class="flex flex-wrap gap-1.5 mt-3.5">
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#FFF3E0] text-[#E65100]">Claude Code</span>
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E8EAF6] text-[#283593]">Cursor</span>
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-plat-more text-txt-3">{ts(locale, "howPlusMore")}</span>
+  <div class="flow-diagram" id="flow-diagram">
+    <div class="flow-nodes flow-nodes--left">
+      {leftNodes.map((node) => (
+        <div class={`flow-node flow-node--${node.active ? "active" : "inactive"}`} data-flow-node="left" data-flow-active={node.active ? "true" : "false"}>
+          <span class="flow-node__icon" set:html={node.icon} />
+          <span>{node.name}</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="flow-center">
+      <svg class="flow-svg" id="flow-svg" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <defs>
+          <radialGradient id="dot-glow">
+            <stop offset="0%" stop-color="rgba(217,119,87,0.6)" />
+            <stop offset="100%" stop-color="rgba(217,119,87,0)" />
+          </radialGradient>
+        </defs>
+      </svg>
+
+      <div class="flow-hub" id="flow-hub">
+        <span class="flow-hub__logo text-accent" set:html={icons.logoOutline} />
+        <span class="flow-hub__label">ccpoke</span>
       </div>
     </div>
 
-    <div class="flow-center-wrap flex flex-col items-center gap-1 relative self-center">
-      <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mb-1.5">ccpoke</span>
-      <div class="flow-line"></div>
-      <div class="flow-line reverse"></div>
-      <span class="text-[0.6rem] font-bold uppercase tracking-wider text-accent bg-accent-light px-2 py-0.5 rounded mt-1.5">{ts(locale, "howFlowRealtime")}</span>
-    </div>
-
-    <div class="p-8 bg-bg-warm rounded-2xl h-full">
-      <h3 class="text-[0.95rem] font-bold mb-2 flex items-center gap-2.5 text-txt">
-        <span class="text-accent shrink-0 w-[18px] h-[18px]" set:html={icons.smartphone} />
-        <span>{ts(locale, "howYouTitle")}</span>
-      </h3>
-      <p class="text-sm text-txt-2 leading-relaxed">{ts(locale, "howYouDesc")}</p>
-      <div class="flex flex-wrap gap-1.5 mt-3.5">
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E3F2FD] text-[#1976D2]">Telegram</span>
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#EDE7F6] text-[#5E35B1]">Discord</span>
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#E8F5E9] text-[#2E7D32]">Zalo</span>
-        <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-plat-more text-txt-3">{ts(locale, "howPlusMore")}</span>
-      </div>
+    <div class="flow-nodes flow-nodes--right">
+      {rightNodes.map((node) => (
+        <div class={`flow-node flow-node--${node.active ? "active" : "inactive"}`} data-flow-node="right" data-flow-active={node.active ? "true" : "false"}>
+          <span class="flow-node__icon" set:html={node.icon} />
+          <span>{node.name}</span>
+        </div>
+      ))}
     </div>
   </div>
 </section>
+
+<script>
+function drawFlowPaths() {
+  const svg = document.getElementById("flow-svg") as SVGSVGElement | null;
+  const hub = document.getElementById("flow-hub");
+  const diagram = document.getElementById("flow-diagram");
+  if (!svg || !hub || !diagram) return;
+
+  const defs = svg.querySelector("defs");
+  svg.innerHTML = "";
+  if (defs) svg.appendChild(defs);
+
+  const svgRect = svg.getBoundingClientRect();
+  const hubRect = hub.getBoundingClientRect();
+
+  const hubLeftX = hubRect.left - svgRect.left;
+  const hubRightX = hubRect.right - svgRect.left;
+  const hubCenterY = hubRect.top + hubRect.height / 2 - svgRect.top;
+
+  const leftNodes = diagram.querySelectorAll('[data-flow-node="left"]');
+  const rightNodes = diagram.querySelectorAll('[data-flow-node="right"]');
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function buildCurvePath(startX: number, startY: number, endX: number, endY: number) {
+    const cpX = startX + (endX - startX) * 0.5;
+    return `M ${startX} ${startY} C ${cpX} ${startY}, ${cpX} ${endY}, ${endX} ${endY}`;
+  }
+
+  function createBasePath(d: string, isActive: boolean) {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", d);
+    path.setAttribute("class", `flow-path flow-path--${isActive ? "active" : "inactive"}`);
+    svg!.appendChild(path);
+  }
+
+  function createFlowDot(d: string, delay: number, reverse: boolean) {
+    if (prefersReducedMotion) return;
+
+    const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    group.setAttribute("opacity", "0.85");
+
+    const glow = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    glow.setAttribute("r", "4");
+    glow.setAttribute("fill", "url(#dot-glow)");
+
+    const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    dot.setAttribute("r", "2");
+    dot.setAttribute("fill", "var(--color-accent)");
+
+    [glow, dot].forEach((el) => {
+      const motion = document.createElementNS("http://www.w3.org/2000/svg", "animateMotion");
+      motion.setAttribute("dur", "4s");
+      motion.setAttribute("repeatCount", "indefinite");
+      motion.setAttribute("begin", `${delay}s`);
+      motion.setAttribute("path", d);
+      if (reverse) {
+        motion.setAttribute("keyPoints", "1;0");
+        motion.setAttribute("keyTimes", "0;1");
+      }
+      el.appendChild(motion);
+    });
+
+    group.appendChild(glow);
+    group.appendChild(dot);
+    svg!.appendChild(group);
+  }
+
+  let activeIndex = 0;
+
+  leftNodes.forEach((node) => {
+    const nodeRect = node.getBoundingClientRect();
+    const startX = nodeRect.right - svgRect.left;
+    const startY = nodeRect.top + nodeRect.height / 2 - svgRect.top;
+    const d = buildCurvePath(startX, startY, hubLeftX, hubCenterY);
+    const isActive = node.getAttribute("data-flow-active") === "true";
+    createBasePath(d, isActive);
+
+    if (isActive) {
+      const reverse = activeIndex % 2 !== 0;
+      createFlowDot(d, activeIndex * 1.5, reverse);
+      activeIndex++;
+    }
+  });
+
+  rightNodes.forEach((node) => {
+    const nodeRect = node.getBoundingClientRect();
+    const endX = nodeRect.left - svgRect.left;
+    const endY = nodeRect.top + nodeRect.height / 2 - svgRect.top;
+    const d = buildCurvePath(hubRightX, hubCenterY, endX, endY);
+    const isActive = node.getAttribute("data-flow-active") === "true";
+    createBasePath(d, isActive);
+
+    if (isActive) {
+      const reverse = activeIndex % 2 !== 0;
+      createFlowDot(d, activeIndex * 1.5, reverse);
+      activeIndex++;
+    }
+  });
+}
+
+drawFlowPaths();
+window.addEventListener("resize", drawFlowPaths);
+</script>

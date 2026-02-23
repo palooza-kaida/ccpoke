@@ -15,12 +15,6 @@ export const vi: Record<string, string | string[]> = {
   howLabel: "Cách hoạt động",
   howTitle: "Bridge 2 chiều giữa terminal và điện thoại",
   howSub: "Gửi prompt, nhận kết quả, approve quyền — tất cả từ nền tảng chat bạn đang dùng.",
-  howTerminalTitle: "AI Agents",
-  howTerminalDesc: "Claude Code, Cursor và các AI agent khác chạy trên máy. ccpoke lắng nghe hook event và transcript.",
-  howYouTitle: "Bạn",
-  howYouDesc: "Chat, review, approve từ bất kỳ đâu.",
-  howFlowRealtime: "real-time",
-  howPlusMore: "+ nữa",
 
   featuresLabel: "Tính năng",
   featuresTitle: "Không chỉ notification",

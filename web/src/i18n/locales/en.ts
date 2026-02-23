@@ -15,12 +15,6 @@ export const en: Record<string, string | string[]> = {
   howLabel: "How it works",
   howTitle: "Two-way bridge between terminal and phone",
   howSub: "Send prompts, receive results, approve permissions — all from your favorite chat platform.",
-  howTerminalTitle: "AI Agents",
-  howTerminalDesc: "Claude Code, Cursor and more run on your machine. ccpoke listens to hook events and transcripts.",
-  howYouTitle: "You",
-  howYouDesc: "Chat, review, approve from anywhere.",
-  howFlowRealtime: "real-time",
-  howPlusMore: "+ more",
 
   featuresLabel: "Features",
   featuresTitle: "More than notifications",
