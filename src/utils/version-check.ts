@@ -56,11 +56,10 @@ function formatUpdateBox(currentVersion: string, latestVersion: string): string 
   ];
 
   const maxLen = Math.max(...lines.map((l) => l.length));
-  const border = "┃";
   const top = "┏" + "━".repeat(maxLen + 2) + "┓";
   const bottom = "┗" + "━".repeat(maxLen + 2) + "┛";
 
-  const boxLines = lines.map((l) => `${border} ${l.padEnd(maxLen)} ${border}`);
+  const boxLines = lines.map((l) => `┃ ${l.padEnd(maxLen)} ┃`);
 
   return [top, ...boxLines, bottom].join("\n");
 }
@@ -94,6 +93,6 @@ export async function checkForUpdates(): Promise<void> {
   if (!latestVersion) return;
 
   if (isNewerVersion(currentVersion, latestVersion)) {
-    logWarn(formatUpdateBox(currentVersion, latestVersion));
+    logWarn(formatUpdateBox(currentVersion, latestVersion), { showTimestamp: false });
   }
 }

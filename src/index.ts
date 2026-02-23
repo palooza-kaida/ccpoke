@@ -59,6 +59,8 @@ function ensureAgentHooks(config: Config): void {
 }
 
 async function startBot(): Promise<void> {
+  await checkForUpdates().catch(() => {});
+
   const cfg = await loadOrSetupConfig();
 
   const apiServer = new ApiServer(cfg.hook_port, cfg.hook_secret);
@@ -83,8 +85,6 @@ async function startBot(): Promise<void> {
   if (detectInstallMethod() === InstallMethod.Npx) {
     log(t("bot.globalInstallTip"));
   }
-
-  checkForUpdates().catch(() => {});
 
   const shutdown = async () => {
     log(t("bot.shuttingDown"));
