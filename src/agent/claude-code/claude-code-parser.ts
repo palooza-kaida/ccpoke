@@ -1,5 +1,34 @@
 import { readFileSync } from "node:fs";
-import { expandHome } from "../../utils/paths.js";
+import { basename } from "node:path";
+import { expandHome, paths } from "../../utils/paths.js";
+
+export function extractProjectName(cwd: string, transcriptPath: string): string {
+  if (transcriptPath) {
+    const expanded = expandHome(transcriptPath);
+    if (expanded.startsWith(`${paths.claudeProjectsDir}/`)) {
+      const encodedDir = expanded.slice(`${paths.claudeProjectsDir}/`.length).split("/")[0];
+      if (encodedDir) {
+        const projectPath = resolveProjectPath(encodedDir, cwd);
+        if (projectPath) return basename(projectPath);
+      }
+    }
+  }
+  return basename(cwd);
+}
+
+function resolveProjectPath(encodedDir: string, cwd: string): string | null {
+  const encodedCwd = encodePathSegment(cwd);
+  if (encodedDir === encodedCwd) return cwd;
+
+  if (encodedDir.startsWith(encodedCwd)) return cwd;
+  if (encodedCwd.startsWith(encodedDir)) return cwd;
+
+  return null;
+}
+
+function encodePathSegment(absolutePath: string): string {
+  return absolutePath.replaceAll("/", "-");
+}
 
 interface TranscriptEntry {
   type?: string;

@@ -2,9 +2,9 @@ import { existsSync } from "node:fs";
 import type { AgentProvider, AgentEventResult } from "../types.js";
 import { AgentName, AGENT_DISPLAY_NAMES } from "../types.js";
 import { ClaudeCodeInstaller } from "./claude-code-installer.js";
-import { isValidStopEvent, parseTranscript } from "./claude-code-parser.js";
+import { isValidStopEvent, parseTranscript, extractProjectName } from "./claude-code-parser.js";
 import { collectGitChanges } from "../../utils/git-collector.js";
-import { extractProjectName, paths } from "../../utils/paths.js";
+import { paths } from "../../utils/paths.js";
 import { DEFAULT_FALLBACK_DURATION_MS, TRANSCRIPT_SETTLE_DELAY_MS } from "../../utils/constants.js";
 import { logError } from "../../utils/log.js";
 import { t } from "../../i18n/index.js";
@@ -57,7 +57,7 @@ export class ClaudeCodeProvider implements AgentProvider {
     }
 
     return {
-      projectName: extractProjectName(raw.cwd),
+      projectName: extractProjectName(raw.cwd, raw.transcript_path),
       responseSummary: summary.lastAssistantMessage,
       durationMs,
       gitChanges,
@@ -70,9 +70,10 @@ export class ClaudeCodeProvider implements AgentProvider {
   private createFallbackResult(raw: unknown): AgentEventResult {
     const obj = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
     const cwd = typeof obj.cwd === "string" ? obj.cwd : process.cwd();
+    const transcriptPath = typeof obj.transcript_path === "string" ? obj.transcript_path : "";
 
     return {
-      projectName: extractProjectName(cwd),
+      projectName: extractProjectName(cwd, transcriptPath),
       responseSummary: "",
       durationMs: 0,
       gitChanges: collectGitChanges(cwd),

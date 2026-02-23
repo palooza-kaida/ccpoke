@@ -1,5 +1,26 @@
 import { readFileSync, existsSync } from "node:fs";
 import { basename } from "node:path";
+import { expandHome, paths } from "../../utils/paths.js";
+
+export function extractProjectName(cwd: string, transcriptPath: string): string {
+  if (transcriptPath) {
+    const expanded = expandHome(transcriptPath);
+    if (expanded.startsWith(`${paths.cursorProjectsDir}/`)) {
+      const encodedDir = expanded.slice(`${paths.cursorProjectsDir}/`.length).split("/")[0];
+      if (encodedDir) {
+        const encodedCwd = cwd.replaceAll("/", "-");
+        if (
+          encodedDir === encodedCwd ||
+          encodedDir.startsWith(encodedCwd) ||
+          encodedCwd.startsWith(encodedDir)
+        ) {
+          return basename(cwd);
+        }
+      }
+    }
+  }
+  return basename(cwd);
+}
 
 interface CursorTranscriptEntry {
   role?: string;
@@ -15,7 +36,6 @@ export interface StopEvent {
   transcriptPath: string;
   cursorVersion: string;
   cwd: string;
-  projectName: string;
 }
 
 export interface TranscriptSummary {
@@ -51,7 +71,6 @@ export function parseStopEvent(raw: Record<string, unknown>): StopEvent {
     transcriptPath,
     cursorVersion: typeof raw.cursor_version === "string" ? raw.cursor_version : "",
     cwd,
-    projectName: basename(cwd),
   };
 }
 

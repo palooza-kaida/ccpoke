@@ -4,9 +4,14 @@ import { homedir } from "node:os";
 import type { AgentProvider, AgentEventResult } from "../types.js";
 import { AgentName, AGENT_DISPLAY_NAMES } from "../types.js";
 import { CursorInstaller } from "./cursor-installer.js";
-import { parseStopEvent, parseTranscript, isValidStopEvent } from "./cursor-parser.js";
+import {
+  parseStopEvent,
+  parseTranscript,
+  isValidStopEvent,
+  extractProjectName,
+} from "./cursor-parser.js";
+import { readComposerData } from "./cursor-state-reader.js";
 import { collectGitChanges } from "../../utils/git-collector.js";
-import { extractProjectName } from "../../utils/paths.js";
 import { logError } from "../../utils/log.js";
 import { t } from "../../i18n/index.js";
 
@@ -37,6 +42,7 @@ export class CursorProvider implements AgentProvider {
     }
 
     const event = parseStopEvent(raw);
+    const composerData = readComposerData(event.conversationId);
 
     let summary = {
       lastAssistantMessage: "",
@@ -57,22 +63,23 @@ export class CursorProvider implements AgentProvider {
     const gitChanges = collectGitChanges(event.cwd);
 
     return {
-      projectName: event.projectName,
+      projectName: extractProjectName(event.cwd, event.transcriptPath),
       responseSummary: summary.lastAssistantMessage,
-      durationMs: summary.durationMs,
+      durationMs: composerData.durationMs,
       gitChanges,
       inputTokens: summary.inputTokens,
       outputTokens: summary.outputTokens,
-      model: summary.model || event.model,
+      model: composerData.model || event.model,
     };
   }
 
   private createFallbackResult(raw: unknown): AgentEventResult {
     const obj = (typeof raw === "object" && raw !== null ? raw : {}) as Record<string, unknown>;
     const cwd = typeof obj.cwd === "string" ? obj.cwd : process.cwd();
+    const transcriptPath = typeof obj.transcript_path === "string" ? obj.transcript_path : "";
 
     return {
-      projectName: extractProjectName(cwd),
+      projectName: extractProjectName(cwd, transcriptPath),
       responseSummary: "",
       durationMs: 0,
       gitChanges: collectGitChanges(cwd),

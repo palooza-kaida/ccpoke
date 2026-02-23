@@ -1,4 +1,4 @@
-import { join, dirname, basename } from "node:path";
+import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
@@ -34,9 +34,11 @@ export const paths = {
 
   claudeDir: CLAUDE_HOME,
   claudeSettings: join(CLAUDE_HOME, "settings.json"),
+  claudeProjectsDir: join(CLAUDE_HOME, "projects"),
 
   cursorDir: CURSOR_HOME,
   cursorHooksJson: join(CURSOR_HOME, "hooks.json"),
+  cursorProjectsDir: join(CURSOR_HOME, "projects"),
 } as const;
 
 export function getPackageVersion(): string {
@@ -52,8 +54,4 @@ export function expandHome(filepath: string): string {
     return join(homedir(), filepath.slice(2));
   }
   return filepath;
-}
-
-export function extractProjectName(cwd: string): string {
-  return basename(cwd);
 }
