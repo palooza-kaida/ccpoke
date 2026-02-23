@@ -52,12 +52,12 @@ export class TelegramChannel implements NotificationChannel {
   private formatNotification(data: NotificationData): string {
     const parts: string[] = [];
 
-    let header = `🐾 *${escapeMarkdownV2(data.agentDisplayName)}*`;
-    header += ` · 📦 *${escapeMarkdownV2(data.projectName)}*`;
+    const titleLine = `📦 *${escapeMarkdownV2(data.projectName)}*`;
+    let metaLine = `🐾 ${escapeMarkdownV2(data.agentDisplayName)}`;
     if (data.durationMs > 0) {
-      header += ` · ${escapeMarkdownV2(formatDuration(data.durationMs))}`;
+      metaLine += ` · ⏱ ${escapeMarkdownV2(formatDuration(data.durationMs))}`;
     }
-    parts.push(header);
+    parts.push(`${titleLine}\n${metaLine}`);
 
     if (data.responseSummary) {
       const snippet = extractProseSnippet(data.responseSummary, 150);
