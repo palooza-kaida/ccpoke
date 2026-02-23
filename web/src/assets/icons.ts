@@ -17,7 +17,7 @@ import logoFilled from "./icons/logo/filled.svg?raw";
 import logoFilledRocket from "./icons/logo/filled-rocket.svg?raw";
 import logoOutline from "./icons/logo/outline.svg?raw";
 import logoOutlineRocket from "./icons/logo/outline-rocket.svg?raw";
-import brandAnthropic from "./icons/brands/anthropic.svg?raw";
+import brandClaude from "./icons/brands/claude.svg?raw";
 import brandCopilot from "./icons/brands/copilot.svg?raw";
 import brandCursor from "./icons/brands/cursor.svg?raw";
 import brandDiscord from "./icons/brands/discord.svg?raw";
@@ -46,7 +46,7 @@ export const icons = {
   logoFilledRocket,
   logoOutline,
   logoOutlineRocket,
-  brandAnthropic,
+  brandClaude,
   brandCopilot,
   brandCursor,
   brandDiscord,
