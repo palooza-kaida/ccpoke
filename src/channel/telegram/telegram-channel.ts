@@ -7,7 +7,7 @@ import { MINI_APP_BASE_URL } from "../../utils/constants.js";
 import { formatModelName, formatDuration, formatTokenCount } from "../../utils/stats-format.js";
 import { extractProseSnippet } from "../../utils/markdown.js";
 import { t, getTranslations } from "../../i18n/index.js";
-import { log, logError } from "../../utils/log.js";
+import { log, logError, logWarn } from "../../utils/log.js";
 
 export class TelegramChannel implements NotificationChannel {
   private bot: TelegramBot;
@@ -137,7 +137,7 @@ export class TelegramChannel implements NotificationChannel {
     this.bot.on("polling_error", () => {
       if (!this.isDisconnected) {
         this.isDisconnected = true;
-        log(t("bot.connectionLost"));
+        logWarn(t("bot.connectionLost"));
       }
     });
 

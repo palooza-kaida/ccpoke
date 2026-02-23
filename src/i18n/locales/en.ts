@@ -14,10 +14,10 @@ export const en: TranslationKeys = {
     registeredChatId: "registered chat ID {chatId}",
     unauthorizedUser: "unauthorized user {userId} ({username})",
     ready:
-      "✅ *ccpoke* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
-    alreadyConnected: "✅ ccpoke is already connected — bot is running normally.",
-    connectionLost: "⚠️ lost connection to Telegram — retrying...",
-    connectionRestored: "✅ reconnected to Telegram",
+      "*ccpoke* is ready\\.\n\nYou will receive notifications when Claude Code completes a response\\.",
+    alreadyConnected: "ccpoke is already connected — bot is running normally.",
+    connectionLost: "lost connection to Telegram — retrying...",
+    connectionRestored: "reconnected to Telegram",
     commands: {
       start: "Connect bot to this chat",
     },
@@ -27,6 +27,8 @@ export const en: TranslationKeys = {
     sendFallbackFailed: "fallback also failed",
     firstTimeSetup: "no config found — starting setup wizard...",
     globalInstallTip: "💡 Tip: run 'npm i -g ccpoke' for faster startup",
+    alreadyRunning:
+      "another ccpoke is already running on port {port}\n\n  To stop it:\n    kill $(lsof -ti:{port})\n",
   },
 
   setup: {
@@ -120,8 +122,8 @@ export const en: TranslationKeys = {
     installing: "installing cloudflared binary...",
     installed: "cloudflared binary installed",
     started: "🌐 public URL: {url}",
-    failed: "⚠️ tunnel failed, using localhost only",
-    disconnected: "⚠️ tunnel disconnected, reconnecting...",
+    failed: "tunnel failed, using localhost only",
+    disconnected: "tunnel disconnected, reconnecting...",
     exited: "tunnel process exited (code {code})",
     timeout: "tunnel connection timeout ({seconds}s)",
   },
@@ -138,7 +140,7 @@ export const en: TranslationKeys = {
   },
   agent: {
     unknownAgent: "Unknown agent: {agent}",
-    taskDone: "✅ Task done",
+    taskDone: "Task done",
   },
 
   common: {

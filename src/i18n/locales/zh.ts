@@ -13,10 +13,10 @@ export const zh: TranslationKeys = {
     notificationFailed: "发送通知失败",
     registeredChatId: "已注册聊天ID {chatId}",
     unauthorizedUser: "未授权用户 {userId} ({username})",
-    ready: "✅ *ccpoke* 已就绪\\.\n\n当Claude Code完成响应时，您将收到通知\\.",
-    alreadyConnected: "✅ ccpoke 已连接 — 机器人运行正常。",
-    connectionLost: "⚠️ 与 Telegram 连接中断 — 正在重试...",
-    connectionRestored: "✅ 已重新连接 Telegram",
+    ready: "*ccpoke* 已就绪\\.\n\n当Claude Code完成响应时，您将收到通知\\.",
+    alreadyConnected: "ccpoke 已连接 — 机器人运行正常。",
+    connectionLost: "与 Telegram 连接中断 — 正在重试...",
+    connectionRestored: "已重新连接 Telegram",
     commands: {
       start: "将机器人连接到此聊天",
     },
@@ -26,6 +26,8 @@ export const zh: TranslationKeys = {
     sendFallbackFailed: "备用方式也失败",
     firstTimeSetup: "未找到配置 — 正在启动设置向导...",
     globalInstallTip: "💡 提示: 运行 'npm i -g ccpoke' 可加快启动速度",
+    alreadyRunning:
+      "另一个 ccpoke 已在端口 {port} 上运行\n\n  停止方法:\n    kill $(lsof -ti:{port})\n",
   },
 
   setup: {
@@ -119,8 +121,8 @@ export const zh: TranslationKeys = {
     installing: "正在安装 cloudflared 二进制文件...",
     installed: "cloudflared 二进制文件已安装",
     started: "🌐 公共 URL: {url}",
-    failed: "⚠️ 隧道失败，仅使用 localhost",
-    disconnected: "⚠️ 隧道断开连接，正在重新连接...",
+    failed: "隧道失败，仅使用 localhost",
+    disconnected: "隧道断开连接，正在重新连接...",
     exited: "隧道进程已退出 (代码 {code})",
     timeout: "隧道连接超时 ({seconds}秒)",
   },
@@ -137,7 +139,7 @@ export const zh: TranslationKeys = {
   },
   agent: {
     unknownAgent: "未知代理: {agent}",
-    taskDone: "✅ 任务完成",
+    taskDone: "任务完成",
   },
 
   common: {

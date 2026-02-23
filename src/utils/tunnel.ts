@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { t } from "../i18n/index.js";
-import { log } from "./log.js";
+import { log, logWarn } from "./log.js";
 import { TUNNEL_TIMEOUT_MS } from "./constants.js";
 
 export class TunnelManager {
@@ -39,7 +39,7 @@ export class TunnelManager {
     this.url = url;
 
     tunnel.on("disconnected", () => {
-      log(t("tunnel.disconnected"));
+      logWarn(t("tunnel.disconnected"));
     });
 
     tunnel.on("exit", (code: number | null) => {

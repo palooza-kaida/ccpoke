@@ -64,7 +64,7 @@ async function startBot(): Promise<void> {
   const cfg = await loadOrSetupConfig();
 
   const apiServer = new ApiServer(cfg.hook_port, cfg.hook_secret);
-  apiServer.start();
+  await apiServer.start();
   log(`ccpoke: ${t("bot.started", { port: cfg.hook_port })}`);
 
   const tunnelManager = new TunnelManager();

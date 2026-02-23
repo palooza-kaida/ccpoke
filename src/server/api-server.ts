@@ -5,7 +5,7 @@ import { AgentName } from "../agent/types.js";
 import { responseStore } from "../utils/response-store.js";
 import { MINI_APP_BASE_URL, ApiRoute } from "../utils/constants.js";
 import { t } from "../i18n/index.js";
-import { log } from "../utils/log.js";
+import { log, logError } from "../utils/log.js";
 
 const ALLOWED_CORS_ORIGIN = new URL(MINI_APP_BASE_URL).origin;
 
@@ -26,9 +26,20 @@ export class ApiServer {
     this.handler = handler;
   }
 
-  start(): void {
-    this.server = this.app.listen(this.port, "127.0.0.1", () => {
-      log(t("hook.serverListening", { port: this.port }));
+  start(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.server = this.app.listen(this.port, "127.0.0.1", () => {
+        log(t("hook.serverListening", { port: this.port }));
+        resolve();
+      });
+
+      this.server.on("error", (err: NodeJS.ErrnoException) => {
+        if (err.code === "EADDRINUSE") {
+          logError(t("bot.alreadyRunning", { port: this.port }));
+          process.exit(1);
+        }
+        reject(err);
+      });
     });
   }
 

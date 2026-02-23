@@ -14,10 +14,10 @@ export const vi: TranslationKeys = {
     registeredChatId: "đã đăng ký chat ID {chatId}",
     unauthorizedUser: "user không có quyền {userId} ({username})",
     ready:
-      "✅ *ccpoke* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
-    alreadyConnected: "✅ ccpoke đã kết nối rồi — bot đang hoạt động bình thường.",
-    connectionLost: "⚠️ mất kết nối tới Telegram — đang thử kết nối lại...",
-    connectionRestored: "✅ đã kết nối lại Telegram",
+      "*ccpoke* đã sẵn sàng\\.\n\nBạn sẽ nhận notification khi Claude Code hoàn thành response\\.",
+    alreadyConnected: "ccpoke đã kết nối rồi — bot đang hoạt động bình thường.",
+    connectionLost: "mất kết nối tới Telegram — đang thử kết nối lại...",
+    connectionRestored: "đã kết nối lại Telegram",
     commands: {
       start: "Kết nối bot với chat này",
     },
@@ -27,6 +27,8 @@ export const vi: TranslationKeys = {
     sendFallbackFailed: "fallback cũng thất bại",
     firstTimeSetup: "chưa có config — bắt đầu setup...",
     globalInstallTip: "💡 Tip: chạy 'npm i -g ccpoke' để khởi động nhanh hơn",
+    alreadyRunning:
+      "một ccpoke khác đang chạy trên port {port}\n\n  Để dừng nó:\n    kill $(lsof -ti:{port})\n",
   },
 
   setup: {
@@ -120,8 +122,8 @@ export const vi: TranslationKeys = {
     installing: "đang cài đặt cloudflared binary...",
     installed: "đã cài đặt cloudflared binary",
     started: "🌐 URL công khai: {url}",
-    failed: "⚠️ tunnel thất bại, chỉ dùng localhost",
-    disconnected: "⚠️ tunnel bị ngắt, đang kết nối lại...",
+    failed: "tunnel thất bại, chỉ dùng localhost",
+    disconnected: "tunnel bị ngắt, đang kết nối lại...",
     exited: "tunnel process đã thoát (code {code})",
     timeout: "tunnel connection timeout ({seconds}s)",
   },
@@ -138,7 +140,7 @@ export const vi: TranslationKeys = {
   },
   agent: {
     unknownAgent: "Agent không xác định: {agent}",
-    taskDone: "✅ Task done",
+    taskDone: "Task done",
   },
 
   common: {
