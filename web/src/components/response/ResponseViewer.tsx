@@ -15,12 +15,18 @@ export default function ResponseViewer() {
   const [model, setModel] = useState("");
 
   useEffect(() => {
+    initTelegram();
+    loadResponse();
+  }, []);
+
+  function initTelegram() {
     if (typeof Telegram !== "undefined" && Telegram?.WebApp) {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
+    } else {
+      setTimeout(initTelegram, 300);
     }
-    loadResponse();
-  }, []);
+  }
 
   async function loadResponse() {
     const params = parseQueryParams();

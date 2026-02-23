@@ -6,6 +6,14 @@ const locale = "en";
 ---
 
 <BaseLayout locale={locale} title="ccpoke — Response" description="AI agent response viewer — ccpoke" currentPath="/response">
-  <script is:inline src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script is:inline>
+    (function() {
+      var s = document.createElement('script');
+      s.src = 'https://telegram.org/js/telegram-web-app.js';
+      s.async = true;
+      s.onerror = function() {};
+      document.head.appendChild(s);
+    })();
+  </script>
   <ResponseViewer client:load />
 </BaseLayout>

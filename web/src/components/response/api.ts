@@ -1,4 +1,5 @@
 import type { ResponseData, ResponseParams, ViewState } from "./types";
+import { getStorage, setStorage } from "../../utils/storage";
 
 export function parseQueryParams(): ResponseParams | null {
   if (typeof window === "undefined") return null;
@@ -17,10 +18,28 @@ export function parseQueryParams(): ResponseParams | null {
   };
 }
 
-export async function fetchResponse(params: ResponseParams): Promise<ViewState> {
-  const response = await fetch(`${params.api}/api/responses/${params.id}`);
-  if (!response.ok) return { kind: "error", message: "expired" };
+async function tryFetch(apiBase: string, id: string): Promise<ResponseData | null> {
+  try {
+    const response = await fetch(`${apiBase}/api/responses/${id}`);
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
 
-  const data: ResponseData = await response.json();
-  return { kind: "success", data };
+export async function fetchResponse(params: ResponseParams): Promise<ViewState> {
+  const data = await tryFetch(params.api, params.id);
+  if (data) {
+    setStorage("tunnelUrl", params.api);
+    return { kind: "success", data };
+  }
+
+  const savedUrl = getStorage("tunnelUrl");
+  if (savedUrl && savedUrl !== params.api) {
+    const fallbackData = await tryFetch(savedUrl, params.id);
+    if (fallbackData) return { kind: "success", data: fallbackData };
+  }
+
+  return { kind: "error", message: "expired" };
 }

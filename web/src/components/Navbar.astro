@@ -92,6 +92,8 @@ const navLinks = [
 )}
 
 <script>
+  import { setStorage } from "../utils/storage";
+
   const langDropdown = document.getElementById("langDropdown");
   const langTrigger = document.getElementById("langTrigger");
   langTrigger?.addEventListener("click", () => langDropdown?.classList.toggle("open"));
@@ -102,7 +104,7 @@ const navLinks = [
   document.querySelectorAll(".lang-option").forEach((el) => {
     el.addEventListener("click", (e) => {
       const locale = (el as HTMLElement).dataset.locale;
-      if (locale) localStorage.setItem("ccpoke-locale", locale);
+      if (locale) setStorage("locale", locale);
 
       const query = window.location.search;
       if (query) {

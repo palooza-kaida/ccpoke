@@ -1,5 +1,6 @@
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type Locale } from "./config";
 import { translations } from "./locales";
+import { getStorage } from "../utils/storage";
 
 export { DEFAULT_LOCALE, SUPPORTED_LOCALES, LOCALE_LABELS } from "./config";
 export type { Locale } from "./config";
@@ -21,7 +22,7 @@ export function ta(locale: Locale, key: string): string[] {
 export function detectLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
 
-  const saved = localStorage.getItem("ccpoke-locale");
+  const saved = getStorage("locale");
   if (saved && SUPPORTED_LOCALES.includes(saved as Locale)) return saved as Locale;
 
   const navLang = navigator.language?.slice(0, 2);
