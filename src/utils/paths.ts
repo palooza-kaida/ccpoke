@@ -26,6 +26,7 @@ export const paths = {
     "hooks",
     process.platform === "win32" ? "claude-code-stop.cmd" : "claude-code-stop.sh"
   ),
+  claudeCodeSessionStartScript: join(CCPOKE_HOME, "hooks", "claude-code-session-start.sh"),
   cursorHookScript: join(
     CCPOKE_HOME,
     "hooks",
