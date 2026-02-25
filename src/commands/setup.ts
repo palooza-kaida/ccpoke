@@ -1,12 +1,15 @@
 import * as p from "@clack/prompts";
 import TelegramBot from "node-telegram-bot-api";
 import qrcode from "qrcode-terminal";
-import { ConfigManager, type Config } from "../config-manager.js";
+
 import { createDefaultRegistry } from "../agent/agent-registry.js";
 import { AgentName } from "../agent/types.js";
+import { ConfigManager, type Config } from "../config-manager.js";
+import { Locale, LOCALE_LABELS, setLocale, SUPPORTED_LOCALES, t } from "../i18n/index.js";
+import { DEFAULT_HOOK_PORT } from "../utils/constants.js";
 import { detectCliPrefix } from "../utils/install-detection.js";
-import { t, setLocale, Locale, SUPPORTED_LOCALES, LOCALE_LABELS } from "../i18n/index.js";
-import { DEFAULT_HOOK_PORT, SETUP_WAIT_TIMEOUT_MS } from "../utils/constants.js";
+
+const SETUP_WAIT_TIMEOUT_MS = 120_000;
 
 export async function runSetup(): Promise<Config> {
   p.intro(t("setup.intro"));

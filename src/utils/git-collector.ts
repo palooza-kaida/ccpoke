@@ -1,6 +1,9 @@
 import { execSync } from "node:child_process";
+
 import type { GitChange } from "../channel/types.js";
-import { GitChangeStatus, GIT_TIMEOUT_MS } from "../utils/constants.js";
+import { GitChangeStatus } from "../utils/constants.js";
+
+const GIT_TIMEOUT_MS = 10_000;
 
 export function collectGitChanges(cwd: string): GitChange[] {
   try {

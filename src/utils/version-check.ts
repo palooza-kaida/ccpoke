@@ -1,8 +1,11 @@
-import { getPackageVersion } from "./paths.js";
-import { logWarn } from "./log.js";
 import { t } from "../i18n/index.js";
-import { NPM_REGISTRY_URL, VERSION_CHECK_TIMEOUT_MS, InstallMethod } from "./constants.js";
+import { InstallMethod } from "./constants.js";
 import { detectInstallMethod } from "./install-detection.js";
+import { logWarn } from "./log.js";
+import { getPackageVersion } from "./paths.js";
+
+const NPM_REGISTRY_URL = "https://registry.npmjs.org/ccpoke/latest";
+const VERSION_CHECK_TIMEOUT_MS = 5_000;
 
 function isNewerVersion(current: string, latest: string): boolean {
   const currentParts = current.split(".").map(Number);

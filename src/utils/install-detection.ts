@@ -1,6 +1,9 @@
 import { existsSync } from "node:fs";
-import { join, dirname } from "node:path";
-import { InstallMethod, MAX_GIT_SEARCH_DEPTH } from "./constants.js";
+import { dirname, join } from "node:path";
+
+import { InstallMethod } from "./constants.js";
+
+const MAX_GIT_SEARCH_DEPTH = 5;
 export type { InstallMethod } from "./constants.js";
 
 export function detectInstallMethod(): InstallMethod {

@@ -1,7 +1,9 @@
 import { existsSync } from "node:fs";
+
 import { t } from "../i18n/index.js";
 import { log, logWarn } from "./log.js";
-import { TUNNEL_TIMEOUT_MS } from "./constants.js";
+
+const TUNNEL_TIMEOUT_MS = 30_000;
 
 export class TunnelManager {
   private tunnel: { stop: () => boolean } | null = null;

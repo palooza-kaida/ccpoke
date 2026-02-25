@@ -1,13 +1,20 @@
 import { existsSync } from "node:fs";
-import type { AgentProvider, AgentEventResult } from "../types.js";
-import { AgentName, AGENT_DISPLAY_NAMES } from "../types.js";
-import { ClaudeCodeInstaller } from "./claude-code-installer.js";
-import { isValidStopEvent, parseTranscript, extractProjectName } from "./claude-code-parser.js";
-import { collectGitChanges } from "../../utils/git-collector.js";
-import { paths } from "../../utils/paths.js";
-import { DEFAULT_FALLBACK_DURATION_MS, TRANSCRIPT_SETTLE_DELAY_MS } from "../../utils/constants.js";
-import { logError } from "../../utils/log.js";
+
 import { t } from "../../i18n/index.js";
+import { collectGitChanges } from "../../utils/git-collector.js";
+import { logError } from "../../utils/log.js";
+import { paths } from "../../utils/paths.js";
+import {
+  AGENT_DISPLAY_NAMES,
+  AgentName,
+  type AgentEventResult,
+  type AgentProvider,
+} from "../types.js";
+import { ClaudeCodeInstaller } from "./claude-code-installer.js";
+import { extractProjectName, isValidStopEvent, parseTranscript } from "./claude-code-parser.js";
+
+const TRANSCRIPT_SETTLE_DELAY_MS = 500;
+const DEFAULT_FALLBACK_DURATION_MS = 1000;
 
 export class ClaudeCodeProvider implements AgentProvider {
   readonly name = AgentName.ClaudeCode;

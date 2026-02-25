@@ -1,10 +1,11 @@
 import TelegramBot from "node-telegram-bot-api";
+
 import { t } from "../../i18n/index.js";
 import { logError } from "../../utils/log.js";
-import { SPLIT_LOOKBACK_RANGE } from "../../utils/constants.js";
 
 const TELEGRAM_MAX_MESSAGE_LENGTH = 4096;
 const PAGINATION_FOOTER_RESERVE = 30;
+const SPLIT_LOOKBACK_RANGE = 200;
 
 export async function sendTelegramMessage(
   bot: TelegramBot,

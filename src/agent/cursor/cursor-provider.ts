@@ -1,19 +1,24 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { homedir } from "node:os";
-import type { AgentProvider, AgentEventResult } from "../types.js";
-import { AgentName, AGENT_DISPLAY_NAMES } from "../types.js";
-import { CursorInstaller } from "./cursor-installer.js";
-import {
-  parseStopEvent,
-  parseTranscript,
-  isValidStopEvent,
-  extractProjectName,
-} from "./cursor-parser.js";
-import { readComposerData } from "./cursor-state-reader.js";
+import { join } from "node:path";
+
+import { t } from "../../i18n/index.js";
 import { collectGitChanges } from "../../utils/git-collector.js";
 import { logError } from "../../utils/log.js";
-import { t } from "../../i18n/index.js";
+import {
+  AGENT_DISPLAY_NAMES,
+  AgentName,
+  type AgentEventResult,
+  type AgentProvider,
+} from "../types.js";
+import { CursorInstaller } from "./cursor-installer.js";
+import {
+  extractProjectName,
+  isValidStopEvent,
+  parseStopEvent,
+  parseTranscript,
+} from "./cursor-parser.js";
+import { readComposerData } from "./cursor-state-reader.js";
 
 export class CursorProvider implements AgentProvider {
   readonly name = AgentName.Cursor;

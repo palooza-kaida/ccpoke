@@ -1,8 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, unlinkSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
+import { type GitChangeStatus } from "./constants.js";
 import { paths } from "./paths.js";
-import { MAX_STORED_RESPONSES, RESPONSE_EXPIRE_MS, type GitChangeStatus } from "./constants.js";
+
+const MAX_STORED_RESPONSES = 100;
+const RESPONSE_EXPIRE_MS = 24 * 60 * 60 * 1000;
 
 export interface StoredResponse {
   id: string;
