@@ -17,6 +17,7 @@ export interface TranslationKeys {
     connectionRestored: string;
     commands: {
       start: string;
+      sessions: string;
     };
     viewDetails: string;
     open: string;
@@ -110,6 +111,7 @@ export interface TranslationKeys {
     notificationFailed: string;
     stopEventFailed: string;
     sessionStartFailed: string;
+    notificationHookFailed: string;
   };
   tunnel: {
     installing: string;
@@ -163,5 +165,22 @@ export interface TranslationKeys {
     sent: string;
     busy: string;
     desktopActive: string;
+  };
+  sessions: {
+    title: string;
+    empty: string;
+    chatButton: string;
+    stateIdle: string;
+    stateBusy: string;
+    stateBlocked: string;
+  };
+  prompt: {
+    elicitationTitle: string;
+    elicitationReplyHint: string;
+    idleTitle: string;
+    idleBody: string;
+    responded: string;
+    expired: string;
+    sessionNotFound: string;
   };
 }

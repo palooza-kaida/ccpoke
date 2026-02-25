@@ -8,6 +8,7 @@ import { isClaudeAliveInPane, scanClaudePanes } from "./tmux-scanner.js";
 export const SessionState = {
   Idle: "idle",
   Busy: "busy",
+  Blocked: "blocked",
   Unknown: "unknown",
 } as const;
 export type SessionState = (typeof SessionState)[keyof typeof SessionState];

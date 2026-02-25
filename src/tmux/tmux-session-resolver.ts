@@ -44,6 +44,10 @@ export class TmuxSessionResolver implements ChatSessionResolver {
     this.stateManager.onStopHook(sessionId);
   }
 
+  onNotificationBlock(sessionId: string): void {
+    this.stateManager.onNotificationBlock(sessionId);
+  }
+
   private findByTmuxTarget(tmuxTarget: string): string | undefined {
     for (const session of this.sessionMap.getAllActive()) {
       if (session.tmuxTarget === tmuxTarget) {

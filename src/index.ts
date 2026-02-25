@@ -118,7 +118,7 @@ async function startBot(): Promise<void> {
   }
 
   const registry = createDefaultRegistry();
-  const channel = new TelegramChannel(cfg, sessionMap, stateManager);
+  const channel = new TelegramChannel(cfg, sessionMap, stateManager, tmuxBridge);
   const handler = new AgentHandler(registry, channel, cfg.hook_port, tunnelManager, chatResolver);
 
   handler.onSessionStart = (rawEvent) => {
@@ -140,6 +140,10 @@ async function startBot(): Promise<void> {
         project,
       })
     );
+  };
+
+  handler.onNotification = (event) => {
+    channel.handleNotificationEvent(event);
   };
 
   apiServer.setHandler(handler);

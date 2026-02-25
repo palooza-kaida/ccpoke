@@ -20,6 +20,7 @@ export const en: TranslationKeys = {
     connectionRestored: "reconnected to Telegram",
     commands: {
       start: "Connect bot to this chat",
+      sessions: "List active Claude Code sessions",
     },
     viewDetails: "View details",
     open: "Open",
@@ -120,6 +121,7 @@ export const en: TranslationKeys = {
     notificationFailed: "failed to send notification",
     stopEventFailed: "stop event handling failed",
     sessionStartFailed: "session start handling failed",
+    notificationHookFailed: "notification hook handling failed",
   },
 
   tunnel: {
@@ -176,5 +178,22 @@ export const en: TranslationKeys = {
     sent: "📩 Sent → {project}",
     busy: "⏳ Claude is busy — try again later",
     desktopActive: "⚠️ Someone typing on desktop",
+  },
+  sessions: {
+    title: "Active Sessions",
+    empty: "No active Claude Code sessions",
+    chatButton: "Chat",
+    stateIdle: "idle",
+    stateBusy: "busy",
+    stateBlocked: "waiting",
+  },
+  prompt: {
+    elicitationTitle: "Claude needs input",
+    elicitationReplyHint: "Type your response below",
+    idleTitle: "Session idle",
+    idleBody: "{project} is waiting for input",
+    responded: "Response sent to {project}",
+    expired: "Prompt expired or already handled",
+    sessionNotFound: "Session not found",
   },
 };

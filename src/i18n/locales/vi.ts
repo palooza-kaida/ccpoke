@@ -20,6 +20,7 @@ export const vi: TranslationKeys = {
     connectionRestored: "đã kết nối lại Telegram",
     commands: {
       start: "Kết nối bot với chat này",
+      sessions: "Danh sách phiên Claude Code",
     },
     viewDetails: "Xem chi tiết",
     open: "Mở",
@@ -120,6 +121,7 @@ export const vi: TranslationKeys = {
     notificationFailed: "gửi notification thất bại",
     stopEventFailed: "xử lý stop event thất bại",
     sessionStartFailed: "xử lý session start thất bại",
+    notificationHookFailed: "xử lý notification hook thất bại",
   },
 
   tunnel: {
@@ -176,5 +178,22 @@ export const vi: TranslationKeys = {
     sent: "📩 Đã gửi → {project}",
     busy: "⏳ Claude đang bận — thử lại sau",
     desktopActive: "⚠️ Có người đang gõ trên desktop",
+  },
+  sessions: {
+    title: "Phiên hoạt động",
+    empty: "Không có phiên Claude Code nào",
+    chatButton: "Chat",
+    stateIdle: "chờ",
+    stateBusy: "đang xử lý",
+    stateBlocked: "chờ input",
+  },
+  prompt: {
+    elicitationTitle: "Claude cần input",
+    elicitationReplyHint: "Nhập phản hồi bên dưới",
+    idleTitle: "Session chờ",
+    idleBody: "{project} đang chờ input",
+    responded: "Đã gửi phản hồi cho {project}",
+    expired: "Prompt đã hết hạn hoặc đã xử lý",
+    sessionNotFound: "Không tìm thấy session",
   },
 };

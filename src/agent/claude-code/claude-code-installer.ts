@@ -25,6 +25,7 @@ interface ClaudeSettings {
   hooks?: {
     Stop?: ClaudeHookEntry[];
     SessionStart?: ClaudeHookEntry[];
+    Notification?: ClaudeHookEntry[];
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -42,7 +43,8 @@ export class ClaudeCodeInstaller {
       const settings = ClaudeCodeInstaller.readSettings();
       return (
         hasCcpokeHook(settings.hooks?.Stop ?? []) &&
-        hasCcpokeHook(settings.hooks?.SessionStart ?? [])
+        hasCcpokeHook(settings.hooks?.SessionStart ?? []) &&
+        hasCcpokeHook(settings.hooks?.Notification ?? [])
       );
     } catch {
       return false;
@@ -56,11 +58,14 @@ export class ClaudeCodeInstaller {
       if (!hasCcpokeHook(settings.hooks?.Stop ?? [])) missing.push("Stop hook in settings");
       if (!hasCcpokeHook(settings.hooks?.SessionStart ?? []))
         missing.push("SessionStart hook in settings");
+      if (!hasCcpokeHook(settings.hooks?.Notification ?? []))
+        missing.push("Notification hook in settings");
     } catch {
       missing.push("settings.json");
     }
     if (!existsSync(paths.claudeCodeHookScript)) missing.push("stop script file");
     if (!existsSync(paths.claudeCodeSessionStartScript)) missing.push("session-start script file");
+    if (!existsSync(paths.claudeCodeNotificationScript)) missing.push("notification script file");
     return { complete: missing.length === 0, missing };
   }
 
@@ -80,6 +85,10 @@ export class ClaudeCodeInstaller {
         ...(settings.hooks.SessionStart ?? []),
         { hooks: [{ type: "command", command: paths.claudeCodeSessionStartScript, timeout: 5 }] },
       ];
+      settings.hooks.Notification = [
+        ...(settings.hooks.Notification ?? []),
+        { hooks: [{ type: "command", command: paths.claudeCodeNotificationScript, timeout: 10 }] },
+      ];
     }
 
     mkdirSync(paths.claudeDir, { recursive: true });
@@ -89,12 +98,14 @@ export class ClaudeCodeInstaller {
 
     ClaudeCodeInstaller.writeStopScript(hookPort, hookSecret);
     ClaudeCodeInstaller.writeSessionStartScript(hookPort, hookSecret);
+    ClaudeCodeInstaller.writeNotificationScript(hookPort, hookSecret);
   }
 
   static uninstall(): void {
     ClaudeCodeInstaller.removeFromSettings();
     ClaudeCodeInstaller.removeStopScript();
     ClaudeCodeInstaller.removeSessionStartScript();
+    ClaudeCodeInstaller.removeNotificationScript();
   }
 
   private static writeStopScript(hookPort: number, hookSecret: string): void {
@@ -156,6 +167,43 @@ curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookSessionStart}" \\
     writeFileSync(paths.claudeCodeSessionStartScript, script, { mode: 0o700 });
   }
 
+  private static writeNotificationScript(hookPort: number, hookSecret: string): void {
+    mkdirSync(paths.hooksDir, { recursive: true });
+
+    if (process.platform === "win32") return;
+
+    const script = `#!/bin/bash
+INPUT=$(cat)
+SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+NOTIFICATION_TYPE=$(echo "$INPUT" | grep -o '"notification_type":"[^"]*"' | head -1 | cut -d'"' -f4)
+MESSAGE=$(echo "$INPUT" | grep -o '"message":"[^"]*"' | head -1 | cut -d'"' -f4)
+TITLE=$(echo "$INPUT" | grep -o '"title":"[^"]*"' | head -1 | cut -d'"' -f4)
+CWD=$(echo "$INPUT" | grep -o '"cwd":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+[ -z "$SESSION_ID" ] && exit 0
+[ -z "$NOTIFICATION_TYPE" ] && exit 0
+
+TMUX_TARGET=""
+[ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+
+json_escape() {
+  printf '%s' "$1" | sed 's/\\\\/\\\\\\\\/g; s/"/\\\\"/g; s/\\t/\\\\t/g' | tr -d '\\n\\r'
+}
+
+PAYLOAD=$(printf '{"session_id":"%s","notification_type":"%s","message":"%s","title":"%s","cwd":"%s","tmux_target":"%s"}' \\
+  "$(json_escape "$SESSION_ID")" "$(json_escape "$NOTIFICATION_TYPE")" "$(json_escape "$MESSAGE")" \\
+  "$(json_escape "$TITLE")" "$(json_escape "$CWD")" "$(json_escape "$TMUX_TARGET")")
+
+curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookNotification}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-CCPoke-Secret: ${hookSecret}" \\
+  -d "$PAYLOAD" \\
+  --max-time 5 > /dev/null 2>&1 || true
+`;
+
+    writeFileSync(paths.claudeCodeNotificationScript, script, { mode: 0o700 });
+  }
+
   private static removeStopScript(): void {
     try {
       unlinkSync(paths.claudeCodeHookScript);
@@ -172,11 +220,19 @@ curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookSessionStart}" \\
     }
   }
 
+  private static removeNotificationScript(): void {
+    try {
+      unlinkSync(paths.claudeCodeNotificationScript);
+    } catch {
+      /* may not exist */
+    }
+  }
+
   private static removeFromSettings(): void {
     const settings = ClaudeCodeInstaller.readSettings();
     if (!settings.hooks) return;
 
-    for (const hookType of ["Stop", "SessionStart"] as const) {
+    for (const hookType of ["Stop", "SessionStart", "Notification"] as const) {
       const entries = settings.hooks[hookType];
       if (!entries) continue;
 

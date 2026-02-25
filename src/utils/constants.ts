@@ -38,6 +38,7 @@ export type PackageManager = (typeof PackageManager)[keyof typeof PackageManager
 export const ApiRoute = {
   HookStop: "/hook/stop",
   HookSessionStart: "/hook/session-start",
+  HookNotification: "/hook/notification",
   ResponseData: "/api/responses/:id",
   Health: "/health",
 } as const;

@@ -19,6 +19,7 @@ export const zh: TranslationKeys = {
     connectionRestored: "已重新连接 Telegram",
     commands: {
       start: "将机器人连接到此聊天",
+      sessions: "列出活跃的 Claude Code 会话",
     },
     viewDetails: "查看详情",
     open: "打开",
@@ -119,6 +120,7 @@ export const zh: TranslationKeys = {
     notificationFailed: "发送通知失败",
     stopEventFailed: "处理 stop event 失败",
     sessionStartFailed: "处理 session start 失败",
+    notificationHookFailed: "处理通知钩子失败",
   },
 
   tunnel: {
@@ -175,5 +177,22 @@ export const zh: TranslationKeys = {
     sent: "📩 已发送 → {project}",
     busy: "⏳ Claude 正在忙 — 请稍后再试",
     desktopActive: "⚠️ 有人正在桌面输入",
+  },
+  sessions: {
+    title: "活跃会话",
+    empty: "没有活跃的 Claude Code 会话",
+    chatButton: "聊天",
+    stateIdle: "空闲",
+    stateBusy: "忙碌",
+    stateBlocked: "等待输入",
+  },
+  prompt: {
+    elicitationTitle: "Claude 需要输入",
+    elicitationReplyHint: "在下方输入回复",
+    idleTitle: "会话空闲",
+    idleBody: "{project} 正在等待输入",
+    responded: "已发送回复到 {project}",
+    expired: "提示已过期或已处理",
+    sessionNotFound: "未找到会话",
   },
 };

@@ -57,4 +57,9 @@ export class SessionStateManager {
     this.sessionMap.updateState(sessionId, SessionState.Idle);
     this.sessionMap.touch(sessionId);
   }
+
+  onNotificationBlock(sessionId: string): void {
+    this.sessionMap.updateState(sessionId, SessionState.Blocked);
+    this.sessionMap.touch(sessionId);
+  }
 }

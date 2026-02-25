@@ -7,4 +7,6 @@ export interface ChatSessionResolver {
   ): string | undefined;
 
   onStopHook(sessionId: string): void;
+
+  onNotificationBlock?(sessionId: string): void;
 }

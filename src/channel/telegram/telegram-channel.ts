@@ -1,15 +1,19 @@
 import TelegramBot from "node-telegram-bot-api";
 
+import type { NotificationEvent } from "../../agent/agent-handler.js";
 import { ConfigManager, type Config } from "../../config-manager.js";
 import { getTranslations, t } from "../../i18n/index.js";
 import type { SessionMap } from "../../tmux/session-map.js";
 import type { SessionStateManager } from "../../tmux/session-state.js";
+import type { TmuxBridge } from "../../tmux/tmux-bridge.js";
 import { MINI_APP_BASE_URL } from "../../utils/constants.js";
 import { log, logError, logWarn } from "../../utils/log.js";
 import { extractProseSnippet } from "../../utils/markdown.js";
 import { formatDuration, formatModelName, formatTokenCount } from "../../utils/stats-format.js";
 import type { NotificationChannel, NotificationData } from "../types.js";
 import { PendingReplyStore } from "./pending-reply-store.js";
+import { PromptHandler } from "./prompt-handler.js";
+import { formatSessionList } from "./session-list.js";
 import { sendTelegramMessage } from "./telegram-sender.js";
 
 export class TelegramChannel implements NotificationChannel {
@@ -20,16 +24,37 @@ export class TelegramChannel implements NotificationChannel {
   private pendingReplyStore = new PendingReplyStore();
   private sessionMap: SessionMap | null;
   private stateManager: SessionStateManager | null;
+  private tmuxBridge: TmuxBridge | null;
+  private promptHandler: PromptHandler | null = null;
 
-  constructor(cfg: Config, sessionMap?: SessionMap, stateManager?: SessionStateManager) {
+  constructor(
+    cfg: Config,
+    sessionMap?: SessionMap,
+    stateManager?: SessionStateManager,
+    tmuxBridge?: TmuxBridge
+  ) {
     this.cfg = cfg;
     this.sessionMap = sessionMap ?? null;
     this.stateManager = stateManager ?? null;
+    this.tmuxBridge = tmuxBridge ?? null;
     this.bot = new TelegramBot(cfg.telegram_bot_token, { polling: false });
     this.chatId = ConfigManager.loadChatState().chat_id;
     this.registerHandlers();
     this.registerChatHandlers();
+    this.registerSessionsHandlers();
     this.registerPollingErrorHandler();
+
+    if (this.sessionMap && this.tmuxBridge) {
+      this.promptHandler = new PromptHandler(
+        this.bot,
+        () => this.chatId,
+        this.sessionMap,
+        this.tmuxBridge
+      );
+      this.promptHandler.onElicitationSent = (chatId, messageId, sessionId, project) => {
+        this.pendingReplyStore.set(chatId, messageId, sessionId, project);
+      };
+    }
   }
 
   async initialize(): Promise<void> {
@@ -40,8 +65,13 @@ export class TelegramChannel implements NotificationChannel {
   }
 
   async shutdown(): Promise<void> {
+    this.promptHandler?.destroy();
     this.pendingReplyStore.destroy();
     this.bot.stopPolling();
+  }
+
+  handleNotificationEvent(event: NotificationEvent): void {
+    this.promptHandler?.forwardPrompt(event).catch(() => {});
   }
 
   async sendNotification(data: NotificationData, responseUrl?: string): Promise<void> {
@@ -93,6 +123,7 @@ export class TelegramChannel implements NotificationChannel {
     const translations = getTranslations();
     const commands: TelegramBot.BotCommand[] = [
       { command: "start", description: translations.bot.commands.start },
+      { command: "sessions", description: translations.bot.commands.sessions },
     ];
 
     try {
@@ -198,6 +229,18 @@ export class TelegramChannel implements NotificationChannel {
 
       this.pendingReplyStore.delete(msg.chat.id, msg.reply_to_message.message_id);
 
+      // Try elicitation response first (prompt forwarding)
+      if (this.promptHandler) {
+        const injected = this.promptHandler.injectElicitationResponse(pending.sessionId, msg.text);
+        if (injected) {
+          await this.bot.sendMessage(
+            msg.chat.id,
+            t("prompt.responded", { project: pending.project })
+          );
+          return;
+        }
+      }
+
       if (!this.stateManager) {
         await this.bot.sendMessage(msg.chat.id, t("chat.sessionNotFound"));
         return;
@@ -218,6 +261,34 @@ export class TelegramChannel implements NotificationChannel {
       } else if ("tmuxDead" in result) {
         await this.bot.sendMessage(msg.chat.id, t("chat.tmuxDead"));
       }
+    });
+  }
+
+  private registerSessionsHandlers(): void {
+    this.bot.onText(/\/sessions(?:\s|$)/, (msg) => {
+      if (!ConfigManager.isOwner(this.cfg, msg.from?.id ?? 0)) return;
+      if (!this.sessionMap) {
+        this.bot.sendMessage(msg.chat.id, t("sessions.empty")).catch(() => {});
+        return;
+      }
+
+      if (this.tmuxBridge) {
+        this.sessionMap.refreshFromTmux(this.tmuxBridge);
+      }
+
+      const sessions = this.sessionMap.getAllActive();
+      const { text, replyMarkup } = formatSessionList(sessions);
+
+      const opts: TelegramBot.SendMessageOptions = { parse_mode: "MarkdownV2" };
+      if (replyMarkup) opts.reply_markup = replyMarkup;
+
+      this.bot.sendMessage(msg.chat.id, text, opts).catch(() => {});
+    });
+
+    this.bot.on("callback_query", async (query) => {
+      if (!query.data?.startsWith("noop:")) return;
+      if (!ConfigManager.isOwner(this.cfg, query.from.id)) return;
+      await this.bot.answerCallbackQuery(query.id);
     });
   }
 
