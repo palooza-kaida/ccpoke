@@ -4,6 +4,7 @@ import type { NotificationEvent } from "../../agent/agent-handler.js";
 import { t } from "../../i18n/index.js";
 import { SessionState, type SessionMap } from "../../tmux/session-map.js";
 import type { TmuxBridge } from "../../tmux/tmux-bridge.js";
+import { escapeMarkdownV2 } from "./escape-markdown.js";
 
 interface PendingPrompt {
   sessionId: string;
@@ -124,8 +125,4 @@ export class PromptHandler {
     if (timer) clearTimeout(timer);
     this.timers.delete(sessionId);
   }
-}
-
-function escapeMarkdownV2(text: string): string {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, (m) => `\\${m}`);
 }

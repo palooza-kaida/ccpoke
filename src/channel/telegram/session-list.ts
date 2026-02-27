@@ -2,6 +2,7 @@ import type TelegramBot from "node-telegram-bot-api";
 
 import { t } from "../../i18n/index.js";
 import { SessionState, type TmuxSession } from "../../tmux/session-map.js";
+import { escapeMarkdownV2 } from "./escape-markdown.js";
 
 const STATE_EMOJI: Record<string, string> = {
   [SessionState.Idle]: "\u{1F7E2}",
@@ -64,8 +65,4 @@ function shortenModel(model: string): string {
 
 function truncate(str: string, max: number): string {
   return str.length <= max ? str : str.slice(0, max - 1) + "…";
-}
-
-function escapeMarkdownV2(text: string): string {
-  return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, (m) => `\\${m}`);
 }
