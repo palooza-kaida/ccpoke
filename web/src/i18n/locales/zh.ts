@@ -54,8 +54,8 @@ export const zh: LocaleDict = {
 
   phase2Label: "阶段 2 · 已完成",
   phase2Title: "双向聊天",
-  phase2Desc: "从 Telegram 与 Claude Code 聊天 — 查看会话、发送提示、回答问题，全部通过 tmux 桥接。",
-  phase2Tags: ["发送提示 → Claude Code","会话列表 + 管理","远程回答问题","空闲提示转发","tmux send-keys 注入","通知钩子"],
+  phase2Desc: "从 Telegram 与 Claude Code 聊天 — 查看会话、发送提示、远程回答问题。支持多个 Claude Code 进程通过 tmux pane 隔离。",
+  phase2Tags: ["发送提示 → Claude Code","会话列表 + 管理","回答问题 (单选/多选)","多进程 pane 隔离","空闲提示转发","tmux send-keys 注入","回调去重 + 序列化"],
 
   phase3Label: "阶段 3 · 开发中",
   phase3Title: "终端控制",

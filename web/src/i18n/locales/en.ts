@@ -52,8 +52,8 @@ const en = {
 
   phase2Label: "Phase 2 · Complete",
   phase2Title: "Two-way chat",
-  phase2Desc: "Chat with Claude Code from Telegram — view sessions, send prompts, answer questions, all via tmux bridge.",
-  phase2Tags: ["Send prompt → Claude Code","Session list + management","Answer questions remotely","Idle prompt forwarding","tmux send-keys injection","Notification hooks"],
+  phase2Desc: "Chat with Claude Code from Telegram — view sessions, send prompts, answer questions remotely. Supports multiple Claude Code processes via per-pane tmux isolation.",
+  phase2Tags: ["Send prompt → Claude Code","Session list + management","Answer questions (single/multi-select)","Multi-process pane isolation","Idle prompt forwarding","tmux send-keys injection","Callback dedup + serialization"],
 
   phase3Label: "Phase 3 · In development",
   phase3Title: "Terminal control",
