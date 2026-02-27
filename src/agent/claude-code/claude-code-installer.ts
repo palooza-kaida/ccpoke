@@ -170,7 +170,11 @@ export class ClaudeCodeInstaller {
 # ccpoke-version: ${version}
 INPUT=$(cat | tr -d '\\n\\r')
 TMUX_TARGET=""
-[ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+if [ -n "$TMUX_PANE" ]; then
+  TMUX_TARGET=$(tmux display-message -t "$TMUX_PANE" -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+elif [ -n "$TMUX" ]; then
+  TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+fi
 if [ -n "$TMUX_TARGET" ] && echo "$TMUX_TARGET" | grep -qE '^[a-zA-Z0-9_.:/@ -]+$'; then
   INPUT=$(echo "$INPUT" | sed 's/}$/,"tmux_target":"'"$TMUX_TARGET"'"}/')
 fi
@@ -195,7 +199,11 @@ echo "$INPUT" | curl -s -X POST "http://localhost:${hookPort}${ApiRoute.HookStop
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
 CWD=$(echo "$INPUT" | grep -o '"cwd":"[^"]*"' | head -1 | cut -d'"' -f4)
-TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}')
+if [ -n "$TMUX_PANE" ]; then
+  TMUX_TARGET=$(tmux display-message -t "$TMUX_PANE" -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null)
+else
+  TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}')
+fi
 
 [ -z "$SESSION_ID" ] && exit 0
 
@@ -229,7 +237,11 @@ SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"
 [ -z "$SESSION_ID" ] && exit 0
 
 TMUX_TARGET=""
-[ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+if [ -n "$TMUX_PANE" ]; then
+  TMUX_TARGET=$(tmux display-message -t "$TMUX_PANE" -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+elif [ -n "$TMUX" ]; then
+  TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+fi
 
 # Inject tmux_target into the raw JSON from Claude Code
 if [ -n "$TMUX_TARGET" ] && echo "$TMUX_TARGET" | grep -qE '^[a-zA-Z0-9_.:/@ -]+$'; then
@@ -264,7 +276,11 @@ SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"
 [ -z "$SESSION_ID" ] && exit 0
 
 TMUX_TARGET=""
-[ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+if [ -n "$TMUX_PANE" ]; then
+  TMUX_TARGET=$(tmux display-message -t "$TMUX_PANE" -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+elif [ -n "$TMUX" ]; then
+  TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+fi
 
 if [ -n "$TMUX_TARGET" ] && echo "$TMUX_TARGET" | grep -qE '^[a-zA-Z0-9_.:/@ -]+$'; then
   PAYLOAD=$(echo "$INPUT" | sed 's/}$/,"tmux_target":"'"$TMUX_TARGET"'"}/')

@@ -32,6 +32,19 @@ export class TmuxBridge {
     });
   }
 
+  /** Send text without trailing Enter — caller controls submission */
+  sendText(target: string, text: string): void {
+    const tgt = escapeShellArg(target);
+    const collapsed = text.replace(/\n+/g, " ").trim();
+    if (collapsed.length === 0) return;
+
+    const escaped = escapeTmuxText(collapsed);
+    execSync(`tmux send-keys -t ${tgt} -l ${escaped}`, {
+      stdio: "pipe",
+      timeout: 5000,
+    });
+  }
+
   sendSpecialKey(target: string, key: "Down" | "Up" | "Space" | "Enter"): void {
     const tgt = escapeShellArg(target);
     execSync(`tmux send-keys -t ${tgt} ${key}`, {
