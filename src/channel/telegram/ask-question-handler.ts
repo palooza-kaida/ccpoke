@@ -3,7 +3,7 @@ import type TelegramBot from "node-telegram-bot-api";
 import type { AskUserQuestionEvent, AskUserQuestionItem } from "../../agent/agent-handler.js";
 import { t } from "../../i18n/index.js";
 import type { TmuxBridge } from "../../tmux/tmux-bridge.js";
-import { logError } from "../../utils/log.js";
+import { log, logDebug, logError } from "../../utils/log.js";
 import {
   buildMultiSelectKeyboard,
   buildSingleSelectKeyboard,
@@ -12,6 +12,7 @@ import { AskQuestionTuiInjector, type InjectionAnswer } from "./ask-question-tui
 import { escapeMarkdownV2 } from "./escape-markdown.js";
 
 interface PendingQuestion {
+  pendingId: number;
   sessionId: string;
   tmuxTarget: string;
   questions: AskUserQuestionItem[];
@@ -22,21 +23,17 @@ interface PendingQuestion {
   createdAt: number;
 }
 
-interface PendingOtherReply {
-  sessionId: string;
-  questionIndex: number;
-  multiSelect: boolean;
-}
-
 const EXPIRE_MS = 10 * 60 * 1000;
 const MAX_PENDING = 50;
 
 export class AskQuestionHandler {
   private pending = new Map<string, PendingQuestion>();
+  private pendingById = new Map<number, string>();
+  private nextPendingId = 1;
   private timers = new Map<string, ReturnType<typeof setTimeout>>();
-  private otherReplies = new Map<string, PendingOtherReply>();
-  private otherTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private injector: AskQuestionTuiInjector;
+  private callbackLocks = new Map<number, Promise<void>>();
+  private processedCallbacks = new Set<string>();
 
   constructor(
     private bot: TelegramBot,
@@ -50,12 +47,18 @@ export class AskQuestionHandler {
     const chat = this.chatId();
     if (!chat || !event.tmuxTarget || event.questions.length === 0) return;
 
+    log(
+      `[AskQ] sessionId=${event.sessionId} tmuxTarget=${event.tmuxTarget} questions=${event.questions.length}`
+    );
+
     if (this.pending.size >= MAX_PENDING && !this.pending.has(event.sessionId)) {
       const oldest = [...this.pending.entries()].sort((a, b) => a[1].createdAt - b[1].createdAt)[0];
       if (oldest) this.clearPending(oldest[0]);
     }
 
+    const pendingId = this.nextPendingId++;
     const pq: PendingQuestion = {
+      pendingId,
       sessionId: event.sessionId,
       tmuxTarget: event.tmuxTarget,
       questions: event.questions,
@@ -66,12 +69,47 @@ export class AskQuestionHandler {
       createdAt: Date.now(),
     };
 
+    log(
+      `[AskQ:store] pendingId=${pendingId} sessionId=${event.sessionId} tmuxTarget=${event.tmuxTarget} pending.keys=[${[...this.pending.keys()].join(",")}]`
+    );
+
     this.setPending(event.sessionId, pq);
     await this.sendQuestion(chat, pq, 0);
   }
 
   async handleCallback(query: TelegramBot.CallbackQuery): Promise<void> {
     if (!query.data || !query.message) return;
+
+    if (this.processedCallbacks.has(query.id)) {
+      logDebug(`[AskQ:callback] DEDUP skip id=${query.id}`);
+      try {
+        await this.bot.answerCallbackQuery(query.id);
+      } catch {
+        /* best-effort ack */
+      }
+      return;
+    }
+    this.processedCallbacks.add(query.id);
+    if (this.processedCallbacks.size > 200) {
+      const first = this.processedCallbacks.values().next().value as string;
+      this.processedCallbacks.delete(first);
+    }
+
+    logDebug(`[AskQ:callback] data=${query.data}`);
+
+    const msgId = query.message.message_id;
+    const prev = this.callbackLocks.get(msgId) ?? Promise.resolve();
+    const current = prev
+      .then(() => this.processCallback(query))
+      .catch((err) => {
+        logError("[AskQ:callback] error", err);
+      });
+    this.callbackLocks.set(msgId, current);
+    await current;
+  }
+
+  private async processCallback(query: TelegramBot.CallbackQuery): Promise<void> {
+    if (!query.data) return;
 
     if (query.data.startsWith("aq:")) {
       await this.handleSingleSelectCallback(query);
@@ -80,71 +118,21 @@ export class AskQuestionHandler {
     }
   }
 
-  async handleOtherTextReply(chatId: number, messageId: number, text: string): Promise<boolean> {
-    const key = `${chatId}:${messageId}`;
-    const pending = this.otherReplies.get(key);
-    if (!pending) return false;
-
-    this.otherReplies.delete(key);
-    const otherTimer = this.otherTimers.get(key);
-    if (otherTimer) clearTimeout(otherTimer);
-    this.otherTimers.delete(key);
-
-    const pq = this.pending.get(pending.sessionId);
-    if (!pq) return false;
-
-    const qIdx = pending.questionIndex;
-
-    if (pending.multiSelect) {
-      const existing = pq.answers.get(qIdx) ?? { indices: [] };
-      existing.otherText = text;
-      pq.answers.set(qIdx, existing);
-
-      const msgId = pq.messageIds.get(qIdx);
-      if (msgId) {
-        const q = pq.questions[qIdx]!;
-        const keyboard = buildMultiSelectKeyboard(
-          pq.sessionId,
-          qIdx,
-          q,
-          pq.multiSelectState.get(qIdx) ?? new Set(),
-          true
-        );
-        await this.bot
-          .editMessageReplyMarkup(keyboard, { chat_id: chatId, message_id: msgId })
-          .catch(() => {});
-      }
-      return true;
-    }
-
-    pq.answers.set(qIdx, { indices: [], otherText: text });
-
-    const msgId = pq.messageIds.get(qIdx);
-    if (msgId) {
-      await this.bot
-        .editMessageText(
-          `${formatQuestionHeader(pq, qIdx)}\n\n${escapeMarkdownV2(t("askQuestion.selected", { option: text }))}`,
-          { chat_id: chatId, message_id: msgId, parse_mode: "MarkdownV2" }
-        )
-        .catch(() => {});
-    }
-
-    await this.injectAnswer(pq, qIdx);
-    await this.advanceToNext(chatId, pq);
-    return true;
+  hasPendingOtherReply(_chatId: number, _messageId: number): boolean {
+    return false;
   }
 
-  hasPendingOtherReply(chatId: number, messageId: number): boolean {
-    return this.otherReplies.has(`${chatId}:${messageId}`);
+  async handleOtherTextReply(_chatId: number, _messageId: number, _text: string): Promise<boolean> {
+    return false;
   }
 
   destroy(): void {
     for (const timer of this.timers.values()) clearTimeout(timer);
     this.timers.clear();
     this.pending.clear();
-    for (const timer of this.otherTimers.values()) clearTimeout(timer);
-    this.otherTimers.clear();
-    this.otherReplies.clear();
+    this.pendingById.clear();
+    this.callbackLocks.clear();
+    this.processedCallbacks.clear();
   }
 
   private async sendQuestion(chatId: number, pq: PendingQuestion, qIdx: number): Promise<void> {
@@ -153,11 +141,14 @@ export class AskQuestionHandler {
 
     const header = formatQuestionHeader(pq, qIdx);
     const hint = q.multiSelect ? t("askQuestion.multiSelectHint") : t("askQuestion.selectHint");
-    const text = `${header}\n\n${escapeMarkdownV2(q.question)}\n\n_${escapeMarkdownV2(hint)}_`;
+    const optionList = formatOptionList(q);
+    const text = optionList
+      ? `${header}\n\n${escapeMarkdownV2(q.question)}\n\n${optionList}\n\n_${escapeMarkdownV2(hint)}_`
+      : `${header}\n\n${escapeMarkdownV2(q.question)}\n\n_${escapeMarkdownV2(hint)}_`;
 
     const keyboard = q.multiSelect
-      ? buildMultiSelectKeyboard(pq.sessionId, qIdx, q, new Set(), false)
-      : buildSingleSelectKeyboard(pq.sessionId, qIdx, q);
+      ? buildMultiSelectKeyboard(pq.pendingId, qIdx, q, new Set())
+      : buildSingleSelectKeyboard(pq.pendingId, qIdx, q);
 
     const sent = await this.bot
       .sendMessage(chatId, text, { parse_mode: "MarkdownV2", reply_markup: keyboard })
@@ -173,21 +164,19 @@ export class AskQuestionHandler {
     const parts = query.data!.split(":");
     if (parts.length < 4) return;
 
-    const session8 = parts[1]!;
+    const pendingId = parseInt(parts[1]!, 10);
     const qIdx = parseInt(parts[2]!, 10);
     const optPart = parts[3]!;
 
-    const pq = this.findPendingByShortId(session8);
+    const pq = this.findPendingByNumericId(pendingId);
     if (!pq) {
+      logDebug(`[AskQ:single] pendingId=${pendingId} NOT FOUND`);
       await this.bot.answerCallbackQuery(query.id, { text: t("askQuestion.sessionExpired") });
       return;
     }
-
-    if (optPart === "o") {
-      await this.bot.answerCallbackQuery(query.id);
-      await this.promptForOther(query.message!.chat.id, pq, qIdx, false);
-      return;
-    }
+    logDebug(
+      `[AskQ:single] pendingId=${pendingId} → sessionId=${pq.sessionId} tmuxTarget=${pq.tmuxTarget} opt=${optPart}`
+    );
 
     const optIdx = parseInt(optPart, 10);
     const q = pq.questions[qIdx];
@@ -214,24 +203,22 @@ export class AskQuestionHandler {
     const parts = query.data!.split(":");
     if (parts.length < 4) return;
 
-    const session8 = parts[1]!;
+    const pendingId = parseInt(parts[1]!, 10);
     const qIdx = parseInt(parts[2]!, 10);
     const optPart = parts[3]!;
 
-    const pq = this.findPendingByShortId(session8);
+    const pq = this.findPendingByNumericId(pendingId);
     if (!pq) {
+      logDebug(`[AskQ:multi] pendingId=${pendingId} NOT FOUND`);
       await this.bot.answerCallbackQuery(query.id, { text: t("askQuestion.sessionExpired") });
       return;
     }
+    logDebug(
+      `[AskQ:multi] pendingId=${pendingId} → sessionId=${pq.sessionId} tmuxTarget=${pq.tmuxTarget} opt=${optPart}`
+    );
 
     const q = pq.questions[qIdx];
     if (!q) return;
-
-    if (optPart === "o") {
-      await this.bot.answerCallbackQuery(query.id);
-      await this.promptForOther(query.message!.chat.id, pq, qIdx, true);
-      return;
-    }
 
     if (optPart === "c") {
       await this.handleMultiSelectConfirm(query, pq, qIdx, q);
@@ -249,8 +236,7 @@ export class AskQuestionHandler {
     }
     pq.multiSelectState.set(qIdx, toggleSet);
 
-    const hasOtherText = !!pq.answers.get(qIdx)?.otherText;
-    const keyboard = buildMultiSelectKeyboard(pq.sessionId, qIdx, q, toggleSet, hasOtherText);
+    const keyboard = buildMultiSelectKeyboard(pq.pendingId, qIdx, q, toggleSet);
 
     await this.bot.answerCallbackQuery(query.id);
     await this.bot
@@ -270,17 +256,14 @@ export class AskQuestionHandler {
     await this.bot.answerCallbackQuery(query.id, { text: t("askQuestion.sending") });
 
     const selected = pq.multiSelectState.get(qIdx) ?? new Set();
-    const existingAnswer = pq.answers.get(qIdx);
     pq.answers.set(qIdx, {
       indices: [...selected].sort((a, b) => a - b),
-      otherText: existingAnswer?.otherText,
     });
 
     const labels = [...selected]
       .sort((a, b) => a - b)
       .map((i) => q.options[i]?.label ?? "")
       .filter(Boolean);
-    if (existingAnswer?.otherText) labels.push(existingAnswer.otherText);
 
     const msgId = pq.messageIds.get(qIdx);
     if (msgId) {
@@ -296,37 +279,18 @@ export class AskQuestionHandler {
     await this.advanceToNext(query.message!.chat.id, pq);
   }
 
-  private async promptForOther(
-    chatId: number,
-    pq: PendingQuestion,
-    qIdx: number,
-    multiSelect: boolean
-  ): Promise<void> {
-    const sent = await this.bot
-      .sendMessage(chatId, escapeMarkdownV2(t("askQuestion.otherButton")), {
-        parse_mode: "MarkdownV2",
-        reply_markup: { force_reply: true, input_field_placeholder: "Type your answer..." },
-      })
-      .catch(() => null);
-
-    if (sent) {
-      const key = `${chatId}:${sent.message_id}`;
-      this.otherReplies.set(key, { sessionId: pq.sessionId, questionIndex: qIdx, multiSelect });
-      const timer = setTimeout(() => {
-        this.otherReplies.delete(key);
-        this.otherTimers.delete(key);
-      }, EXPIRE_MS);
-      this.otherTimers.set(key, timer);
-    }
-  }
-
   private async injectAnswer(pq: PendingQuestion, qIdx: number): Promise<void> {
     const q = pq.questions[qIdx];
     const answer = pq.answers.get(qIdx);
     if (!q || !answer) return;
 
+    logDebug(
+      `[AskQ:inject] tmuxTarget=${pq.tmuxTarget} sessionId=${pq.sessionId} qIdx=${qIdx} indices=${answer.indices}`
+    );
+
     try {
       const ready = await this.injector.waitForTui(pq.tmuxTarget, 5000);
+      logDebug(`[AskQ:inject] TUI ready=${ready} for target=${pq.tmuxTarget}`);
       if (!ready) throw new Error("TUI not ready");
 
       if (q.multiSelect) {
@@ -346,6 +310,18 @@ export class AskQuestionHandler {
   private async advanceToNext(chatId: number, pq: PendingQuestion): Promise<void> {
     pq.currentIndex++;
     if (pq.currentIndex >= pq.questions.length) {
+      logDebug(
+        `[AskQ:submit] all ${pq.questions.length} questions answered, submitting via Enter on target=${pq.tmuxTarget}`
+      );
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      try {
+        const ready = await this.injector.waitForTui(pq.tmuxTarget, 5000);
+        if (ready) {
+          this.injector.sendEnter(pq.tmuxTarget);
+        }
+      } catch {
+        /* best-effort submit */
+      }
       this.clearPending(pq.sessionId);
       await this.bot.sendMessage(chatId, t("askQuestion.allAnswered")).catch(() => {});
       return;
@@ -354,21 +330,23 @@ export class AskQuestionHandler {
     await this.sendQuestion(chatId, pq, pq.currentIndex);
   }
 
-  private findPendingByShortId(s8: string): PendingQuestion | undefined {
-    for (const [sid, pq] of this.pending) {
-      if (sid.startsWith(s8)) return pq;
-    }
-    return undefined;
+  private findPendingByNumericId(id: number): PendingQuestion | undefined {
+    const sessionId = this.pendingById.get(id);
+    if (!sessionId) return undefined;
+    return this.pending.get(sessionId);
   }
 
   private setPending(sessionId: string, pq: PendingQuestion): void {
     this.clearPending(sessionId);
     this.pending.set(sessionId, pq);
+    this.pendingById.set(pq.pendingId, sessionId);
     const timer = setTimeout(() => this.clearPending(sessionId), EXPIRE_MS);
     this.timers.set(sessionId, timer);
   }
 
   private clearPending(sessionId: string): void {
+    const pq = this.pending.get(sessionId);
+    if (pq) this.pendingById.delete(pq.pendingId);
     this.pending.delete(sessionId);
     const timer = this.timers.get(sessionId);
     if (timer) clearTimeout(timer);
@@ -383,4 +361,17 @@ function formatQuestionHeader(pq: PendingQuestion, qIdx: number): string {
   const title = t("askQuestion.title", { n, total });
   const header = q.header ? ` \\[${escapeMarkdownV2(q.header)}\\]` : "";
   return `*${escapeMarkdownV2(title)}*${header}`;
+}
+
+function formatOptionList(q: AskUserQuestionItem): string | null {
+  const hasAnyDescription = q.options.some((o) => o.description);
+  if (!hasAnyDescription) return null;
+
+  return q.options
+    .map((opt, i) => {
+      const label = `*${escapeMarkdownV2(opt.label)}*`;
+      const desc = opt.description ? ` — ${escapeMarkdownV2(opt.description)}` : "";
+      return `${i + 1}\\. ${label}${desc}`;
+    })
+    .join("\n");
 }
