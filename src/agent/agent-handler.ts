@@ -16,6 +16,25 @@ export interface NotificationEvent {
   cwd?: string;
 }
 
+export interface AskUserQuestionOption {
+  label: string;
+  description: string;
+}
+
+export interface AskUserQuestionItem {
+  question: string;
+  header: string;
+  multiSelect: boolean;
+  options: AskUserQuestionOption[];
+}
+
+export interface AskUserQuestionEvent {
+  sessionId: string;
+  tmuxTarget?: string;
+  cwd?: string;
+  questions: AskUserQuestionItem[];
+}
+
 export class AgentHandler {
   constructor(
     private registry: AgentRegistry,
@@ -72,6 +91,24 @@ export class AgentHandler {
   onSessionStart?: (rawEvent: unknown) => void;
 
   onNotification?: (event: NotificationEvent) => void;
+  onAskUserQuestion?: (event: AskUserQuestionEvent) => void;
+
+  async handleAskUserQuestion(rawEvent: unknown): Promise<void> {
+    const event = this.parseAskUserQuestionEvent(rawEvent);
+    if (!event) return;
+
+    let sessionId: string | undefined;
+    if (this.chatResolver) {
+      sessionId = this.chatResolver.resolveSessionId(
+        event.sessionId,
+        "",
+        event.cwd,
+        event.tmuxTarget
+      );
+    }
+
+    this.onAskUserQuestion?.({ ...event, sessionId: sessionId ?? event.sessionId });
+  }
 
   async handleNotification(rawEvent: unknown): Promise<void> {
     const event = this.parseNotificationEvent(rawEvent);
@@ -106,6 +143,52 @@ export class AgentHandler {
       a: data.agent,
     });
     return `${MINI_APP_BASE_URL}/response/?${params.toString()}`;
+  }
+
+  private parseAskUserQuestionEvent(raw: unknown): AskUserQuestionEvent | null {
+    if (!raw || typeof raw !== "object") return null;
+    const obj = raw as Record<string, unknown>;
+
+    const sessionId = typeof obj.session_id === "string" ? obj.session_id : "";
+    if (!sessionId) return null;
+
+    const toolInput = (
+      typeof obj.tool_input === "object" && obj.tool_input !== null ? obj.tool_input : obj
+    ) as Record<string, unknown>;
+
+    const rawQuestions = Array.isArray(toolInput.questions) ? toolInput.questions : [];
+    if (rawQuestions.length === 0) return null;
+
+    const questions: AskUserQuestionItem[] = [];
+    for (const q of rawQuestions) {
+      if (!q || typeof q !== "object") continue;
+      const qObj = q as Record<string, unknown>;
+      const question = typeof qObj.question === "string" ? qObj.question : "";
+      const header = typeof qObj.header === "string" ? qObj.header : "";
+      const multiSelect = qObj.multiSelect === true;
+      const opts = Array.isArray(qObj.options) ? qObj.options : [];
+      const options: AskUserQuestionOption[] = [];
+      for (const o of opts) {
+        if (!o || typeof o !== "object") continue;
+        const oObj = o as Record<string, unknown>;
+        options.push({
+          label: typeof oObj.label === "string" ? oObj.label : "",
+          description: typeof oObj.description === "string" ? oObj.description : "",
+        });
+      }
+      if (question && options.length > 0) {
+        questions.push({ question, header, multiSelect, options });
+      }
+    }
+
+    if (questions.length === 0) return null;
+
+    return {
+      sessionId,
+      tmuxTarget: typeof obj.tmux_target === "string" ? obj.tmux_target : undefined,
+      cwd: typeof obj.cwd === "string" ? obj.cwd : undefined,
+      questions,
+    };
   }
 
   private parseNotificationEvent(raw: unknown): NotificationEvent | null {

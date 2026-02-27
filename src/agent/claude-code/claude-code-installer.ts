@@ -21,6 +21,7 @@ interface ClaudeHookCommand {
 }
 
 interface ClaudeHookEntry {
+  matcher?: string;
   hooks: ClaudeHookCommand[];
 }
 
@@ -29,6 +30,7 @@ interface ClaudeSettings {
     Stop?: ClaudeHookEntry[];
     SessionStart?: ClaudeHookEntry[];
     Notification?: ClaudeHookEntry[];
+    PreToolUse?: ClaudeHookEntry[];
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -66,7 +68,8 @@ export class ClaudeCodeInstaller {
       return (
         hasCcpokeHook(settings.hooks?.Stop ?? []) &&
         hasCcpokeHook(settings.hooks?.SessionStart ?? []) &&
-        hasCcpokeHook(settings.hooks?.Notification ?? [])
+        hasCcpokeHook(settings.hooks?.Notification ?? []) &&
+        hasCcpokeHook(settings.hooks?.PreToolUse ?? [])
       );
     } catch {
       return false;
@@ -82,17 +85,22 @@ export class ClaudeCodeInstaller {
         missing.push("SessionStart hook in settings");
       if (!hasCcpokeHook(settings.hooks?.Notification ?? []))
         missing.push("Notification hook in settings");
+      if (!hasCcpokeHook(settings.hooks?.PreToolUse ?? []))
+        missing.push("PreToolUse hook in settings");
     } catch {
       missing.push("settings.json");
     }
     if (!existsSync(paths.claudeCodeHookScript)) missing.push("stop script file");
     if (!existsSync(paths.claudeCodeSessionStartScript)) missing.push("session-start script file");
     if (!existsSync(paths.claudeCodeNotificationScript)) missing.push("notification script file");
+    if (!existsSync(paths.claudeCodePreToolUseScript)) missing.push("pretooluse script file");
     if (isScriptOutdated(paths.claudeCodeHookScript)) missing.push("outdated stop script");
     if (isScriptOutdated(paths.claudeCodeSessionStartScript))
       missing.push("outdated session-start script");
     if (isScriptOutdated(paths.claudeCodeNotificationScript))
       missing.push("outdated notification script");
+    if (isScriptOutdated(paths.claudeCodePreToolUseScript))
+      missing.push("outdated pretooluse script");
 
     return { complete: missing.length === 0, missing };
   }
@@ -117,6 +125,13 @@ export class ClaudeCodeInstaller {
         ...(settings.hooks.Notification ?? []),
         { hooks: [{ type: "command", command: paths.claudeCodeNotificationScript, timeout: 10 }] },
       ];
+      settings.hooks.PreToolUse = [
+        ...(settings.hooks.PreToolUse ?? []),
+        {
+          matcher: "AskUserQuestion",
+          hooks: [{ type: "command", command: paths.claudeCodePreToolUseScript, timeout: 5 }],
+        },
+      ];
     }
 
     mkdirSync(paths.claudeDir, { recursive: true });
@@ -127,6 +142,7 @@ export class ClaudeCodeInstaller {
     ClaudeCodeInstaller.writeStopScript(hookPort, hookSecret);
     ClaudeCodeInstaller.writeSessionStartScript(hookPort, hookSecret);
     ClaudeCodeInstaller.writeNotificationScript(hookPort, hookSecret);
+    ClaudeCodeInstaller.writePreToolUseScript(hookPort, hookSecret);
   }
 
   static uninstall(): void {
@@ -134,6 +150,7 @@ export class ClaudeCodeInstaller {
     ClaudeCodeInstaller.removeStopScript();
     ClaudeCodeInstaller.removeSessionStartScript();
     ClaudeCodeInstaller.removeNotificationScript();
+    ClaudeCodeInstaller.removePreToolUseScript();
   }
 
   private static writeStopScript(hookPort: number, hookSecret: string): void {
@@ -231,6 +248,40 @@ echo "$PAYLOAD" | curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookNo
     writeFileSync(paths.claudeCodeNotificationScript, script, { mode: 0o700 });
   }
 
+  private static writePreToolUseScript(hookPort: number, hookSecret: string): void {
+    mkdirSync(paths.hooksDir, { recursive: true });
+
+    if (process.platform === "win32") return;
+
+    const version = getPackageVersion();
+    const script = `#!/bin/bash
+# ccpoke-version: ${version}
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | grep -o '"tool_name":"[^"]*"' | head -1 | cut -d'"' -f4)
+[ "$TOOL_NAME" != "AskUserQuestion" ] && exit 0
+
+SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
+[ -z "$SESSION_ID" ] && exit 0
+
+TMUX_TARGET=""
+[ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
+
+if [ -n "$TMUX_TARGET" ] && echo "$TMUX_TARGET" | grep -qE '^[a-zA-Z0-9_.:/@ -]+$'; then
+  PAYLOAD=$(echo "$INPUT" | sed 's/}$/,"tmux_target":"'"$TMUX_TARGET"'"}/')
+else
+  PAYLOAD="$INPUT"
+fi
+
+echo "$PAYLOAD" | curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookAskUserQuestion}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-CCPoke-Secret: ${hookSecret}" \\
+  --data-binary @- \\
+  --max-time 3 > /dev/null 2>&1 || true
+`;
+
+    writeFileSync(paths.claudeCodePreToolUseScript, script, { mode: 0o700 });
+  }
+
   private static removeStopScript(): void {
     try {
       unlinkSync(paths.claudeCodeHookScript);
@@ -255,11 +306,19 @@ echo "$PAYLOAD" | curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookNo
     }
   }
 
+  private static removePreToolUseScript(): void {
+    try {
+      unlinkSync(paths.claudeCodePreToolUseScript);
+    } catch {
+      /* may not exist */
+    }
+  }
+
   private static removeFromSettings(): void {
     const settings = ClaudeCodeInstaller.readSettings();
     if (!settings.hooks) return;
 
-    for (const hookType of ["Stop", "SessionStart", "Notification"] as const) {
+    for (const hookType of ["Stop", "SessionStart", "Notification", "PreToolUse"] as const) {
       const entries = settings.hooks[hookType];
       if (!entries) continue;
 
