@@ -29,13 +29,8 @@ export class PromptHandler {
     const chat = this.chatId();
     if (!chat) return;
 
-    switch (event.notificationType) {
-      case "elicitation_dialog":
-        await this.sendElicitationPrompt(chat, event);
-        break;
-      case "idle_prompt":
-        await this.sendIdleNotification(chat, event);
-        break;
+    if (event.notificationType === "elicitation_dialog") {
+      await this.sendElicitationPrompt(chat, event);
     }
   }
 
@@ -76,8 +71,6 @@ export class PromptHandler {
     project: string
   ) => void;
 
-  // --- Private ---
-
   private async sendElicitationPrompt(chatId: number, event: NotificationEvent): Promise<void> {
     const title = event.title
       ? `\u2753 *${escapeMarkdownV2(event.title)}*`
@@ -103,30 +96,6 @@ export class PromptHandler {
       this.setPending(event.sessionId);
       this.onElicitationSent?.(chatId, sent.message_id, event.sessionId, project ?? "");
     }
-  }
-
-  private async sendIdleNotification(chatId: number, event: NotificationEvent): Promise<void> {
-    const project = this.resolveProjectName(event.sessionId);
-    const title = `\u{1F4AD} *${escapeMarkdownV2(t("prompt.idleTitle"))}*`;
-    const body = project
-      ? escapeMarkdownV2(t("prompt.idleBody", { project }))
-      : escapeMarkdownV2(event.message);
-
-    const text = `${title}\n\n${body}`;
-
-    const buttons: TelegramBot.InlineKeyboardButton[][] = [];
-    if (event.sessionId) {
-      buttons.push([
-        { text: `\u{1F4AC} ${t("sessions.chatButton")}`, callback_data: `chat:${event.sessionId}` },
-      ]);
-    }
-
-    await this.bot
-      .sendMessage(chatId, text, {
-        parse_mode: "MarkdownV2",
-        reply_markup: buttons.length > 0 ? { inline_keyboard: buttons } : undefined,
-      })
-      .catch(() => {});
   }
 
   private resolveProjectName(sessionId: string): string | undefined {

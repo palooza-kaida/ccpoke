@@ -6,11 +6,11 @@ import { SessionState, type TmuxSession } from "../../tmux/session-map.js";
 const STATE_EMOJI: Record<string, string> = {
   [SessionState.Idle]: "\u{1F7E2}",
   [SessionState.Busy]: "\u{1F7E1}",
-  [SessionState.Blocked]: "\u{1F534}",
   [SessionState.Unknown]: "\u26AA",
 };
 
 const MAX_KEYBOARD_ROWS = 50;
+const MAX_LABEL_CHARS = 32;
 
 export function formatSessionList(sessions: TmuxSession[]): {
   text: string;
@@ -26,13 +26,10 @@ export function formatSessionList(sessions: TmuxSession[]): {
 
   for (const session of sorted.slice(0, MAX_KEYBOARD_ROWS)) {
     const emoji = STATE_EMOJI[session.state] ?? "\u26AA";
-    const label = `${emoji} ${session.project}`;
-    const stateLabel = stateText(session.state);
+    const model = shortenModel(session.model);
+    const label = fitLabel(session.project, model, MAX_LABEL_CHARS);
 
-    rows.push([
-      { text: `${label} (${stateLabel})`, callback_data: `noop:${session.sessionId}` },
-      { text: t("sessions.chatButton"), callback_data: `chat:${session.sessionId}` },
-    ]);
+    rows.push([{ text: `${emoji} ${label}`, callback_data: `chat:${session.sessionId}` }]);
   }
 
   return {
@@ -41,17 +38,32 @@ export function formatSessionList(sessions: TmuxSession[]): {
   };
 }
 
-function stateText(state: SessionState): string {
-  switch (state) {
-    case SessionState.Idle:
-      return t("sessions.stateIdle");
-    case SessionState.Busy:
-      return t("sessions.stateBusy");
-    case SessionState.Blocked:
-      return t("sessions.stateBlocked");
-    default:
-      return "?";
+function fitLabel(project: string, model: string, maxLen: number): string {
+  if (!model) return truncate(project, maxLen);
+
+  const sep = " · ";
+  const full = `${project}${sep}${model}`;
+  if (full.length <= maxLen) return full;
+
+  const projectBudget = maxLen - sep.length - model.length;
+  if (projectBudget >= 6) {
+    return `${truncate(project, projectBudget)}${sep}${model}`;
   }
+
+  const half = Math.floor((maxLen - sep.length) / 2);
+  return `${truncate(project, half)}${sep}${truncate(model, half)}`;
+}
+
+function shortenModel(model: string): string {
+  if (!model) return "";
+  return model
+    .replace(/^claude-/, "")
+    .replace(/-(\d+)-(\d+)$/, " $1.$2")
+    .replace(/-(\d+)$/, " $1");
+}
+
+function truncate(str: string, max: number): string {
+  return str.length <= max ? str : str.slice(0, max - 1) + "…";
 }
 
 function escapeMarkdownV2(text: string): string {
