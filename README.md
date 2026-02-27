@@ -1,6 +1,6 @@
 # 🐾 ccpoke — AI Agent Notification Bridge
 
-[English](./README.en.md)
+[English](./README.en.md) · [中文](./README.zh.md)
 
 > Nhận thông báo Telegram khi AI agent (Claude Code, Cursor, ...) hoàn thành response — kèm git diff, thời gian xử lý, và tóm tắt kết quả.
 
@@ -22,12 +22,12 @@ AI agent xong response
   Telegram notification 📱
 ```
 
-## Supported Agents
+## Hỗ trợ Agent
 
-| Agent | Trạng thái |
-|-------|-----------|
-| Claude Code | ✅ Hỗ trợ |
-| Cursor | ✅ Hỗ trợ |
+| | Claude Code | Cursor |
+|---|---|---|
+| Notification Telegram | ✅ macOS · Linux · Windows | ✅ macOS · Linux · Windows |
+| Chat 2 chiều (Telegram ↔ Agent) | ✅ macOS · Linux | ❌ |
 
 Thêm agent mới qua kiến trúc plugin — contributions welcome!
 
