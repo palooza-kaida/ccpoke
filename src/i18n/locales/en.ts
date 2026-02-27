@@ -189,6 +189,7 @@ export const en: TranslationKeys = {
     responded: "Response sent to {project}",
     expired: "Prompt expired or already handled",
     sessionNotFound: "Session not found",
+    replyButton: "Reply",
   },
   askQuestion: {
     title: "Question {n}/{total}",

@@ -4,6 +4,7 @@ import type { NotificationEvent } from "../../agent/agent-handler.js";
 import { t } from "../../i18n/index.js";
 import { SessionState, type SessionMap } from "../../tmux/session-map.js";
 import type { TmuxBridge } from "../../tmux/tmux-bridge.js";
+import { log } from "../../utils/log.js";
 import { escapeMarkdownV2 } from "./escape-markdown.js";
 
 interface PendingPrompt {
@@ -40,6 +41,9 @@ export class PromptHandler {
     if (!session) return false;
 
     if (!this.pending.has(sessionId)) return false;
+    log(
+      `[Prompt:inject] sessionId=${sessionId} tmuxTarget=${session.tmuxTarget} text="${text.slice(0, 50)}"`
+    );
 
     const trimmed = text.trim();
     if (trimmed.length === 0) return false;
@@ -87,8 +91,9 @@ export class PromptHandler {
       .sendMessage(chatId, text, {
         parse_mode: "MarkdownV2",
         reply_markup: {
-          force_reply: true,
-          input_field_placeholder: t("chat.placeholder"),
+          inline_keyboard: [
+            [{ text: `💬 ${t("prompt.replyButton")}`, callback_data: `elicit:${event.sessionId}` }],
+          ],
         },
       })
       .catch(() => null);

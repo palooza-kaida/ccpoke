@@ -189,6 +189,7 @@ export const vi: TranslationKeys = {
     responded: "Đã gửi phản hồi cho {project}",
     expired: "Prompt đã hết hạn hoặc đã xử lý",
     sessionNotFound: "Không tìm thấy session",
+    replyButton: "Trả lời",
   },
   askQuestion: {
     title: "Câu hỏi {n}/{total}",

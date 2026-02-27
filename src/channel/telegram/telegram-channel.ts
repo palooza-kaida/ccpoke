@@ -6,7 +6,7 @@ import { getTranslations, t } from "../../i18n/index.js";
 import type { SessionMap } from "../../tmux/session-map.js";
 import type { SessionStateManager } from "../../tmux/session-state.js";
 import type { TmuxBridge } from "../../tmux/tmux-bridge.js";
-import { log, logError, logWarn } from "../../utils/log.js";
+import { log, logDebug, logError, logWarn } from "../../utils/log.js";
 import { extractProseSnippet } from "../../utils/markdown.js";
 import { formatDuration, formatModelName, formatTokenCount } from "../../utils/stats-format.js";
 import type { NotificationChannel, NotificationData } from "../types.js";
@@ -183,59 +183,83 @@ export class TelegramChannel implements NotificationChannel {
 
   private registerChatHandlers(): void {
     this.bot.on("callback_query", async (query) => {
-      if (!ConfigManager.isOwner(this.cfg, query.from.id)) return;
+      try {
+        if (!ConfigManager.isOwner(this.cfg, query.from.id)) return;
 
-      if (query.data?.startsWith("aq:") || query.data?.startsWith("am:")) {
-        await this.askQuestionHandler?.handleCallback(query);
-        return;
-      }
-
-      if (!query.data?.startsWith("chat:")) return;
-
-      const sessionId = query.data.slice(5);
-
-      if (!this.sessionMap) {
-        await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
-        return;
-      }
-
-      const session = this.sessionMap.getBySessionId(sessionId);
-      if (!session) {
-        await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
-        return;
-      }
-
-      if (!query.message) {
-        await this.bot.answerCallbackQuery(query.id);
-        return;
-      }
-
-      const sent = await this.bot.sendMessage(
-        query.message.chat.id,
-        `💬 *${escapeMarkdownV2(session.project)}*\n${escapeMarkdownV2(t("chat.replyHint"))}`,
-        {
-          parse_mode: "MarkdownV2",
-          reply_to_message_id: query.message.message_id,
-          reply_markup: {
-            force_reply: true,
-            input_field_placeholder: `${session.project} → Claude`,
-          },
+        if (query.data?.startsWith("aq:") || query.data?.startsWith("am:")) {
+          await this.askQuestionHandler?.handleCallback(query);
+          return;
         }
-      );
 
-      this.pendingReplyStore.set(
-        query.message.chat.id,
-        sent.message_id,
-        sessionId,
-        session.project
-      );
-      await this.bot.answerCallbackQuery(query.id);
+        if (query.data?.startsWith("elicit:")) {
+          const sessionId = query.data.slice(7);
+          logDebug(`[Elicit:callback] sessionId=${sessionId}`);
+          await this.handleElicitReplyButton(query, sessionId);
+          return;
+        }
+
+        if (!query.data?.startsWith("chat:")) return;
+
+        const sessionId = query.data.slice(5);
+        logDebug(`[Chat:callback] sessionId=${sessionId}`);
+
+        if (!this.sessionMap) {
+          await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+          return;
+        }
+
+        const session = this.sessionMap.getBySessionId(sessionId);
+        if (!session) {
+          await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+          return;
+        }
+
+        if (!query.message) {
+          await this.bot.answerCallbackQuery(query.id);
+          return;
+        }
+
+        const sent = await this.bot.sendMessage(
+          query.message.chat.id,
+          `💬 *${escapeMarkdownV2(session.project)}*\n${escapeMarkdownV2(t("chat.replyHint"))}`,
+          {
+            parse_mode: "MarkdownV2",
+            reply_to_message_id: query.message.message_id,
+            reply_markup: {
+              force_reply: true,
+              input_field_placeholder: `${session.project} → Claude`,
+            },
+          }
+        );
+
+        this.pendingReplyStore.set(
+          query.message.chat.id,
+          sent.message_id,
+          sessionId,
+          session.project
+        );
+        logDebug(
+          `[Chat:pending] msgId=${sent.message_id} → sessionId=${sessionId} project=${session.project} tmuxTarget=${session.tmuxTarget}`
+        );
+        await this.bot.answerCallbackQuery(query.id);
+      } catch (err) {
+        logError("[callback_query] unhandled error", err);
+        try {
+          await this.bot.answerCallbackQuery(query.id);
+        } catch {
+          /* best-effort ack */
+        }
+      }
     });
 
     this.bot.on("message", async (msg) => {
       if (!msg.reply_to_message) return;
       if (!msg.text) return;
       if (!ConfigManager.isOwner(this.cfg, msg.from?.id ?? 0)) return;
+
+      logDebug(
+        `[Chat:msg] replyTo=${msg.reply_to_message.message_id} text="${msg.text.slice(0, 50)}"`
+      );
 
       if (
         this.askQuestionHandler?.hasPendingOtherReply(msg.chat.id, msg.reply_to_message.message_id)
@@ -281,6 +305,42 @@ export class TelegramChannel implements NotificationChannel {
         await this.bot.sendMessage(msg.chat.id, t("chat.tmuxDead"));
       }
     });
+  }
+
+  /** Handle elicitation "Reply" button — sends force_reply targeted at this specific elicitation */
+  private async handleElicitReplyButton(
+    query: TelegramBot.CallbackQuery,
+    sessionId: string
+  ): Promise<void> {
+    if (!this.sessionMap || !query.message) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    const session = this.sessionMap.getBySessionId(sessionId);
+    if (!session) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    const sent = await this.bot.sendMessage(
+      query.message.chat.id,
+      `💬 *${escapeMarkdownV2(session.project)}*\n${escapeMarkdownV2(t("prompt.elicitationReplyHint"))}`,
+      {
+        parse_mode: "MarkdownV2",
+        reply_to_message_id: query.message.message_id,
+        reply_markup: {
+          force_reply: true,
+          input_field_placeholder: t("chat.placeholder"),
+        },
+      }
+    );
+
+    this.pendingReplyStore.set(query.message.chat.id, sent.message_id, sessionId, session.project);
+    logDebug(
+      `[Elicit:pending] msgId=${sent.message_id} → sessionId=${sessionId} project=${session.project}`
+    );
+    await this.bot.answerCallbackQuery(query.id);
   }
 
   private registerSessionsHandlers(): void {

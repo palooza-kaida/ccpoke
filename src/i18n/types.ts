@@ -176,6 +176,7 @@ export interface TranslationKeys {
     responded: string;
     expired: string;
     sessionNotFound: string;
+    replyButton: string;
   };
   askQuestion: {
     title: string;

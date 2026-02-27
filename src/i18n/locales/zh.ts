@@ -188,6 +188,7 @@ export const zh: TranslationKeys = {
     responded: "已发送回复到 {project}",
     expired: "提示已过期或已处理",
     sessionNotFound: "未找到会话",
+    replyButton: "回复",
   },
   askQuestion: {
     title: "问题 {n}/{total}",
