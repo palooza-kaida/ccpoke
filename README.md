@@ -187,3 +187,11 @@ ccpoke uninstall
 ## License
 
 MIT
+
+## Contributors
+<a href="https://github.com/lethai2597">
+  <img src="https://github.com/lethai2597.png" width="50" />
+</a>
+<a href="https://github.com/palooza-kaida">
+  <img src="https://github.com/palooza-kaida.png" width="50" />
+</a>
