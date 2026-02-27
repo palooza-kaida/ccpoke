@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "preact/hooks";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 import hljs from "highlight.js/lib/core";
 import typescript from "highlight.js/lib/languages/typescript";
 import javascript from "highlight.js/lib/languages/javascript";
@@ -62,7 +63,8 @@ export function useMarkdownRenderer() {
 
   const render = useCallback((markdownContent: string) => {
     if (!containerRef.current) return;
-    containerRef.current.innerHTML = marked.parse(markdownContent) as string;
+    const rawHtml = marked.parse(markdownContent) as string;
+    containerRef.current.innerHTML = DOMPurify.sanitize(rawHtml);
     containerRef.current
       .querySelectorAll("pre code")
       .forEach((block) => hljs.highlightElement(block as HTMLElement));
