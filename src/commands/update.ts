@@ -4,6 +4,8 @@ import { dirname, join } from "node:path";
 
 import * as p from "@clack/prompts";
 
+import { createDefaultRegistry } from "../agent/agent-registry.js";
+import { ConfigManager } from "../config-manager.js";
 import { t } from "../i18n/index.js";
 import { InstallMethod, PackageManager } from "../utils/constants.js";
 import { detectInstallMethod, getGitRepoRoot } from "../utils/install-detection.js";
@@ -54,7 +56,7 @@ function updateGlobal(): void {
       pm === PackageManager.Yarn ? `yarn info ${pkg} version --silent` : `npm view ${pkg} version`;
     latestVersion = execSync(cmd, { stdio: "pipe" }).toString().trim();
   } catch {
-    // ignore
+    // registry may be unreachable
   }
 
   if (
@@ -80,6 +82,7 @@ function updateGlobal(): void {
   try {
     execSync(cmd, { stdio: "pipe" });
     s.stop(t("update.updateSuccess", { from: currentVersion, to: latestVersion }));
+    refreshHooks();
     p.outro(t("update.updateComplete"));
   } catch {
     s.stop(t("update.updateFailed"));
@@ -152,10 +155,27 @@ function updateGitClone(): void {
     execSync(`${pm} run build`, { cwd: repoRoot, stdio: "pipe" });
     s.stop(t("update.buildComplete"));
 
+    refreshHooks();
+
     p.outro(t("update.updateComplete"));
   } catch {
     s.stop(t("update.updateFailed"));
     p.log.error(t("update.updateManualGit"));
     process.exit(1);
+  }
+}
+
+function refreshHooks(): void {
+  try {
+    const config = ConfigManager.load();
+    const registry = createDefaultRegistry();
+    for (const agentName of config.agents) {
+      const provider = registry.resolve(agentName);
+      if (!provider?.detect()) continue;
+      provider.installHook(config.hook_port, config.hook_secret);
+    }
+    p.log.success(t("update.hooksRefreshed"));
+  } catch {
+    // config may not exist yet
   }
 }
