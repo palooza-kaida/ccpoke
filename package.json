@@ -48,7 +48,7 @@
     "build": "tsc",
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts",
+    "dev": "LOG_LEVEL=debug tsx src/index.ts",
     "setup": "tsx src/index.ts setup",
     "uninstall": "tsx src/index.ts uninstall",
     "help": "tsx src/index.ts help",
