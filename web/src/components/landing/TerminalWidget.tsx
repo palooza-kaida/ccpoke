@@ -11,10 +11,14 @@ interface Props {
 export default function TerminalWidget({ copyLabel, copiedLabel }: Props) {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(COMMAND);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(COMMAND);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard denied or unavailable — do nothing
+    }
   }, []);
 
   return (
@@ -33,6 +37,7 @@ export default function TerminalWidget({ copyLabel, copiedLabel }: Props) {
         </div>
         <button
           onClick={handleCopy}
+          aria-label={copied ? copiedLabel : copyLabel}
           class={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[7px] border font-sans text-[0.78rem] font-semibold cursor-pointer transition-all duration-150 shrink-0 ${
             copied
               ? "bg-[rgba(46,139,87,0.2)] text-emerald border-[rgba(46,139,87,0.3)]"

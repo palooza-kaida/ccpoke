@@ -47,7 +47,7 @@ const navLinks = [
         {ts(locale, "navBrand")}
       </a>
       <div class="lang-dropdown" id="langDropdown">
-        <button class="lang-trigger" id="langTrigger" type="button" aria-label="Language">
+        <button class="lang-trigger" id="langTrigger" type="button" aria-label={ts(locale, "ariaLanguage")}>
           <span id="langCurrent">{LOCALE_LABELS[locale]}</span>
           <Fragment set:html={icons.chevronDown} />
         </button>
@@ -65,12 +65,12 @@ const navLinks = [
       </div>
 
       <a href="https://github.com/palooza-kaida/ccpoke" target="_blank" rel="noopener"
-        class="text-txt-3 hover:text-txt transition-colors duration-150 nav-hide-mobile flex items-center" aria-label="GitHub">
+        class="text-txt-3 hover:text-txt transition-colors duration-150 nav-hide-mobile flex items-center" aria-label={ts(locale, "ariaGitHub")}>
         <span class="w-5 h-5" set:html={icons.github} />
       </a>
 
       {showSectionNav && (
-        <button class="mob-menu-btn" id="mobMenuBtn" type="button" aria-label="Menu">
+        <button class="mob-menu-btn" id="mobMenuBtn" type="button" aria-label={ts(locale, "ariaMenu")} aria-expanded="false" aria-controls="mobPanel">
           <Fragment set:html={icons.menu} />
         </button>
       )}
@@ -80,8 +80,8 @@ const navLinks = [
 
 {showSectionNav && (
   <div class="mob-nav-overlay" id="mobOverlay"></div>
-  <div class="mob-nav-panel" id="mobPanel">
-    <button class="mob-nav-close" id="mobClose" type="button" aria-label="Close">
+  <div class="mob-nav-panel" id="mobPanel" role="dialog" aria-label={ts(locale, "ariaMenu")}>
+    <button class="mob-nav-close" id="mobClose" type="button" aria-label={ts(locale, "ariaClose")}>
       <Fragment set:html={icons.close} />
     </button>
     {navLinks.map(({ key, hash }) => (
@@ -122,10 +122,12 @@ const navLinks = [
   function openMobMenu() {
     mobOverlay?.classList.add("open");
     mobPanel?.classList.add("open");
+    mobMenuBtn?.setAttribute("aria-expanded", "true");
   }
   function closeMobMenu() {
     mobOverlay?.classList.remove("open");
     mobPanel?.classList.remove("open");
+    mobMenuBtn?.setAttribute("aria-expanded", "false");
   }
 
   mobMenuBtn?.addEventListener("click", openMobMenu);
