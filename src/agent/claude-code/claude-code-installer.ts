@@ -8,8 +8,11 @@ import {
 } from "node:fs";
 
 import { ApiRoute } from "../../utils/constants.js";
-import { paths } from "../../utils/paths.js";
+import { getPackageVersion, paths } from "../../utils/paths.js";
 import { AgentName } from "../types.js";
+
+const VERSION_HEADER_PATTERN = /^#\s*ccpoke-version:\s*(\S+)/;
+const VERSION_HEADER_PATTERN_WIN = /^@REM\s+ccpoke-version:\s*(\S+)/;
 
 interface ClaudeHookCommand {
   type: string;
@@ -35,6 +38,25 @@ function hasCcpokeHook(entries: ClaudeHookEntry[]): boolean {
   return entries.some((entry) =>
     entry.hooks?.some((h) => typeof h.command === "string" && h.command.includes("ccpoke"))
   );
+}
+
+function readScriptVersion(scriptPath: string): string | null {
+  try {
+    const content = readFileSync(scriptPath, "utf-8");
+    const lines = content.split("\n");
+    for (const line of lines.slice(0, 3)) {
+      const match = line.match(VERSION_HEADER_PATTERN) ?? line.match(VERSION_HEADER_PATTERN_WIN);
+      if (match) return match[1] ?? null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function isScriptOutdated(scriptPath: string): boolean {
+  if (!existsSync(scriptPath)) return false;
+  return readScriptVersion(scriptPath) !== getPackageVersion();
 }
 
 export class ClaudeCodeInstaller {
@@ -66,6 +88,12 @@ export class ClaudeCodeInstaller {
     if (!existsSync(paths.claudeCodeHookScript)) missing.push("stop script file");
     if (!existsSync(paths.claudeCodeSessionStartScript)) missing.push("session-start script file");
     if (!existsSync(paths.claudeCodeNotificationScript)) missing.push("notification script file");
+    if (isScriptOutdated(paths.claudeCodeHookScript)) missing.push("outdated stop script");
+    if (isScriptOutdated(paths.claudeCodeSessionStartScript))
+      missing.push("outdated session-start script");
+    if (isScriptOutdated(paths.claudeCodeNotificationScript))
+      missing.push("outdated notification script");
+
     return { complete: missing.length === 0, missing };
   }
 
@@ -113,14 +141,16 @@ export class ClaudeCodeInstaller {
 
     const agentParam = `?agent=${AgentName.ClaudeCode}`;
     const isWindows = process.platform === "win32";
+    const version = getPackageVersion();
 
     if (isWindows) {
-      const script = `@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop}${agentParam} -H "Content-Type: application/json" -H "X-CCPoke-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`;
+      const script = `@REM ccpoke-version: ${version}\n@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop}${agentParam} -H "Content-Type: application/json" -H "X-CCPoke-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`;
       writeFileSync(paths.claudeCodeHookScript, script, { mode: 0o644 });
       return;
     }
 
     const script = `#!/bin/bash
+# ccpoke-version: ${version}
 INPUT=$(cat | tr -d '\\n\\r')
 TMUX_TARGET=""
 [ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
@@ -140,7 +170,9 @@ echo "$INPUT" | curl -s -X POST "http://localhost:${hookPort}${ApiRoute.HookStop
 
     if (process.platform === "win32") return;
 
+    const version = getPackageVersion();
     const script = `#!/bin/bash
+# ccpoke-version: ${version}
 [ -z "$TMUX" ] && exit 0
 
 INPUT=$(cat)
@@ -172,32 +204,27 @@ curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookSessionStart}" \\
 
     if (process.platform === "win32") return;
 
+    const version = getPackageVersion();
     const script = `#!/bin/bash
+# ccpoke-version: ${version}
 INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | grep -o '"session_id":"[^"]*"' | head -1 | cut -d'"' -f4)
-NOTIFICATION_TYPE=$(echo "$INPUT" | grep -o '"notification_type":"[^"]*"' | head -1 | cut -d'"' -f4)
-MESSAGE=$(echo "$INPUT" | grep -o '"message":"[^"]*"' | head -1 | cut -d'"' -f4)
-TITLE=$(echo "$INPUT" | grep -o '"title":"[^"]*"' | head -1 | cut -d'"' -f4)
-CWD=$(echo "$INPUT" | grep -o '"cwd":"[^"]*"' | head -1 | cut -d'"' -f4)
-
 [ -z "$SESSION_ID" ] && exit 0
-[ -z "$NOTIFICATION_TYPE" ] && exit 0
 
 TMUX_TARGET=""
 [ -n "$TMUX" ] && TMUX_TARGET=$(tmux display-message -p '#{session_name}:#{window_index}.#{pane_index}' 2>/dev/null || echo "")
 
-json_escape() {
-  printf '%s' "$1" | sed 's/\\\\/\\\\\\\\/g; s/"/\\\\"/g; s/\\t/\\\\t/g' | tr -d '\\n\\r'
-}
+# Inject tmux_target into the raw JSON from Claude Code
+if [ -n "$TMUX_TARGET" ] && echo "$TMUX_TARGET" | grep -qE '^[a-zA-Z0-9_.:/@ -]+$'; then
+  PAYLOAD=$(echo "$INPUT" | sed 's/}$/,"tmux_target":"'"$TMUX_TARGET"'"}/')
+else
+  PAYLOAD="$INPUT"
+fi
 
-PAYLOAD=$(printf '{"session_id":"%s","notification_type":"%s","message":"%s","title":"%s","cwd":"%s","tmux_target":"%s"}' \\
-  "$(json_escape "$SESSION_ID")" "$(json_escape "$NOTIFICATION_TYPE")" "$(json_escape "$MESSAGE")" \\
-  "$(json_escape "$TITLE")" "$(json_escape "$CWD")" "$(json_escape "$TMUX_TARGET")")
-
-curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookNotification}" \\
+echo "$PAYLOAD" | curl -s -X POST "http://127.0.0.1:${hookPort}${ApiRoute.HookNotification}" \\
   -H "Content-Type: application/json" \\
   -H "X-CCPoke-Secret: ${hookSecret}" \\
-  -d "$PAYLOAD" \\
+  --data-binary @- \\
   --max-time 5 > /dev/null 2>&1 || true
 `;
 

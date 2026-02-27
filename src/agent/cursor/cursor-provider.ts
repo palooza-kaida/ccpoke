@@ -42,7 +42,7 @@ export class CursorProvider implements AgentProvider {
   }
 
   verifyIntegrity(): { complete: boolean; missing: string[] } {
-    return { complete: this.isHookInstalled(), missing: [] };
+    return CursorInstaller.verifyIntegrity();
   }
 
   parseEvent(raw: unknown): AgentEventResult {

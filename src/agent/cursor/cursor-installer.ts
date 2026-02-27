@@ -1,8 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from "node:fs";
 
 import { ApiRoute } from "../../utils/constants.js";
-import { paths } from "../../utils/paths.js";
+import { getPackageVersion, paths } from "../../utils/paths.js";
 import { AgentName } from "../types.js";
+
+const VERSION_HEADER_PATTERN = /^#\s*ccpoke-version:\s*(\S+)/;
+const VERSION_HEADER_PATTERN_WIN = /^@REM\s+ccpoke-version:\s*(\S+)/;
 
 interface CursorStopHook {
   command: string;
@@ -24,6 +27,20 @@ function hasCcpokeHook(stopHooks: CursorStopHook[]): boolean {
   );
 }
 
+function readScriptVersion(scriptPath: string): string | null {
+  try {
+    const content = readFileSync(scriptPath, "utf-8");
+    const lines = content.split("\n");
+    for (const line of lines.slice(0, 3)) {
+      const match = line.match(VERSION_HEADER_PATTERN) ?? line.match(VERSION_HEADER_PATTERN_WIN);
+      if (match) return match[1] ?? null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export class CursorInstaller {
   static isInstalled(): boolean {
     try {
@@ -42,20 +59,41 @@ export class CursorInstaller {
     const config = CursorInstaller.readConfig();
 
     if (!config.hooks) config.hooks = {};
-    const stopHooks = config.hooks.stop ?? [];
 
-    if (hasCcpokeHook(stopHooks)) return;
+    const existing = config.hooks.stop ?? [];
+    const filtered = existing.filter(
+      (entry) => !(typeof entry.command === "string" && entry.command.includes("ccpoke"))
+    );
 
-    stopHooks.push({
+    filtered.push({
       command: paths.cursorHookScript,
       timeout: 10,
     });
 
-    config.hooks.stop = stopHooks;
+    config.hooks.stop = filtered;
     if (!config.version) config.version = 1;
 
     writeFileSync(paths.cursorHooksJson, JSON.stringify(config, null, 2));
     CursorInstaller.writeScript(hookPort, hookSecret);
+  }
+
+  static verifyIntegrity(): { complete: boolean; missing: string[] } {
+    const missing: string[] = [];
+
+    try {
+      const config = CursorInstaller.readConfig();
+      if (!hasCcpokeHook(config.hooks?.stop ?? [])) missing.push("Stop hook in hooks.json");
+    } catch {
+      missing.push("hooks.json");
+    }
+
+    if (!existsSync(paths.cursorHookScript)) {
+      missing.push("stop script file");
+    } else if (readScriptVersion(paths.cursorHookScript) !== getPackageVersion()) {
+      missing.push("outdated stop script");
+    }
+
+    return { complete: missing.length === 0, missing };
   }
 
   static uninstall(): void {
@@ -68,9 +106,10 @@ export class CursorInstaller {
 
     const agentParam = `?agent=${AgentName.Cursor}`;
     const isWindows = process.platform === "win32";
+    const version = getPackageVersion();
     const script = isWindows
-      ? `@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop}${agentParam} -H "Content-Type: application/json" -H "X-CCPoke-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`
-      : `#!/bin/bash\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop}${agentParam} \\\n  -H "Content-Type: application/json" \\\n  -H "X-CCPoke-Secret: ${hookSecret}" \\\n  --data-binary @- > /dev/null 2>&1 || true\n`;
+      ? `@REM ccpoke-version: ${version}\n@echo off\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop}${agentParam} -H "Content-Type: application/json" -H "X-CCPoke-Secret: ${hookSecret}" --data-binary @- > nul 2>&1\n`
+      : `#!/bin/bash\n# ccpoke-version: ${version}\ncurl -s -X POST http://localhost:${hookPort}${ApiRoute.HookStop}${agentParam} \\\n  -H "Content-Type: application/json" \\\n  -H "X-CCPoke-Secret: ${hookSecret}" \\\n  --data-binary @- > /dev/null 2>&1 || true\n`;
 
     writeFileSync(paths.cursorHookScript, script, { mode: isWindows ? 0o644 : 0o700 });
   }
@@ -79,7 +118,7 @@ export class CursorInstaller {
     try {
       unlinkSync(paths.cursorHookScript);
     } catch {
-      // script file may not exist
+      // script may not exist
     }
   }
 
