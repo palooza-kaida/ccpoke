@@ -20,7 +20,6 @@ export interface TranslationKeys {
       sessions: string;
     };
     viewDetails: string;
-    open: string;
     sendFailed: string;
     sendFallbackFailed: string;
     firstTimeSetup: string;
@@ -91,6 +90,7 @@ export interface TranslationKeys {
     buildComplete: string;
     updateManualGit: string;
     gitRepoNotFound: string;
+    hooksRefreshed: string;
   };
   help: {
     intro: string;
@@ -164,21 +164,15 @@ export interface TranslationKeys {
     tmuxDead: string;
     sent: string;
     busy: string;
-    desktopActive: string;
   };
   sessions: {
     title: string;
     empty: string;
     chatButton: string;
-    stateIdle: string;
-    stateBusy: string;
-    stateBlocked: string;
   };
   prompt: {
     elicitationTitle: string;
     elicitationReplyHint: string;
-    idleTitle: string;
-    idleBody: string;
     responded: string;
     expired: string;
     sessionNotFound: string;
