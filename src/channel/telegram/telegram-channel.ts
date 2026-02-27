@@ -6,7 +6,6 @@ import { getTranslations, t } from "../../i18n/index.js";
 import type { SessionMap } from "../../tmux/session-map.js";
 import type { SessionStateManager } from "../../tmux/session-state.js";
 import type { TmuxBridge } from "../../tmux/tmux-bridge.js";
-import { MINI_APP_BASE_URL } from "../../utils/constants.js";
 import { log, logError, logWarn } from "../../utils/log.js";
 import { extractProseSnippet } from "../../utils/markdown.js";
 import { formatDuration, formatModelName, formatTokenCount } from "../../utils/stats-format.js";
@@ -135,14 +134,9 @@ export class TelegramChannel implements NotificationChannel {
   }
 
   private async registerMenuButton(): Promise<void> {
-    const url = `${MINI_APP_BASE_URL}/`;
     try {
       await this.bot.setChatMenuButton({
-        menu_button: JSON.stringify({
-          type: "web_app",
-          text: t("bot.open"),
-          web_app: { url },
-        }),
+        menu_button: JSON.stringify({ type: "commands" }),
       } as Record<string, unknown>);
       log(t("bot.menuButtonRegistered"));
     } catch (err: unknown) {
@@ -229,7 +223,6 @@ export class TelegramChannel implements NotificationChannel {
 
       this.pendingReplyStore.delete(msg.chat.id, msg.reply_to_message.message_id);
 
-      // Try elicitation response first (prompt forwarding)
       if (this.promptHandler) {
         const injected = this.promptHandler.injectElicitationResponse(pending.sessionId, msg.text);
         if (injected) {
@@ -250,12 +243,8 @@ export class TelegramChannel implements NotificationChannel {
 
       if ("sent" in result) {
         await this.bot.sendMessage(msg.chat.id, t("chat.sent", { project: pending.project }));
-      } else if ("empty" in result) {
-        // Silently ignore empty messages — nothing to send
       } else if ("busy" in result) {
         await this.bot.sendMessage(msg.chat.id, t("chat.busy"));
-      } else if ("desktopActive" in result) {
-        await this.bot.sendMessage(msg.chat.id, t("chat.desktopActive"));
       } else if ("sessionNotFound" in result) {
         await this.bot.sendMessage(msg.chat.id, t("chat.sessionNotFound"));
       } else if ("tmuxDead" in result) {
@@ -283,12 +272,6 @@ export class TelegramChannel implements NotificationChannel {
       if (replyMarkup) opts.reply_markup = replyMarkup;
 
       this.bot.sendMessage(msg.chat.id, text, opts).catch(() => {});
-    });
-
-    this.bot.on("callback_query", async (query) => {
-      if (!query.data?.startsWith("noop:")) return;
-      if (!ConfigManager.isOwner(this.cfg, query.from.id)) return;
-      await this.bot.answerCallbackQuery(query.id);
     });
   }
 

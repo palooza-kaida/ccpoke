@@ -3,12 +3,11 @@ import { basename } from "node:path";
 
 import { paths } from "../utils/paths.js";
 import type { TmuxBridge } from "./tmux-bridge.js";
-import { isClaudeAliveInPane, scanClaudePanes } from "./tmux-scanner.js";
+import { detectModelFromCwd, scanClaudePanes } from "./tmux-scanner.js";
 
 export const SessionState = {
   Idle: "idle",
   Busy: "busy",
-  Blocked: "blocked",
   Unknown: "unknown",
 } as const;
 export type SessionState = (typeof SessionState)[keyof typeof SessionState];
@@ -20,6 +19,7 @@ export interface TmuxSession {
   cwd: string;
   label: string;
   state: SessionState;
+  model: string;
   lastActivity: Date;
 }
 
@@ -36,6 +36,7 @@ interface PersistedSession {
   cwd: string;
   label: string;
   state: SessionState;
+  model: string;
   lastActivity: string;
 }
 
@@ -48,6 +49,14 @@ export class SessionMap {
   private scanInterval: ReturnType<typeof setInterval> | null = null;
 
   register(sessionId: string, tmuxTarget: string, project: string, cwd = "", label = ""): void {
+    if (tmuxTarget) {
+      for (const [existingId, existing] of this.sessions) {
+        if (existing.tmuxTarget === tmuxTarget && existingId !== sessionId) {
+          this.sessions.delete(existingId);
+        }
+      }
+    }
+
     if (this.sessions.size >= MAX_SESSIONS && !this.sessions.has(sessionId)) {
       const oldest = [...this.sessions.entries()].sort(
         (a, b) => a[1].lastActivity.getTime() - b[1].lastActivity.getTime()
@@ -61,6 +70,7 @@ export class SessionMap {
       cwd,
       label,
       state: SessionState.Idle,
+      model: "",
       lastActivity: new Date(),
     });
   }
@@ -94,6 +104,11 @@ export class SessionMap {
     if (session) session.label = label;
   }
 
+  updateModel(sessionId: string, model: string): void {
+    const session = this.sessions.get(sessionId);
+    if (session && model) session.model = model;
+  }
+
   touch(sessionId: string): void {
     const session = this.sessions.get(sessionId);
     if (session) session.lastActivity = new Date();
@@ -120,10 +135,10 @@ export class SessionMap {
         if (!s.sessionId || !s.tmuxTarget || !s.project) continue;
         const date = new Date(s.lastActivity);
         if (isNaN(date.getTime())) continue;
-        this.sessions.set(s.sessionId, {
-          ...s,
-          lastActivity: date,
-        });
+        this.register(s.sessionId, s.tmuxTarget, s.project, s.cwd, s.label);
+        const session = this.sessions.get(s.sessionId)!;
+        session.lastActivity = date;
+        if (s.model) session.model = s.model;
       }
     } catch {
       // no persisted sessions
@@ -135,25 +150,39 @@ export class SessionMap {
     const discovered: TmuxSession[] = [];
     const removed: TmuxSession[] = [];
 
-    const knownTargets = new Set([...this.sessions.values()].map((s) => s.tmuxTarget));
-    for (const pane of panes) {
-      if (knownTargets.has(pane.target)) continue;
+    const alivePaneTargets = new Set(panes.map((p) => p.target));
 
-      const syntheticId = `tmux-${pane.target.replace(/[:.]/g, "-")}`;
-      const project = basename(pane.cwd) || "unknown";
-      const state = tmuxBridge.isClaudeIdle(pane.target) ? SessionState.Idle : SessionState.Unknown;
-
-      this.register(syntheticId, pane.target, project, pane.cwd);
-      this.updateState(syntheticId, state);
-      discovered.push(this.sessions.get(syntheticId)!);
-    }
-
-    // Remove dead sessions (reuse process tree from scan)
+    // Remove sessions whose pane no longer runs Claude
     for (const [id, session] of this.sessions) {
-      if (!isClaudeAliveInPane(session.tmuxTarget, tree)) {
+      if (!alivePaneTargets.has(session.tmuxTarget)) {
         removed.push(session);
         this.sessions.delete(id);
       }
+    }
+
+    // Register new panes not yet tracked (dedup handled by register())
+    for (const pane of panes) {
+      const existing = [...this.sessions.values()].find((s) => s.tmuxTarget === pane.target);
+      if (existing) {
+        // Update project/cwd if pane changed directory
+        const currentProject = basename(pane.cwd) || "unknown";
+        if (existing.project !== currentProject || existing.cwd !== pane.cwd) {
+          existing.project = currentProject;
+          existing.cwd = pane.cwd;
+        }
+        continue;
+      }
+
+      const syntheticId = `tmux-${pane.target.replace(/[:.]/g, "-")}`;
+      const project = basename(pane.cwd) || "unknown";
+      const state = tmuxBridge.isClaudeIdle(pane.target, tree)
+        ? SessionState.Idle
+        : SessionState.Unknown;
+
+      this.register(syntheticId, pane.target, project, pane.cwd);
+      this.updateState(syntheticId, state);
+      this.updateModel(syntheticId, detectModelFromCwd(pane.cwd));
+      discovered.push(this.sessions.get(syntheticId)!);
     }
 
     return { discovered, removed, total: this.sessions.size };

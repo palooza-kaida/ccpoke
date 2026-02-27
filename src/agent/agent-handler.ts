@@ -56,7 +56,7 @@ export class AgentHandler {
     };
 
     if (chatSessionId && this.chatResolver) {
-      this.chatResolver.onStopHook(chatSessionId);
+      this.chatResolver.onStopHook(chatSessionId, result.model);
     }
 
     const responseUrl = this.buildResponseUrl(data);
@@ -91,11 +91,6 @@ export class AgentHandler {
       sessionId = event.sessionId;
     }
 
-    // Only elicitation_dialog blocks the session (needs user input)
-    if (event.notificationType === "elicitation_dialog") {
-      this.chatResolver?.onNotificationBlock?.(sessionId);
-    }
-
     this.onNotification?.({ ...event, sessionId });
   }
 
@@ -118,10 +113,14 @@ export class AgentHandler {
     const obj = raw as Record<string, unknown>;
 
     const sessionId = typeof obj.session_id === "string" ? obj.session_id : "";
-    const notificationType = typeof obj.notification_type === "string" ? obj.notification_type : "";
     const message = typeof obj.message === "string" ? obj.message : "";
 
-    if (!sessionId || !notificationType) return null;
+    if (!sessionId || !message) return null;
+
+    const notificationType =
+      typeof obj.notification_type === "string" && obj.notification_type
+        ? obj.notification_type
+        : "notification";
 
     return {
       sessionId,

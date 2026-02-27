@@ -6,7 +6,5 @@ export interface ChatSessionResolver {
     tmuxTarget?: string
   ): string | undefined;
 
-  onStopHook(sessionId: string): void;
-
-  onNotificationBlock?(sessionId: string): void;
+  onStopHook(sessionId: string, model?: string): void;
 }
