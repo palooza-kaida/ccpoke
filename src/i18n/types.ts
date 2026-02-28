@@ -172,6 +172,11 @@ export interface TranslationKeys {
     title: string;
     empty: string;
     chatButton: string;
+    closeButton: string;
+    confirmClose: string;
+    closed: string;
+    yes: string;
+    no: string;
   };
   projects: {
     title: string;

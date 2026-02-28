@@ -106,12 +106,17 @@ export class TmuxBridge {
   }
 
   createWindow(sessionName: string, cwd: string): string {
-    const sess = escapeShellArg(sessionName);
+    const sess = escapeShellArg(`${sessionName}:`);
     const dir = escapeShellArg(cwd);
     return execSync(
       `tmux new-window -t ${sess} -c ${dir} -P -F '#{session_name}:#{window_index}.#{pane_index}'`,
       { encoding: "utf-8", stdio: "pipe", timeout: 5000 }
     ).trim();
+  }
+
+  killPane(target: string): void {
+    const tgt = escapeShellArg(target);
+    execSync(`tmux kill-pane -t ${tgt}`, { stdio: "pipe", timeout: 5000 });
   }
 }
 

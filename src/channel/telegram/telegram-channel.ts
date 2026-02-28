@@ -213,6 +213,36 @@ export class TelegramChannel implements NotificationChannel {
           return;
         }
 
+        if (query.data?.startsWith("session:")) {
+          await this.handleSessionCallback(query);
+          return;
+        }
+
+        if (query.data?.startsWith("session_chat:")) {
+          // Rewrite to chat: flow
+          const sessionId = query.data.slice(13);
+          query.data = `chat:${sessionId}`;
+          // fall through to chat: handler below
+        }
+
+        if (query.data?.startsWith("session_close:")) {
+          await this.handleSessionCloseConfirm(query);
+          return;
+        }
+
+        if (query.data?.startsWith("session_close_yes:")) {
+          await this.handleSessionCloseExecute(query);
+          return;
+        }
+
+        if (query.data === "session_close_no:") {
+          if (query.message) {
+            await this.bot.deleteMessage(query.message.chat.id, query.message.message_id);
+          }
+          await this.bot.answerCallbackQuery(query.id);
+          return;
+        }
+
         if (!query.data?.startsWith("chat:")) return;
 
         const sessionId = query.data.slice(5);
@@ -420,16 +450,16 @@ export class TelegramChannel implements NotificationChannel {
     }
 
     await this.bot.answerCallbackQuery(query.id);
-    await this.bot.sendMessage(
-      query.message.chat.id,
-      t("projects.started", { project: project.name })
-    );
 
     try {
       const tmuxSession = this.getTmuxSessionName();
       const paneTarget = this.tmuxBridge.createWindow(tmuxSession, project.path);
       this.tmuxBridge.sendKeys(paneTarget, "claude");
       log(`[Projects] started claude in ${paneTarget} for ${project.name}`);
+      await this.bot.sendMessage(
+        query.message.chat.id,
+        t("projects.started", { project: project.name })
+      );
     } catch (err) {
       logError(`[Projects] failed to start panel for ${project.name}`, err);
       await this.bot.sendMessage(
@@ -439,7 +469,115 @@ export class TelegramChannel implements NotificationChannel {
     }
   }
 
+  /** Session sub-menu: Chat / Close */
+  private async handleSessionCallback(query: TelegramBot.CallbackQuery): Promise<void> {
+    const sessionId = query.data!.slice(8);
+    if (!this.sessionMap || !query.message) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    const session = this.sessionMap.getBySessionId(sessionId);
+    if (!session) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    await this.bot.answerCallbackQuery(query.id);
+    await this.bot.sendMessage(query.message.chat.id, `*${escapeMarkdownV2(session.project)}*`, {
+      parse_mode: "MarkdownV2",
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: `💬 ${t("sessions.chatButton")}`, callback_data: `session_chat:${sessionId}` },
+            {
+              text: `🗑 ${t("sessions.closeButton")}`,
+              callback_data: `session_close:${sessionId}`,
+            },
+          ],
+        ],
+      },
+    });
+  }
+
+  /** Session close confirmation */
+  private async handleSessionCloseConfirm(query: TelegramBot.CallbackQuery): Promise<void> {
+    const sessionId = query.data!.slice(14);
+    if (!this.sessionMap || !query.message) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    const session = this.sessionMap.getBySessionId(sessionId);
+    if (!session) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    await this.bot.answerCallbackQuery(query.id);
+    await this.bot.editMessageText(t("sessions.confirmClose", { project: session.project }), {
+      chat_id: query.message.chat.id,
+      message_id: query.message.message_id,
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: `✅ ${t("sessions.yes")}`, callback_data: `session_close_yes:${sessionId}` },
+            { text: `❌ ${t("sessions.no")}`, callback_data: `session_close_no:` },
+          ],
+        ],
+      },
+    });
+  }
+
+  /** Execute session close: kill tmux pane + unregister */
+  private async handleSessionCloseExecute(query: TelegramBot.CallbackQuery): Promise<void> {
+    const sessionId = query.data!.slice(18);
+    if (!this.sessionMap || !query.message) {
+      await this.bot.answerCallbackQuery(query.id);
+      return;
+    }
+
+    const session = this.sessionMap.getBySessionId(sessionId);
+    if (!session) {
+      await this.bot.answerCallbackQuery(query.id, { text: t("chat.sessionExpired") });
+      return;
+    }
+
+    // Kill tmux pane (best-effort)
+    if (this.tmuxBridge && session.tmuxTarget) {
+      try {
+        this.tmuxBridge.killPane(session.tmuxTarget);
+      } catch {
+        // pane may already be dead
+      }
+    }
+
+    this.sessionMap.unregister(sessionId);
+    this.sessionMap.save();
+    log(`[Sessions] closed session ${sessionId} (${session.project})`);
+
+    await this.bot.answerCallbackQuery(query.id);
+    await this.bot.editMessageText(t("sessions.closed", { project: session.project }), {
+      chat_id: query.message.chat.id,
+      message_id: query.message.message_id,
+    });
+  }
+
   private getTmuxSessionName(): string {
+    // If ccpoke was started inside tmux, use that session
+    if (process.env.TMUX) {
+      try {
+        return execSync("tmux display-message -p '#{session_name}'", {
+          encoding: "utf-8",
+          stdio: "pipe",
+          timeout: 3000,
+        }).trim();
+      } catch {
+        // fall through
+      }
+    }
+
+    // Fallback: first available session
     try {
       const output = execSync("tmux list-sessions -F '#{session_name}'", {
         encoding: "utf-8",

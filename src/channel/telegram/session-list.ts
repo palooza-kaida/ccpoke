@@ -30,7 +30,7 @@ export function formatSessionList(sessions: TmuxSession[]): {
     const model = shortenModel(session.model);
     const label = fitLabel(session.project, model, MAX_LABEL_CHARS);
 
-    rows.push([{ text: `${emoji} ${label}`, callback_data: `chat:${session.sessionId}` }]);
+    rows.push([{ text: `${emoji} ${label}`, callback_data: `session:${session.sessionId}` }]);
   }
 
   return {
