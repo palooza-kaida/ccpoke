@@ -201,7 +201,10 @@ function handleSubcommand(args: string[]): void {
       break;
 
     case CliCommand.Project:
-      runProject(args.slice(1));
+      runProject().catch((err: unknown) => {
+        logError(t("common.setupFailed"), err);
+        process.exit(1);
+      });
       break;
 
     case CliCommand.Help:

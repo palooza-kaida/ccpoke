@@ -204,4 +204,24 @@ export interface TranslationKeys {
     waitingNext: string;
     hookFailed: string;
   };
+  projectCmd: {
+    intro: string;
+    emptyHint: string;
+    addNew: string;
+    selectAction: string;
+    cancelled: string;
+    pathMessage: string;
+    pathRequired: string;
+    pathInvalid: string;
+    nameMessage: string;
+    nameRequired: string;
+    nameDuplicate: string;
+    added: string;
+    projectAction: string;
+    edit: string;
+    remove: string;
+    updated: string;
+    confirmRemove: string;
+    removed: string;
+  };
 }

@@ -4,100 +4,167 @@ import { basename, resolve } from "node:path";
 import * as p from "@clack/prompts";
 
 import { ConfigManager } from "../config-manager.js";
+import { t } from "../i18n/index.js";
 
-export function runProject(args: string[]): void {
-  const sub = args[0];
+const ADD_NEW = "__add_new__" as const;
 
-  switch (sub) {
-    case "add":
-      addProject(args.slice(1));
-      break;
-    case "list":
-    case "ls":
-      listProjects();
-      break;
-    case "remove":
-    case "rm":
-      removeProject(args.slice(1));
-      break;
-    default:
-      p.log.error(sub ? `Unknown project subcommand: ${sub}` : "Missing subcommand");
-      p.log.message("Usage: ccpoke project <add|list|remove>");
-      process.exit(1);
-  }
-}
+export async function runProject(): Promise<void> {
+  p.intro(t("projectCmd.intro"));
 
-function addProject(args: string[]): void {
-  let name: string | undefined;
-  let rawPath: string | undefined;
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--name" && args[i + 1]) {
-      name = args[++i];
-    } else if (!rawPath) {
-      rawPath = args[i];
-    }
-  }
-
-  if (!rawPath) {
-    p.log.error("Missing path. Usage: ccpoke project add <path> [--name <name>]");
-    process.exit(1);
-  }
-
-  const fullPath = resolve(rawPath);
-
-  if (!existsSync(fullPath) || !statSync(fullPath).isDirectory()) {
-    p.log.error(`Path does not exist or is not a directory: ${fullPath}`);
-    process.exit(1);
-  }
-
-  if (!name) {
-    name = basename(fullPath);
-  }
-
-  const cfg = ConfigManager.load();
-
-  if (cfg.projects.some((p) => p.name === name)) {
-    p.log.warn(`Project "${name}" already registered. Remove it first to re-add.`);
-    process.exit(1);
-  }
-
-  cfg.projects.push({ name, path: fullPath });
-  ConfigManager.save(cfg);
-  p.log.success(`Added project "${name}" → ${fullPath}`);
-}
-
-function listProjects(): void {
   const cfg = ConfigManager.load();
 
   if (cfg.projects.length === 0) {
-    p.log.message("No projects registered. Use 'ccpoke project add <path>' to add one.");
+    p.log.message(t("projectCmd.emptyHint"));
+    await addProjectFlow(cfg);
     return;
   }
 
-  p.intro("Registered Projects");
-  for (const proj of cfg.projects) {
-    p.log.message(`  ${proj.name}  →  ${proj.path}`);
+  const options: { value: string; label: string }[] = [
+    { value: ADD_NEW, label: t("projectCmd.addNew") },
+    ...cfg.projects.map((proj, i) => ({
+      value: proj.name,
+      label: `${i + 1}. ${proj.name} → ${proj.path}`,
+    })),
+  ];
+
+  const choice = await p.select({ message: t("projectCmd.selectAction"), options });
+
+  if (p.isCancel(choice)) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
   }
-  p.outro(`${cfg.projects.length} project(s)`);
+
+  if (choice === ADD_NEW) {
+    await addProjectFlow(cfg);
+    return;
+  }
+
+  const project = cfg.projects.find((proj) => proj.name === choice)!;
+  await projectActionFlow(cfg, project);
 }
 
-function removeProject(args: string[]): void {
-  const name = args[0];
-  if (!name) {
-    p.log.error("Missing name. Usage: ccpoke project remove <name>");
-    process.exit(1);
+async function addProjectFlow(cfg: ReturnType<typeof ConfigManager.load>): Promise<void> {
+  const rawPath = await p.text({
+    message: t("projectCmd.pathMessage"),
+    initialValue: process.cwd(),
+    validate(value) {
+      if (!value || !value.trim()) return t("projectCmd.pathRequired");
+      const full = resolve(value);
+      if (!existsSync(full) || !statSync(full).isDirectory()) return t("projectCmd.pathInvalid");
+    },
+  });
+
+  if (p.isCancel(rawPath)) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
   }
 
-  const cfg = ConfigManager.load();
-  const idx = cfg.projects.findIndex((p) => p.name === name);
+  const fullPath = resolve(rawPath as string);
 
-  if (idx === -1) {
-    p.log.error(`Project "${name}" not found.`);
-    process.exit(1);
+  const name = await p.text({
+    message: t("projectCmd.nameMessage"),
+    initialValue: basename(fullPath),
+    validate(value) {
+      if (!value || !value.trim()) return t("projectCmd.nameRequired");
+      if (cfg.projects.some((proj) => proj.name === value.trim()))
+        return t("projectCmd.nameDuplicate");
+    },
+  });
+
+  if (p.isCancel(name)) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
   }
 
+  const trimmedName = (name as string).trim();
+  cfg.projects.push({ name: trimmedName, path: fullPath });
+  ConfigManager.save(cfg);
+  p.outro(t("projectCmd.added", { name: trimmedName, path: fullPath }));
+}
+
+async function projectActionFlow(
+  cfg: ReturnType<typeof ConfigManager.load>,
+  project: { name: string; path: string }
+): Promise<void> {
+  const action = await p.select({
+    message: t("projectCmd.projectAction", { name: project.name }),
+    options: [
+      { value: "edit", label: t("projectCmd.edit") },
+      { value: "remove", label: t("projectCmd.remove") },
+    ],
+  });
+
+  if (p.isCancel(action)) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
+  }
+
+  if (action === "edit") {
+    await editProjectFlow(cfg, project);
+  } else {
+    await removeProjectFlow(cfg, project);
+  }
+}
+
+async function editProjectFlow(
+  cfg: ReturnType<typeof ConfigManager.load>,
+  project: { name: string; path: string }
+): Promise<void> {
+  const rawPath = await p.text({
+    message: t("projectCmd.pathMessage"),
+    initialValue: project.path,
+    validate(value) {
+      if (!value || !value.trim()) return t("projectCmd.pathRequired");
+      const full = resolve(value);
+      if (!existsSync(full) || !statSync(full).isDirectory()) return t("projectCmd.pathInvalid");
+    },
+  });
+
+  if (p.isCancel(rawPath)) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
+  }
+
+  const fullPath = resolve(rawPath as string);
+
+  const name = await p.text({
+    message: t("projectCmd.nameMessage"),
+    initialValue: project.name,
+    validate(value) {
+      if (!value || !value.trim()) return t("projectCmd.nameRequired");
+      const trimmed = value.trim();
+      if (trimmed !== project.name && cfg.projects.some((proj) => proj.name === trimmed))
+        return t("projectCmd.nameDuplicate");
+    },
+  });
+
+  if (p.isCancel(name)) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
+  }
+
+  const trimmedName = (name as string).trim();
+  const idx = cfg.projects.findIndex((proj) => proj.name === project.name);
+  cfg.projects[idx] = { name: trimmedName, path: fullPath };
+  ConfigManager.save(cfg);
+  p.outro(t("projectCmd.updated", { name: trimmedName, path: fullPath }));
+}
+
+async function removeProjectFlow(
+  cfg: ReturnType<typeof ConfigManager.load>,
+  project: { name: string; path: string }
+): Promise<void> {
+  const confirmed = await p.confirm({
+    message: t("projectCmd.confirmRemove", { name: project.name }),
+  });
+
+  if (p.isCancel(confirmed) || !confirmed) {
+    p.cancel(t("projectCmd.cancelled"));
+    return;
+  }
+
+  const idx = cfg.projects.findIndex((proj) => proj.name === project.name);
   cfg.projects.splice(idx, 1);
   ConfigManager.save(cfg);
-  p.log.success(`Removed project "${name}"`);
+  p.outro(t("projectCmd.removed", { name: project.name }));
 }
