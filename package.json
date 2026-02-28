@@ -31,7 +31,7 @@
     "automation"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "files": [
     "dist",
@@ -45,7 +45,7 @@
     "ccpoke": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && chmod +x dist/index.js",
     "prepublishOnly": "npm run build",
     "start": "node dist/index.js",
     "dev": "LOG_LEVEL=debug tsx src/index.ts",

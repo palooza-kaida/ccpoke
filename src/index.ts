@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { basename } from "node:path";
 
 import { AgentHandler } from "./agent/agent-handler.js";
