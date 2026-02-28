@@ -168,7 +168,7 @@
 
 | Tool | Installation |
 |------|---|
-| **ccpoke** | `npx ccpoke` — done in 2 seconds |
+| **ccpoke** | `npx -y ccpoke` — done in 2 seconds |
 | six-ddc/ccbot | Clone repo, Python setup, 5+ minutes |
 | kidandcat/ccc | Clone, Go build, 10+ minutes |
 | CoderBOT | Install, configure, 15+ minutes |
@@ -441,7 +441,7 @@ RIGHT:  ccpoke ──(bridges)──→ [existing tmux] ──→ Claude Code
 | Cross-platform | ✅ | ✅ | ✅ |
 | Setup friction | Low | Medium | Medium |
 
-**Result:** `npx ccpoke` is unique competitive advantage.
+**Result:** `npx -y ccpoke` is unique competitive advantage.
 
 ---
 

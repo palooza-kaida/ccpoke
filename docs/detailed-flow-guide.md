@@ -81,7 +81,7 @@ graph TB
 
 ```mermaid
 flowchart TD
-    START["pnpm dev / npx ccpoke"] --> LOAD_CFG
+    START["pnpm dev / npx -y ccpoke"] --> LOAD_CFG
 
     LOAD_CFG["1. loadOrSetupConfig()<br/>Doc ~/.ccpoke/config.json"]
     LOAD_CFG -->|"Chua co config"| SETUP["Chay setup wizard<br/>(hoi bot token, user_id)"]
@@ -625,7 +625,7 @@ graph TD
 
 ```mermaid
 flowchart TD
-    A["1. Ban chay npx ccpoke<br/>Bot khoi dong, cai hook,<br/>scan tmux, listen port 9377"]
+    A["1. Ban chay npx -y ccpoke<br/>Bot khoi dong, cai hook,<br/>scan tmux, listen port 9377"]
     B["2. Ban mo tmux, chay Claude Code<br/>SessionStart hook fire, session registered"]
     C["3. Ban yeu cau Claude Code<br/>implement feature X"]
     D["4. Claude Code xong, Stop hook fire<br/>Parse transcript, collect git, format"]

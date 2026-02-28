@@ -182,7 +182,7 @@ npm publish --tag beta
 
 User cài bản beta:
 ```bash
-npx ccpoke@beta
+npx -y ccpoke@beta
 ```
 
 ---
