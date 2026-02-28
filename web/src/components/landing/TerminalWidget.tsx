@@ -1,7 +1,7 @@
 import { useState, useCallback } from "preact/hooks";
 import copyIcon from "../../assets/icons/copy.svg?raw";
 
-const COMMAND = "npx ccpoke";
+const COMMAND = "npx -y ccpoke";
 
 interface Props {
   copyLabel: string;
