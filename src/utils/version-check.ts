@@ -25,7 +25,7 @@ function getUpdateCommand(): string {
   const method = detectInstallMethod();
   switch (method) {
     case InstallMethod.Npx:
-      return "npx ccpoke@latest";
+      return "npx -y ccpoke@latest";
     case InstallMethod.GitClone:
       return "git pull && npm run build";
     case InstallMethod.Global:

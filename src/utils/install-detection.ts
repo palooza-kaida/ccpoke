@@ -25,7 +25,7 @@ export function detectCliPrefix(): string {
   const method = detectInstallMethod();
   switch (method) {
     case InstallMethod.Npx:
-      return "npx ccpoke";
+      return "npx -y ccpoke";
     case InstallMethod.GitClone:
       return "node dist/index.js";
     default:
