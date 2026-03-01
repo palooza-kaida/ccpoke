@@ -8,6 +8,7 @@ import { ConfigManager, type Config } from "../config-manager.js";
 import { Locale, LOCALE_LABELS, setLocale, SUPPORTED_LOCALES, t } from "../i18n/index.js";
 import { DEFAULT_HOOK_PORT } from "../utils/constants.js";
 import { detectCliPrefix } from "../utils/install-detection.js";
+import { installShellCompletion } from "../utils/shell-completion.js";
 
 const SETUP_WAIT_TIMEOUT_MS = 120_000;
 
@@ -47,6 +48,7 @@ export async function runSetup(): Promise<Config> {
   registerChatId(userId);
 
   const startCommand = detectCliPrefix();
+  installShellCompletion();
   p.outro(t("setup.complete", { command: startCommand }));
 
   return config;

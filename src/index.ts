@@ -19,6 +19,7 @@ import { TmuxSessionResolver } from "./tmux/tmux-session-resolver.js";
 import { CliCommand, InstallMethod } from "./utils/constants.js";
 import { detectInstallMethod } from "./utils/install-detection.js";
 import { log, logError } from "./utils/log.js";
+import { ensureShellCompletion } from "./utils/shell-completion.js";
 import { TunnelManager } from "./utils/tunnel.js";
 import { checkForUpdates } from "./utils/version-check.js";
 
@@ -72,6 +73,7 @@ async function startBot(): Promise<void> {
   await checkForUpdates().catch(() => {});
 
   const cfg = await loadOrSetupConfig();
+  ensureShellCompletion();
 
   const tmuxBridge = new TmuxBridge();
   const sessionMap = new SessionMap();

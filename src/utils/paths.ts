@@ -20,6 +20,9 @@ export const paths = {
   stateFile: join(CCPOKE_HOME, "state.json"),
   hooksDir: join(CCPOKE_HOME, "hooks"),
   responsesDir: join(CCPOKE_HOME, "responses"),
+  completionsDir: join(CCPOKE_HOME, "completions"),
+  zshCompletion: join(CCPOKE_HOME, "completions", "_ccpoke"),
+  bashCompletion: join(CCPOKE_HOME, "completions", "ccpoke.bash"),
 
   claudeCodeHookScript: join(
     CCPOKE_HOME,

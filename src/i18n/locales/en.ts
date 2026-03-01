@@ -63,6 +63,8 @@ export const en: TranslationKeys = {
     agentHookInstalled: "{agent} hook installed",
     agentHookAlreadyInstalled: "{agent} hook already installed",
     agentHookUninstalled: "{agent} hook removed",
+    shellCompletionHint:
+      "Shell completions installed to {dir}\n  → zsh: add `fpath=({dir} $fpath); autoload -Uz compinit && compinit` to ~/.zshrc\n  → bash: add `source {dir}/ccpoke.bash` to ~/.bashrc",
   },
 
   uninstall: {

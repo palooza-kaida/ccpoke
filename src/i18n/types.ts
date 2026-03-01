@@ -57,6 +57,7 @@ export interface TranslationKeys {
     agentHookInstalled: string;
     agentHookAlreadyInstalled: string;
     agentHookUninstalled: string;
+    shellCompletionHint: string;
   };
   uninstall: {
     intro: string;

@@ -62,6 +62,8 @@ export const zh: TranslationKeys = {
     agentHookInstalled: "{agent} hook 已安装",
     agentHookAlreadyInstalled: "{agent} hook 已安装",
     agentHookUninstalled: "{agent} hook 已移除",
+    shellCompletionHint:
+      "Shell补全已安装到 {dir}\n  → zsh: 在 ~/.zshrc 中添加 `fpath=({dir} $fpath); autoload -Uz compinit && compinit`\n  → bash: 在 ~/.bashrc 中添加 `source {dir}/ccpoke.bash`",
   },
 
   uninstall: {

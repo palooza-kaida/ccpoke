@@ -63,6 +63,8 @@ export const vi: TranslationKeys = {
     agentHookInstalled: "Đã cài hook cho {agent}",
     agentHookAlreadyInstalled: "Hook cho {agent} đã được cài rồi",
     agentHookUninstalled: "Đã gỡ hook cho {agent}",
+    shellCompletionHint:
+      "Đã cài shell completions vào {dir}\n  → zsh: thêm `fpath=({dir} $fpath); autoload -Uz compinit && compinit` vào ~/.zshrc\n  → bash: thêm `source {dir}/ccpoke.bash` vào ~/.bashrc",
   },
 
   uninstall: {

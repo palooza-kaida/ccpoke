@@ -5,6 +5,7 @@ import * as p from "@clack/prompts";
 
 import { ConfigManager } from "../config-manager.js";
 import { t } from "../i18n/index.js";
+import { promptPath } from "../utils/path-prompt.js";
 
 const ADD_NEW = "__add_new__" as const;
 
@@ -44,22 +45,24 @@ export async function runProject(): Promise<void> {
 }
 
 async function addProjectFlow(cfg: ReturnType<typeof ConfigManager.load>): Promise<void> {
-  const rawPath = await p.text({
-    message: t("projectCmd.pathMessage"),
-    initialValue: process.cwd(),
-    validate(value) {
-      if (!value || !value.trim()) return t("projectCmd.pathRequired");
-      const full = resolve(value);
-      if (!existsSync(full) || !statSync(full).isDirectory()) return t("projectCmd.pathInvalid");
-    },
-  });
+  const rawPath = await promptPath(t("projectCmd.pathMessage"), process.cwd());
 
   if (p.isCancel(rawPath)) {
     p.cancel(t("projectCmd.cancelled"));
     return;
   }
 
-  const fullPath = resolve(rawPath as string);
+  const pathStr = rawPath as string;
+  if (!pathStr) {
+    p.log.error(t("projectCmd.pathRequired"));
+    return;
+  }
+
+  const fullPath = resolve(pathStr);
+  if (!existsSync(fullPath) || !statSync(fullPath).isDirectory()) {
+    p.log.error(t("projectCmd.pathInvalid"));
+    return;
+  }
 
   const name = await p.text({
     message: t("projectCmd.nameMessage"),
@@ -110,22 +113,24 @@ async function editProjectFlow(
   cfg: ReturnType<typeof ConfigManager.load>,
   project: { name: string; path: string }
 ): Promise<void> {
-  const rawPath = await p.text({
-    message: t("projectCmd.pathMessage"),
-    initialValue: project.path,
-    validate(value) {
-      if (!value || !value.trim()) return t("projectCmd.pathRequired");
-      const full = resolve(value);
-      if (!existsSync(full) || !statSync(full).isDirectory()) return t("projectCmd.pathInvalid");
-    },
-  });
+  const rawPath = await promptPath(t("projectCmd.pathMessage"), project.path);
 
   if (p.isCancel(rawPath)) {
     p.cancel(t("projectCmd.cancelled"));
     return;
   }
 
-  const fullPath = resolve(rawPath as string);
+  const pathStr = rawPath as string;
+  if (!pathStr) {
+    p.log.error(t("projectCmd.pathRequired"));
+    return;
+  }
+
+  const fullPath = resolve(pathStr);
+  if (!existsSync(fullPath) || !statSync(fullPath).isDirectory()) {
+    p.log.error(t("projectCmd.pathInvalid"));
+    return;
+  }
 
   const name = await p.text({
     message: t("projectCmd.nameMessage"),
