@@ -137,6 +137,9 @@ export const vi: TranslationKeys = {
     disconnected: "tunnel bị ngắt, đang kết nối lại...",
     exited: "tunnel process đã thoát (code {code})",
     timeout: "tunnel connection timeout ({seconds}s)",
+    retrying: "tunnel thử lại {attempt}/{max} sau {seconds}s...",
+    attemptFailed: "tunnel lần {attempt} thất bại: {error}",
+    autoRestart: "tunnel thoát bất ngờ, đang khởi động lại...",
   },
 
   config: {

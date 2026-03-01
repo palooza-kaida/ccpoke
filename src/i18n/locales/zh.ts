@@ -136,6 +136,9 @@ export const zh: TranslationKeys = {
     disconnected: "隧道断开连接，正在重新连接...",
     exited: "隧道进程已退出 (代码 {code})",
     timeout: "隧道连接超时 ({seconds}秒)",
+    retrying: "隧道重试 {attempt}/{max}，{seconds}秒后...",
+    attemptFailed: "隧道第 {attempt} 次尝试失败: {error}",
+    autoRestart: "隧道意外退出，正在重新启动...",
   },
 
   config: {

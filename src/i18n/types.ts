@@ -125,6 +125,9 @@ export interface TranslationKeys {
     disconnected: string;
     exited: string;
     timeout: string;
+    retrying: string;
+    attemptFailed: string;
+    autoRestart: string;
   };
   config: {
     notFound: string;

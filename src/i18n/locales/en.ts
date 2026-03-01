@@ -137,6 +137,9 @@ export const en: TranslationKeys = {
     disconnected: "tunnel disconnected, reconnecting...",
     exited: "tunnel process exited (code {code})",
     timeout: "tunnel connection timeout ({seconds}s)",
+    retrying: "tunnel retry {attempt}/{max} in {seconds}s...",
+    attemptFailed: "tunnel attempt {attempt} failed: {error}",
+    autoRestart: "tunnel exited unexpectedly, restarting...",
   },
 
   config: {
