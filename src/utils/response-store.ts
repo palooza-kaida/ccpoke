@@ -38,10 +38,7 @@ class ResponseStore {
   save(data: Omit<StoredResponse, "id" | "timestamp">): string {
     this.ensureInitialized();
     this.cleanup();
-    let id: string;
-    do {
-      id = randomUUID().slice(0, 8);
-    } while (this.responses.has(id));
+    const id = randomUUID();
     const entry: StoredResponse = { ...data, id, timestamp: Date.now() };
     this.responses.set(id, entry);
     this.persistToDisk(id, entry);
